@@ -1,0 +1,18 @@
+﻿using System.ComponentModel.DataAnnotations;
+using WorkSpace.Domain.Common;
+
+namespace WorkSpace.Domain.Entities;
+
+public class BookingStatus : AuditableBaseEntity
+{
+
+    [Required]
+    [MaxLength(50)]
+    public string Name { get; set; } // Pending, Confirmed, Cancelled, Completed, etc.
+
+    [MaxLength(255)]
+    public string Description { get; set; }
+
+    // Navigation properties
+    public virtual List<Booking> Bookings { get; set; }
+}
