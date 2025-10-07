@@ -2,16 +2,20 @@
 
 public class RequestParameter
 {
-    public int PageNumber { get; set; }
-    public int PageSize { get; set; }
-    public RequestParameter()
+    private const int MaxPageSize = 100;
+    private int _pageNumber = 1;
+
+    public int PageNumber
     {
-        this.PageNumber = 1;
-        this.PageSize = 10;
+        get => _pageNumber;
+        set => _pageNumber = (value < 1) ? 1 : value;
     }
-    public RequestParameter(int pageNumber, int pageSize)
+    public int PageSize { get; set; }
+
+    private int _pageSize = 10;
+    public int Size
     {
-        this.PageNumber = pageNumber < 1 ? 1 : pageNumber;
-        this.PageSize = pageSize > 10 ? 10 : pageSize;
+        get => _pageSize;
+        set => _pageSize = (value > MaxPageSize) ? MaxPageSize : (value < 1 ? 10 : value);
     }
 }

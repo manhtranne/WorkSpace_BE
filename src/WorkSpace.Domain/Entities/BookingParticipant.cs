@@ -8,12 +8,12 @@ public class BookingParticipant : AuditableBaseEntity
     public int BookingId { get; set; }
 
     [MaxLength(100)]
-    public string FullName { get; set; }
+    public string? FullName { get; set; }
 
     [EmailAddress]
     [MaxLength(255)]
-    public string Email { get; set; }
+    public string? Email { get; set; }
 
     // Navigation properties
-    public virtual Booking Booking { get; set; }
+    public virtual Booking? Booking { get; set; }
 }

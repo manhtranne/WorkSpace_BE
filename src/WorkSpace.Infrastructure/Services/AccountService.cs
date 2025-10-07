@@ -83,7 +83,9 @@ public class AccountService : IAccountService
                 Email = request.Email,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
-                UserName = request.UserName
+                UserName = request.UserName,
+                DateCreated = DateTime.UtcNow,
+                IsActive = true,
             };
             var userWithSameEmail = await _userManager.FindByEmailAsync(request.Email);
             if (userWithSameEmail == null)

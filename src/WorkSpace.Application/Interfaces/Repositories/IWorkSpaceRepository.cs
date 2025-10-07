@@ -2,6 +2,6 @@
 
 namespace WorkSpace.Application.Interfaces.Repositories;
 
-public interface IWorkSpaceRepository : IGenericRepositoryAsync<WorkSpaces>
+public interface IWorkSpaceRepository : IGenericRepositoryAsync<Domain.Entities.WorkSpace>
 {
 }

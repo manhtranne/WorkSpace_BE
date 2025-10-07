@@ -10,6 +10,6 @@ public class WorkspaceAmenity : AuditableBaseEntity
     public bool IsAvailable { get; set; } = true;
 
     // Navigation properties
-    public virtual WorkSpaces Workspace { get; set; }
-    public virtual Amenity Amenity { get; set; }
+    public virtual WorkSpace? Workspace { get; set; }
+    public virtual Amenity? Amenity { get; set; }
 }

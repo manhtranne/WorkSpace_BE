@@ -6,8 +6,7 @@ public class WorkSpaceFavorite : AuditableBaseEntity
 {
     public int UserId { get; set; }
     public int WorkspaceId { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     // Navigation properties
-    public virtual AppUser User { get; set; }
-    public virtual WorkSpaces Workspace { get; set; } 
+    public virtual AppUser? User { get; set; }
+    public virtual WorkSpace? Workspace { get; set; } 
 }
