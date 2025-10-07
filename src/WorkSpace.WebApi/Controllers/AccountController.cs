@@ -5,7 +5,7 @@ using WorkSpace.Application.Interfaces.Services;
 
 namespace WorkSpace.WebApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/accounts")]
     [ApiController]
     public class AccountController : ControllerBase
     {
@@ -14,7 +14,7 @@ namespace WorkSpace.WebApi.Controllers
         {
             _accountService = accountService;
         }
-        [HttpPost("authenticate")]
+        [HttpPost("login")]
         public async Task<IActionResult> AuthenticateAsync(AuthenticationRequest request)
         {
             return Ok(await _accountService.AuthenticateAsync(request, GenerateIPAddress()));

@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using WorkSpace.Domain.Common;
 using WorkSpace.Domain.Entities;
-using WorkSpace.Domain.SeedWorks.Constants;
 namespace WorkSpace.Infrastructure;
 
 public class WorkSpaceContext : IdentityDbContext<AppUser, AppRole, int>
@@ -12,7 +12,7 @@ public class WorkSpaceContext : IdentityDbContext<AppUser, AppRole, int>
         
     }
     
-    public DbSet<WorkSpaces> Workspaces { get; set; }
+    public DbSet<Domain.Entities.WorkSpace> Workspaces { get; set; }
     public DbSet<Booking> Bookings { get; set; }
     public DbSet<HostProfile> HostProfiles { get; set; }
     public DbSet<Review> Reviews { get; set; }
@@ -199,6 +199,23 @@ public class WorkSpaceContext : IdentityDbContext<AppUser, AppRole, int>
 
             modelBuilder.Entity<IdentityUserToken<int>>().ToTable("AppUserTokens")
                 .HasKey(x => new { x.UserId });
+
+            // foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            // {
+            //     if (typeof(AuditableBaseEntity).IsAssignableFrom(entityType.ClrType))
+            //     {
+            //         modelBuilder.Entity(entityType.ClrType)
+            //             .Property<byte[]>("RowVersion")
+            //             .IsRowVersion()
+            //             .ValueGeneratedOnAddOrUpdate();
+            //     }
+            // }
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes ()) {
+                var tableName = entityType.GetTableName () ?? string.Empty;
+                if (tableName.StartsWith ("AspNet")) {
+                    entityType.SetTableName (tableName.Substring (6));
+                }
+            }
 
     }
 }

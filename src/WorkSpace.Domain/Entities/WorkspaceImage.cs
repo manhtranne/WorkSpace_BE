@@ -10,13 +10,11 @@ public class WorkspaceImage : AuditableBaseEntity
 
     [Required]
     [Column(TypeName = "nvarchar(max)")]
-    public string ImageUrl { get; set; }
+    public required string ImageUrl { get; set; }
 
     [MaxLength(255)]
-    public string Caption { get; set; }
-
-    public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
-
+    public string? Caption { get; set; }
+    
     // Navigation properties
-    public virtual WorkSpaces Workspace { get; set; }
+    public virtual WorkSpace? Workspace { get; set; }
 }

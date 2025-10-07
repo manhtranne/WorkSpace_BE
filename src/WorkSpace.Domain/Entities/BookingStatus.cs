@@ -8,11 +8,11 @@ public class BookingStatus : AuditableBaseEntity
 
     [Required]
     [MaxLength(50)]
-    public string Name { get; set; } // Pending, Confirmed, Cancelled, Completed, etc.
+    public  string? Name { get; set; } // Pending, Confirmed, Cancelled, Completed, etc.
 
     [MaxLength(255)]
-    public string Description { get; set; }
+    public string? Description { get; set; }
 
     // Navigation properties
-    public virtual List<Booking> Bookings { get; set; }
+    public virtual List<Booking> Bookings { get; set; } = new();
 }

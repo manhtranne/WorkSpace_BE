@@ -14,7 +14,7 @@ public class Promotion : AuditableBaseEntity
     public string Description { get; set; }
 
     public decimal DiscountValue { get; set; }
-    public string DiscountType { get; set; } // Percentage, FixedAmount
+    public string? DiscountType { get; set; } // Percentage, FixedAmount
 
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
@@ -23,9 +23,8 @@ public class Promotion : AuditableBaseEntity
     public int UsedCount { get; set; } = 0;
 
     public bool IsActive { get; set; } = true;
-
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    
 
     // Navigation properties
-    public virtual List<PromotionUsage> PromotionUsages { get; set; }
+    public virtual List<PromotionUsage> PromotionUsages { get; set; } = new();
 }

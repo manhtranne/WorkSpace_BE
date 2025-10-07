@@ -11,8 +11,7 @@ public class Payment : AuditableBaseEntity
     [Range(0.01, double.MaxValue)]
     public decimal Amount { get; set; }
 
-    [Required]
-    public DateTime PaymentDate { get; set; } = DateTime.Now;
+    [Required] public DateTimeOffset PaymentDate { get; set; } = DateTimeOffset.UtcNow;
 
     [Required]
     [StringLength(50)]
@@ -29,5 +28,5 @@ public class Payment : AuditableBaseEntity
     public string? PaymentResponse { get; set; } // JSON response từ VNPay
 
     // Navigation properties
-    public virtual Booking Booking { get; set; }
+    public virtual Booking? Booking { get; set; }
 }

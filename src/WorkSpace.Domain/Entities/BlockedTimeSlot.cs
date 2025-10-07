@@ -11,10 +11,10 @@ public class BlockedTimeSlot : AuditableBaseEntity
     public DateTime EndTime { get; set; }
 
     [MaxLength(500)]
-    public string Reason { get; set; }
+    public string? Reason { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // Navigation properties
-    public virtual WorkSpaces Workspace { get; set; }
+    public virtual WorkSpace? Workspace { get; set; }
 }

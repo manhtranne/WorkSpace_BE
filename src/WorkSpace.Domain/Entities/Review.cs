@@ -13,16 +13,14 @@ public class Review : AuditableBaseEntity
     public int Rating { get; set; }
 
     [MaxLength(1000)]
-    public string Comment { get; set; }
-
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime? UpdatedAt { get; set; }
+    public string? Comment { get; set; }
+    
 
     public bool IsVerified { get; set; } = false; // Verified as actual customer
     public bool IsPublic { get; set; } = true;
 
     // Navigation properties
-    public virtual Booking Booking { get; set; }
-    public virtual AppUser User { get; set; }
-    public virtual WorkSpaces Workspace { get; set; }
+    public virtual Booking? Booking { get; set; }
+    public virtual AppUser? User { get; set; }
+    public virtual WorkSpace? Workspace { get; set; }
 }

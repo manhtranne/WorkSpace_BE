@@ -123,7 +123,7 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.ToTable("AppUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.Address", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.Address", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -132,7 +132,6 @@ namespace WorkSpace.Infrastructure.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("City")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
@@ -141,6 +140,18 @@ namespace WorkSpace.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<DateTimeOffset>("CreateUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("LastModifiedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("LastModifiedUtc")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<double>("Latitude")
                         .HasColumnType("float");
 
@@ -148,12 +159,10 @@ namespace WorkSpace.Infrastructure.Migrations
                         .HasColumnType("float");
 
                     b.Property<string>("PostalCode")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("State")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
@@ -167,7 +176,7 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.ToTable("Addresses");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.Amenity", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.Amenity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -175,15 +184,25 @@ namespace WorkSpace.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTimeOffset>("CreateUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
+
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("IconClass")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<int?>("LastModifiedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("LastModifiedUtc")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -195,7 +214,7 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.ToTable("Amenities");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.AppRole", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.AppRole", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -227,10 +246,10 @@ namespace WorkSpace.Infrastructure.Migrations
                         .HasDatabaseName("RoleNameIndex")
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
-                    b.ToTable("AspNetRoles", (string)null);
+                    b.ToTable("Roles", (string)null);
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.AppUser", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.AppUser", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -302,7 +321,8 @@ namespace WorkSpace.Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("RefreshToken")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
 
                     b.Property<DateTime?>("RefreshTokenExpiryTime")
                         .HasColumnType("datetime2");
@@ -327,16 +347,22 @@ namespace WorkSpace.Infrastructure.Migrations
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.ToTable("AspNetUsers", (string)null);
+                    b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.AvailabilitySchedule", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.AvailabilitySchedule", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset>("CreateUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
 
                     b.Property<int>("DayOfWeek")
                         .HasColumnType("int");
@@ -346,6 +372,12 @@ namespace WorkSpace.Infrastructure.Migrations
 
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("bit");
+
+                    b.Property<int?>("LastModifiedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("LastModifiedUtc")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<TimeSpan>("StartTime")
                         .HasColumnType("time");
@@ -360,7 +392,7 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.ToTable("AvailabilitySchedules");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.BlockedTimeSlot", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.BlockedTimeSlot", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -368,14 +400,25 @@ namespace WorkSpace.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTimeOffset>("CreateUtc")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("LastModifiedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("LastModifiedUtc")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<string>("Reason")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
@@ -392,7 +435,7 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.ToTable("BlockedTimeSlots");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.Booking", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.Booking", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -409,34 +452,42 @@ namespace WorkSpace.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("CancellationReason")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<DateTime?>("CheckedInAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset?>("CheckedInAt")
+                        .HasColumnType("datetimeoffset");
 
-                    b.Property<DateTime?>("CheckedOutAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset?>("CheckedOutAt")
+                        .HasColumnType("datetimeoffset");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("CreateUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
 
                     b.Property<string>("Currency")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)");
 
                     b.Property<int>("CustomerId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("EndTime")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("EndTimeUtc")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<decimal>("FinalAmount")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<bool>("IsReviewed")
                         .HasColumnType("bit");
+
+                    b.Property<int?>("LastModifiedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("LastModifiedUtc")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<int>("NumberOfParticipants")
                         .HasColumnType("int");
@@ -445,21 +496,17 @@ namespace WorkSpace.Infrastructure.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("SpecialRequests")
-                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("StartTimeUtc")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<decimal>("TaxAmount")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("TotalPrice")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<int>("WorkspaceId")
                         .HasColumnType("int");
@@ -478,7 +525,7 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.ToTable("Bookings");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.BookingParticipant", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.BookingParticipant", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -489,15 +536,25 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Property<int>("BookingId")
                         .HasColumnType("int");
 
+                    b.Property<DateTimeOffset>("CreateUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
+
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("FullName")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("LastModifiedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("LastModifiedUtc")
+                        .HasColumnType("datetimeoffset");
 
                     b.HasKey("Id");
 
@@ -506,7 +563,7 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.ToTable("BookingParticipants");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.BookingStatus", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.BookingStatus", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -514,10 +571,21 @@ namespace WorkSpace.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTimeOffset>("CreateUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
+
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<int?>("LastModifiedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("LastModifiedUtc")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -529,7 +597,7 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.ToTable("BookingStatuses");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.HostProfile", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.HostProfile", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -538,38 +606,39 @@ namespace WorkSpace.Infrastructure.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CompanyName")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("ContactPhone")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("CreateUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
                     b.Property<bool>("IsVerified")
                         .HasColumnType("bit");
 
-                    b.Property<string>("LogoUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("LastModifiedById")
+                        .HasColumnType("int");
 
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset?>("LastModifiedUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LogoUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.Property<string>("WebsiteUrl")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -580,7 +649,7 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.ToTable("HostProfiles");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.Payment", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.Payment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -594,8 +663,20 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Property<int>("BookingId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("PaymentDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("CreateUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("LastModifiedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("LastModifiedUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("PaymentDate")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
@@ -623,7 +704,7 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.ToTable("Payments");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.Post", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.Post", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -632,26 +713,32 @@ namespace WorkSpace.Infrastructure.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ContentHtml")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("ContentMarkdown")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("CreateUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
 
                     b.Property<string>("ImageData")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int?>("LastModifiedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("LastModifiedUtc")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -663,7 +750,7 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.ToTable("Posts");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.Promotion", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.Promotion", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -676,8 +763,11 @@ namespace WorkSpace.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("CreateUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -685,7 +775,6 @@ namespace WorkSpace.Infrastructure.Migrations
                         .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("DiscountType")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("DiscountValue")
@@ -696,6 +785,12 @@ namespace WorkSpace.Infrastructure.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
+
+                    b.Property<int?>("LastModifiedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("LastModifiedUtc")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
@@ -711,7 +806,7 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.ToTable("Promotions");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.PromotionUsage", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.PromotionUsage", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -722,8 +817,20 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Property<int>("BookingId")
                         .HasColumnType("int");
 
+                    b.Property<DateTimeOffset>("CreateUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("DiscountAmount")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("LastModifiedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("LastModifiedUtc")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<int>("PromotionId")
                         .HasColumnType("int");
@@ -745,7 +852,7 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.ToTable("PromotionUsages");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.Review", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.Review", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -757,12 +864,14 @@ namespace WorkSpace.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Comment")
-                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("CreateUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsPublic")
                         .HasColumnType("bit");
@@ -770,11 +879,14 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Property<bool>("IsVerified")
                         .HasColumnType("bit");
 
-                    b.Property<int>("Rating")
+                    b.Property<int?>("LastModifiedById")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset?>("LastModifiedUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -794,28 +906,7 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.ToTable("Reviews");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.WorkSpaceFavorite", b =>
-                {
-                    b.Property<int>("WorkspaceId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
-
-                    b.HasKey("WorkspaceId", "UserId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("WorkSpaceFavorites");
-                });
-
-            modelBuilder.Entity("WorkSpace.Domain.Domain.WorkSpaces", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkSpace", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -832,11 +923,13 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Property<int>("Capacity")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("CreateUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
@@ -848,6 +941,12 @@ namespace WorkSpace.Infrastructure.Migrations
 
                     b.Property<bool>("IsVerified")
                         .HasColumnType("bit");
+
+                    b.Property<int?>("LastModifiedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("LastModifiedUtc")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<decimal>("PricePerDay")
                         .HasColumnType("decimal(18,2)");
@@ -863,9 +962,6 @@ namespace WorkSpace.Infrastructure.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("WorkspaceTypeId")
                         .HasColumnType("int");
 
@@ -880,7 +976,37 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.ToTable("Workspaces");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.WorkspaceAmenity", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkSpaceFavorite", b =>
+                {
+                    b.Property<int>("WorkspaceId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("CreateUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("LastModifiedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("LastModifiedUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("WorkspaceId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("WorkSpaceFavorites");
+                });
+
+            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkspaceAmenity", b =>
                 {
                     b.Property<int>("WorkspaceId")
                         .HasColumnType("int");
@@ -888,8 +1014,23 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Property<int>("AmenityId")
                         .HasColumnType("int");
 
+                    b.Property<DateTimeOffset>("CreateUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("bit");
+
+                    b.Property<int?>("LastModifiedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("LastModifiedUtc")
+                        .HasColumnType("datetimeoffset");
 
                     b.HasKey("WorkspaceId", "AmenityId");
 
@@ -898,7 +1039,7 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.ToTable("WorkspaceAmenities");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.WorkspaceImage", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkspaceImage", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -907,16 +1048,24 @@ namespace WorkSpace.Infrastructure.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Caption")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTimeOffset>("CreateUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("UploadedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<int?>("LastModifiedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("LastModifiedUtc")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<int>("WorkspaceId")
                         .HasColumnType("int");
@@ -928,7 +1077,7 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.ToTable("WorkspaceImages");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.WorkspaceType", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkspaceType", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -936,10 +1085,21 @@ namespace WorkSpace.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTimeOffset>("CreateUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
+
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<int?>("LastModifiedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("LastModifiedUtc")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -953,7 +1113,7 @@ namespace WorkSpace.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
-                    b.HasOne("WorkSpace.Domain.Domain.AppRole", null)
+                    b.HasOne("WorkSpace.Domain.Entities.AppRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -962,7 +1122,7 @@ namespace WorkSpace.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
                 {
-                    b.HasOne("WorkSpace.Domain.Domain.AppUser", null)
+                    b.HasOne("WorkSpace.Domain.Entities.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -971,7 +1131,7 @@ namespace WorkSpace.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
                 {
-                    b.HasOne("WorkSpace.Domain.Domain.AppUser", null)
+                    b.HasOne("WorkSpace.Domain.Entities.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -980,13 +1140,13 @@ namespace WorkSpace.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
                 {
-                    b.HasOne("WorkSpace.Domain.Domain.AppRole", null)
+                    b.HasOne("WorkSpace.Domain.Entities.AppRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("WorkSpace.Domain.Domain.AppUser", null)
+                    b.HasOne("WorkSpace.Domain.Entities.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -995,16 +1155,16 @@ namespace WorkSpace.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
                 {
-                    b.HasOne("WorkSpace.Domain.Domain.AppUser", null)
+                    b.HasOne("WorkSpace.Domain.Entities.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.AvailabilitySchedule", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.AvailabilitySchedule", b =>
                 {
-                    b.HasOne("WorkSpace.Domain.Domain.WorkSpaces", "Workspace")
+                    b.HasOne("WorkSpace.Domain.Entities.WorkSpace", "Workspace")
                         .WithMany("AvailabilitySchedules")
                         .HasForeignKey("WorkspaceId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1013,9 +1173,9 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Navigation("Workspace");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.BlockedTimeSlot", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.BlockedTimeSlot", b =>
                 {
-                    b.HasOne("WorkSpace.Domain.Domain.WorkSpaces", "Workspace")
+                    b.HasOne("WorkSpace.Domain.Entities.WorkSpace", "Workspace")
                         .WithMany("BlockedTimeSlots")
                         .HasForeignKey("WorkspaceId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1024,21 +1184,21 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Navigation("Workspace");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.Booking", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.Booking", b =>
                 {
-                    b.HasOne("WorkSpace.Domain.Domain.BookingStatus", "BookingStatus")
+                    b.HasOne("WorkSpace.Domain.Entities.BookingStatus", "BookingStatus")
                         .WithMany("Bookings")
                         .HasForeignKey("BookingStatusId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("WorkSpace.Domain.Domain.AppUser", "Customer")
+                    b.HasOne("WorkSpace.Domain.Entities.AppUser", "Customer")
                         .WithMany("Bookings")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("WorkSpace.Domain.Domain.WorkSpaces", "Workspace")
+                    b.HasOne("WorkSpace.Domain.Entities.WorkSpace", "Workspace")
                         .WithMany("Bookings")
                         .HasForeignKey("WorkspaceId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1051,9 +1211,9 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Navigation("Workspace");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.BookingParticipant", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.BookingParticipant", b =>
                 {
-                    b.HasOne("WorkSpace.Domain.Domain.Booking", "Booking")
+                    b.HasOne("WorkSpace.Domain.Entities.Booking", "Booking")
                         .WithMany("BookingParticipants")
                         .HasForeignKey("BookingId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1062,31 +1222,31 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Navigation("Booking");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.HostProfile", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.HostProfile", b =>
                 {
-                    b.HasOne("WorkSpace.Domain.Domain.AppUser", "User")
+                    b.HasOne("WorkSpace.Domain.Entities.AppUser", "User")
                         .WithOne("HostProfile")
-                        .HasForeignKey("WorkSpace.Domain.Domain.HostProfile", "UserId")
+                        .HasForeignKey("WorkSpace.Domain.Entities.HostProfile", "UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.Payment", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.Payment", b =>
                 {
-                    b.HasOne("WorkSpace.Domain.Domain.Booking", "Booking")
+                    b.HasOne("WorkSpace.Domain.Entities.Booking", "Booking")
                         .WithOne("Payment")
-                        .HasForeignKey("WorkSpace.Domain.Domain.Payment", "BookingId")
+                        .HasForeignKey("WorkSpace.Domain.Entities.Payment", "BookingId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Booking");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.Post", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.Post", b =>
                 {
-                    b.HasOne("WorkSpace.Domain.Domain.AppUser", "User")
+                    b.HasOne("WorkSpace.Domain.Entities.AppUser", "User")
                         .WithMany("Posts")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1095,21 +1255,21 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.PromotionUsage", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.PromotionUsage", b =>
                 {
-                    b.HasOne("WorkSpace.Domain.Domain.Booking", "Booking")
+                    b.HasOne("WorkSpace.Domain.Entities.Booking", "Booking")
                         .WithMany("PromotionUsages")
                         .HasForeignKey("BookingId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("WorkSpace.Domain.Domain.Promotion", "Promotion")
+                    b.HasOne("WorkSpace.Domain.Entities.Promotion", "Promotion")
                         .WithMany("PromotionUsages")
                         .HasForeignKey("PromotionId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("WorkSpace.Domain.Domain.AppUser", "User")
+                    b.HasOne("WorkSpace.Domain.Entities.AppUser", "User")
                         .WithMany("PromotionUsages")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1122,21 +1282,21 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.Review", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.Review", b =>
                 {
-                    b.HasOne("WorkSpace.Domain.Domain.Booking", "Booking")
+                    b.HasOne("WorkSpace.Domain.Entities.Booking", "Booking")
                         .WithMany("Reviews")
                         .HasForeignKey("BookingId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("WorkSpace.Domain.Domain.AppUser", "User")
+                    b.HasOne("WorkSpace.Domain.Entities.AppUser", "User")
                         .WithMany("Reviews")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("WorkSpace.Domain.Domain.WorkSpaces", "Workspace")
+                    b.HasOne("WorkSpace.Domain.Entities.WorkSpace", "Workspace")
                         .WithMany("Reviews")
                         .HasForeignKey("WorkspaceId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1149,40 +1309,21 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Navigation("Workspace");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.WorkSpaceFavorite", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkSpace", b =>
                 {
-                    b.HasOne("WorkSpace.Domain.Domain.AppUser", "User")
-                        .WithMany("WorkSpaceFavorites")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("WorkSpace.Domain.Domain.WorkSpaces", "Workspace")
-                        .WithMany("WorkSpaceFavorites")
-                        .HasForeignKey("WorkspaceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-
-                    b.Navigation("Workspace");
-                });
-
-            modelBuilder.Entity("WorkSpace.Domain.Domain.WorkSpaces", b =>
-                {
-                    b.HasOne("WorkSpace.Domain.Domain.Address", "Address")
+                    b.HasOne("WorkSpace.Domain.Entities.Address", "Address")
                         .WithMany("Workspaces")
                         .HasForeignKey("AddressId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("WorkSpace.Domain.Domain.HostProfile", "Host")
+                    b.HasOne("WorkSpace.Domain.Entities.HostProfile", "Host")
                         .WithMany("Workspaces")
                         .HasForeignKey("HostId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("WorkSpace.Domain.Domain.WorkspaceType", "WorkspaceType")
+                    b.HasOne("WorkSpace.Domain.Entities.WorkspaceType", "WorkspaceType")
                         .WithMany("Workspaces")
                         .HasForeignKey("WorkspaceTypeId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1195,15 +1336,34 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Navigation("WorkspaceType");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.WorkspaceAmenity", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkSpaceFavorite", b =>
                 {
-                    b.HasOne("WorkSpace.Domain.Domain.Amenity", "Amenity")
+                    b.HasOne("WorkSpace.Domain.Entities.AppUser", "User")
+                        .WithMany("WorkSpaceFavorites")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WorkSpace.Domain.Entities.WorkSpace", "Workspace")
+                        .WithMany("WorkSpaceFavorites")
+                        .HasForeignKey("WorkspaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+
+                    b.Navigation("Workspace");
+                });
+
+            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkspaceAmenity", b =>
+                {
+                    b.HasOne("WorkSpace.Domain.Entities.Amenity", "Amenity")
                         .WithMany("WorkspaceAmenities")
                         .HasForeignKey("AmenityId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("WorkSpace.Domain.Domain.WorkSpaces", "Workspace")
+                    b.HasOne("WorkSpace.Domain.Entities.WorkSpace", "Workspace")
                         .WithMany("WorkspaceAmenities")
                         .HasForeignKey("WorkspaceId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1214,9 +1374,9 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Navigation("Workspace");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.WorkspaceImage", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkspaceImage", b =>
                 {
-                    b.HasOne("WorkSpace.Domain.Domain.WorkSpaces", "Workspace")
+                    b.HasOne("WorkSpace.Domain.Entities.WorkSpace", "Workspace")
                         .WithMany("WorkspaceImages")
                         .HasForeignKey("WorkspaceId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1225,17 +1385,17 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Navigation("Workspace");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.Address", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.Address", b =>
                 {
                     b.Navigation("Workspaces");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.Amenity", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.Amenity", b =>
                 {
                     b.Navigation("WorkspaceAmenities");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.AppUser", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.AppUser", b =>
                 {
                     b.Navigation("Bookings");
 
@@ -1251,34 +1411,33 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Navigation("WorkSpaceFavorites");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.Booking", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.Booking", b =>
                 {
                     b.Navigation("BookingParticipants");
 
-                    b.Navigation("Payment")
-                        .IsRequired();
+                    b.Navigation("Payment");
 
                     b.Navigation("PromotionUsages");
 
                     b.Navigation("Reviews");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.BookingStatus", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.BookingStatus", b =>
                 {
                     b.Navigation("Bookings");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.HostProfile", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.HostProfile", b =>
                 {
                     b.Navigation("Workspaces");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.Promotion", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.Promotion", b =>
                 {
                     b.Navigation("PromotionUsages");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.WorkSpaces", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkSpace", b =>
                 {
                     b.Navigation("AvailabilitySchedules");
 
@@ -1295,7 +1454,7 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Navigation("WorkspaceImages");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Domain.WorkspaceType", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkspaceType", b =>
                 {
                     b.Navigation("Workspaces");
                 });

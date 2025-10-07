@@ -2,5 +2,5 @@
 
 public interface IWorkSpaceSeeder
 {
-    Task SeedAsync();
+    Task SeedAsync(CancellationToken ct = default);
 }

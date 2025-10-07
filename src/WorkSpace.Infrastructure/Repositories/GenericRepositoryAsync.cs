@@ -17,7 +17,7 @@ public class GenericRepositoryAsync<T> : IGenericRepositoryAsync<T> where T : cl
         return await _dbContext.Set<T>().FindAsync(id);
     }
 
-    public async Task<IReadOnlyList<T>> GetPagedReponseAsync(int pageNumber, int pageSize)
+    public async Task<IReadOnlyList<T>> GetPagedResponseAsync(int pageNumber, int pageSize)
     {
         return await _dbContext
             .Set<T>()
