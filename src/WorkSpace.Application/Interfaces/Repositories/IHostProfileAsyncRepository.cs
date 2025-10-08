@@ -4,5 +4,5 @@ namespace WorkSpace.Application.Interfaces.Repositories;
 
 public interface IHostProfileAsyncRepository  : IGenericRepositoryAsync<Domain.Entities.HostProfile>
 {
-    public Task<HostProfile?> GetHostProfileByUserId(int userId);
+    public Task<HostProfile?> GetHostProfileByUserId(int userId, CancellationToken cancellationToken);
 }
