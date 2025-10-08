@@ -27,7 +27,7 @@ public class AppUser : IdentityUser<int>
     
     // Navigation properties
     public virtual List<Booking> Bookings { get; set; } = new();
-    public virtual HostProfile HostProfile { get; set; } = new();
+    public virtual HostProfile? HostProfile { get; set; }
     public virtual List<Review> Reviews { get; set; } = new();
     public virtual List<WorkSpaceFavorite> WorkSpaceFavorites { get; set; } = new();
     public virtual List<PromotionUsage> PromotionUsages { get; set; } = new();

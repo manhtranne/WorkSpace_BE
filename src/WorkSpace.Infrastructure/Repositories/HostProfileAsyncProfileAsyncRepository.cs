@@ -12,14 +12,10 @@ public class HostProfileAsyncProfileAsyncRepository : GenericRepositoryAsync<Hos
         _hosts = dbContext.Set<HostProfile>();
     }
 
-    public Task<HostProfile?> GetHostProfileByUserId(int userId)
+    public Task<HostProfile?> GetHostProfileByUserId(int userId, CancellationToken cancellationToken)
     {
-        var hostProfile = _hosts.Include(h => h.User)
-                            .FirstOrDefaultAsync(h => h.UserId == userId);
-        if (hostProfile == null)
-        {
-            throw new KeyNotFoundException($"Host profile with id {userId} not found");
-        }
+        var hostProfile = _hosts.AsNoTracking()
+                            .FirstOrDefaultAsync(h => h.UserId == userId, cancellationToken);
         return hostProfile;
     }
 }
