@@ -229,6 +229,14 @@ public class WorkSpaceContext : IdentityDbContext<AppUser, AppRole, int>
             e.HasIndex(x => new { x.Date, x.StartTime, x.EndTime });
             e.HasIndex(x => x.CreatedAt);
         });
+        modelBuilder.Entity<Domain.Entities.WorkSpace>(e =>
+        {
+            e.HasIndex(w => w.IsFeatured);
+            e.HasIndex(w => w.PricePerHour);
+            e.HasIndex(w => w.Capacity);
+
+            e.HasIndex(w => w.Title);
+        });
 
 
         modelBuilder.Entity<IdentityUserClaim<int>>().ToTable("AppUserClaims").HasKey(x => x.Id);

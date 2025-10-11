@@ -90,6 +90,16 @@ public class SearchService : ISearchService
             }
         }
 
+        if (!string.IsNullOrWhiteSpace(req.QueryText))
+        {
+            var q = req.QueryText.Trim();
+            var pattern = $"%{q}%";
+
+            baseQuery = baseQuery.Where(w =>
+                EF.Functions.Like(EF.Functions.Collate(w.Title, "SQL_Latin1_General_CP1_CI_AI"), pattern) ||
+                EF.Functions.Like(EF.Functions.Collate(w.Description, "SQL_Latin1_General_CP1_CI_AI"), pattern));
+        }
+
 
         baseQuery = req.SortBy?.ToLowerInvariant() switch
         {
@@ -98,6 +108,14 @@ public class SearchService : ISearchService
                 .ThenByDescending(w => w.Reviews.Count),
             "price" => (req.SortDesc ? baseQuery.OrderByDescending(w => w.PricePerHour) : baseQuery.OrderBy(w => w.PricePerHour)),
             "newest" => baseQuery.OrderByDescending(w => w.CreatedAt),
+            "relevance" when !string.IsNullOrWhiteSpace(req.QueryText) =>
+        baseQuery
+            .OrderByDescending(w => EF.Functions.Like(EF.Functions.Collate(w.Title, "SQL_Latin1_General_CP1_CI_AI"), $"{req.QueryText}%"))
+            .ThenByDescending(w => EF.Functions.Like(EF.Functions.Collate(w.Title, "SQL_Latin1_General_CP1_CI_AI"), $"% {req.QueryText}%"))
+            .ThenByDescending(w => EF.Functions.Like(EF.Functions.Collate(w.Title, "SQL_Latin1_General_CP1_CI_AI"), $"%{req.QueryText}%"))
+            .ThenByDescending(w => EF.Functions.Like(EF.Functions.Collate(w.Description, "SQL_Latin1_General_CP1_CI_AI"), $"%{req.QueryText}%"))
+            .ThenByDescending(w => w.IsFeatured),
+
             _ => baseQuery.OrderByDescending(w => w.IsFeatured)
                           .ThenByDescending(w => w.Reviews.Any() ? w.Reviews.Average(r => r.Rating) : 0.0)
         };
@@ -155,6 +173,7 @@ public class SearchService : ISearchService
                 ClientIp = null,
                 UserAgent = null,
                 CreatedAt = DateTime.UtcNow
+                QueryText = req.QueryText,
             });
             await _ctx.SaveChangesAsync();
         }
