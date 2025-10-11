@@ -29,7 +29,6 @@
       <Folder Include="Features\HostProfile\Commands\UpdateHostProfile\" />
       <Folder Include="Features\HostProfile\Queries\GetAllHostProfile\" />
       <Folder Include="Features\HostProfile\Queries\GetHostProfileById\" />
-      <Folder Include="Features\WorkSpace\" />
     </ItemGroup>
 
 </Project>

@@ -23,6 +23,7 @@ public static class ServiceRegistration
     {
         
         #region Repositories
+        services.AddScoped(typeof(IWorkSpaceRepository), typeof(WorkSpaceRepository));
         services.AddTransient(typeof(IGenericRepositoryAsync<>), typeof(GenericRepositoryAsync<>));
         services.AddTransient(typeof(IHostProfileAsyncRepository), typeof(HostProfileAsyncProfileAsyncRepository));
         #endregion
