@@ -1,16 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
-using WorkSpace.Application.Interfaces.Repositories;
+﻿    using Microsoft.EntityFrameworkCore;
+    using WorkSpace.Application.Interfaces.Repositories;
 
-namespace WorkSpace.Infrastructure.Repositories;
+    namespace WorkSpace.Infrastructure.Repositories;
 
-public class GenericRepositoryAsync<T> : IGenericRepositoryAsync<T> where T : class
-{
-    private readonly WorkSpaceContext _dbContext;
-
-    public GenericRepositoryAsync(WorkSpaceContext dbContext)
+    public class GenericRepositoryAsync<T> : IGenericRepositoryAsync<T> where T : class
     {
-        _dbContext = dbContext;
-    }
+        private readonly WorkSpaceContext _dbContext;
+
+        public GenericRepositoryAsync(WorkSpaceContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
 
     public virtual async Task<T> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
