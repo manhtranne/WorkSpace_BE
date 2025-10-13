@@ -13,10 +13,12 @@ public class SearchController : ControllerBase
 
 
     [HttpPost("workspaces")]
+    // API Request URL: POST /api/Search/workspaces
     public async Task<IActionResult> SearchWorkspaces([FromBody] SearchWorkspacesRequest request)
         => Ok(await _search.SearchWorkspacesAsync(request));
 
     [HttpGet("history")]
+    // API Request URL: GET /api/Search/history
     public async Task<IActionResult> GetHistory([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 100)
         => Ok(await _search.GetSearchHistoryAsync(pageNumber, pageSize));
 }

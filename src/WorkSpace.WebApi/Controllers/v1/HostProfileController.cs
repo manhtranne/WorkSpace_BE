@@ -6,6 +6,7 @@ namespace WorkSpace.WebApi.Controllers.v1;
 public class HostProfileController : BaseApiController
 {
     [HttpPost]
+    // API Request URL: POST /api/v1/host-profile
     public async Task<IActionResult> Post([FromBody] CreateHostProfileCommand command)
     {
         return Ok(await Mediator.Send(command));
