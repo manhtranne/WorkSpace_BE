@@ -23,6 +23,7 @@ public static class ServiceRegistration
     {
         
         #region Repositories
+        services.AddScoped(typeof(IWorkSpaceRepository), typeof(WorkSpaceRepository));
         services.AddTransient(typeof(IGenericRepositoryAsync<>), typeof(GenericRepositoryAsync<>));
         services.AddTransient(typeof(IHostProfileAsyncRepository), typeof(HostProfileAsyncProfileAsyncRepository));
         #endregion
@@ -33,7 +34,11 @@ public static class ServiceRegistration
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IDateTimeService, DateTimeService>();
-        
+
+        services.AddScoped<ISearchService, SearchService>();
+        services.AddScoped<ILookupService, LookupService>();
+        services.AddScoped<IWorkSpaceService, WorkSpaceService>();
+
         services.AddIdentityCore<AppUser>()
             .AddRoles<AppRole>()
             .AddEntityFrameworkStores<WorkSpaceContext>()

@@ -10,7 +10,7 @@ public class WorkSpaceSeeder(WorkSpaceContext context, UserManager<AppUser> user
 {
     public async Task SeedAsync(CancellationToken ct = default)
     {
-        if (!await context.Database.CanConnectAsync()) return;
+       
         await context.Database.MigrateAsync(ct);
 
         if (await roleManager.Roles.AnyAsync(ct)) return;
