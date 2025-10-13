@@ -19,8 +19,6 @@ public class WorkSpace : AuditableBaseEntity
 
     public int WorkspaceTypeId { get; set; }
 
-    public TimeOnly CreatedAt { get; set; }
-
     public decimal PricePerHour { get; set; }
     public decimal PricePerDay { get; set; }
     public decimal PricePerMonth { get; set; }
@@ -30,7 +28,6 @@ public class WorkSpace : AuditableBaseEntity
     
     public bool IsActive { get; set; } = true;
     public bool IsVerified { get; set; } = false;
-    public bool IsFeatured { get; set; } = false;
 
     // Navigation properties
     public virtual WorkspaceType? WorkspaceType { get; set; }
