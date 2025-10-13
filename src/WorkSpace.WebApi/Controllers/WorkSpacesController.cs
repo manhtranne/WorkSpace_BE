@@ -12,6 +12,7 @@ public class WorkSpacesController : ControllerBase
 
 
     [HttpGet("featured")]
+    // API Request URL: GET /api/WorkSpaces/featured
     public async Task<IActionResult> GetFeatured([FromQuery] int take = 4)
         => Ok(await _wsService.GetFeaturedAsync(take));
 }

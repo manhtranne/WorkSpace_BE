@@ -12,6 +12,7 @@ public class LookupController : ControllerBase
 
 
     [HttpGet("wards")]
+    // API Request URL: GET /api/Lookup/wards
     public async Task<IActionResult> GetWards([FromQuery] string? q, [FromQuery] int? take)
         => Ok(await _lookup.GetAllWardsAsync(q, take));
 }
