@@ -19,7 +19,20 @@ public static class WebApplicationBuilderExtensions
             )
         );
         builder.Services
-            .AddIdentity<AppUser, AppRole>()
+            .AddIdentity<AppUser, AppRole>(options =>
+            {
+                // Cấu hình password requirements
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequiredLength = 6;
+                options.Password.RequiredUniqueChars = 1;
+                
+                // Cấu hình user requirements
+                options.User.RequireUniqueEmail = true;
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+            })
             .AddEntityFrameworkStores<WorkSpaceContext>()  
             .AddDefaultTokenProviders();
         builder.Services.AddAuthentication();

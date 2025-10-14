@@ -39,14 +39,10 @@ public static class ServiceRegistration
         services.AddScoped<ILookupService, LookupService>();
         services.AddScoped<IWorkSpaceService, WorkSpaceService>();
 
-        services.AddIdentityCore<AppUser>()
-            .AddRoles<AppRole>()
-            .AddEntityFrameworkStores<WorkSpaceContext>()
-            .AddDefaultTokenProviders();
-        
         #endregion
         
         services.Configure<JWTSettings>(configuration.GetSection("JWTSettings"));
+        services.Configure<MailSettings>(configuration.GetSection("MailSettings"));
         services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

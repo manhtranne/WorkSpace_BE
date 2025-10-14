@@ -160,7 +160,7 @@ public class SearchService : ISearchService
             var amenityCsv = (req.AmenityIds != null && req.AmenityIds.Count > 0) ? string.Join(",", req.AmenityIds.Distinct()) : null;
             _ctx.SearchQueryHistories.Add(new SearchQueryHistory
             {
-                UserId = null, 
+                UserId = null,
                 Ward = req.Ward,
                 Date = req.Date,
                 StartTime = req.StartTime,
@@ -172,7 +172,7 @@ public class SearchService : ISearchService
                 ResultsCount = total,
                 ClientIp = null,
                 UserAgent = null,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
                 QueryText = req.QueryText,
             });
             await _ctx.SaveChangesAsync();
