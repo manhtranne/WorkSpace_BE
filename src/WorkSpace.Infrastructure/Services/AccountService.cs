@@ -4,6 +4,8 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using WorkSpace.Application.DTOs.Account;
@@ -26,12 +28,15 @@ public class AccountService : IAccountService
         private readonly IEmailService _emailService;
         private readonly JWTSettings _jwtSettings;
         private readonly IDateTimeService _dateTimeService;
+        private readonly ILogger<AccountService> _logger;
+        
         public AccountService(UserManager<AppUser> userManager, 
             RoleManager<AppRole> roleManager, 
             IOptions<JWTSettings> jwtSettings, 
             IDateTimeService dateTimeService, 
             SignInManager<AppUser> signInManager,
-            IEmailService emailService)
+            IEmailService emailService,
+            ILogger<AccountService> logger)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -39,36 +44,66 @@ public class AccountService : IAccountService
             _dateTimeService = dateTimeService;
             _signInManager = signInManager;
             _emailService = emailService;
+            _logger = logger;
         }
 
         public async Task<Response<AuthenticationResponse>> AuthenticateAsync(AuthenticationRequest request, string ipAddress)
         {
-            var user = await _userManager.FindByEmailAsync(request.Email);
-            if (user == null)
+            try
             {
-                throw new ApiException($"No Accounts Registered with {request.Email}.");
+                _logger.LogInformation("Authentication attempt for email: {Email} from IP: {IpAddress}", request.Email, ipAddress);
+                
+                var user = await _userManager.FindByEmailAsync(request.Email);
+                if (user == null)
+                {
+                    _logger.LogWarning("Authentication failed: No account found for email {Email} from IP {IpAddress}", request.Email, ipAddress);
+                    throw new ApiException($"No Accounts Registered with {request.Email}.");
+                }
+                
+                var result = await _signInManager.PasswordSignInAsync(user.UserName, request.Password, false, lockoutOnFailure: false);
+                if (!result.Succeeded)
+                {
+                    _logger.LogWarning("Authentication failed: Invalid credentials for email {Email} from IP {IpAddress}", request.Email, ipAddress);
+                    throw new ApiException($"Invalid Credentials for '{request.Email}'.");
+                }
+                
+                if (!user.EmailConfirmed)
+                {
+                    _logger.LogWarning("Authentication failed: Email not confirmed for {Email} from IP {IpAddress}", request.Email, ipAddress);
+                    throw new ApiException($"Account Not Confirmed for '{request.Email}'.");
+                }
+                
+                JwtSecurityToken jwtSecurityToken = await GenerateJWToken(user);
+                AuthenticationResponse response = new AuthenticationResponse();
+                response.Id = user.Id.ToString();
+                response.JWToken = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+                response.Email = user.Email;
+                response.UserName = user.UserName;
+                var rolesList = await _userManager.GetRolesAsync(user).ConfigureAwait(false);
+                response.Roles = rolesList.ToList();
+                response.IsVerified = user.EmailConfirmed;
+                var refreshToken = GenerateRefreshToken(ipAddress);
+                response.RefreshToken = refreshToken.Token;
+                
+                // Save refresh token to database
+                user.RefreshToken = refreshToken.Token;
+                user.RefreshTokenExpiryTime = refreshToken.Expires;
+                user.LastLoginDate = DateTime.UtcNow;
+                await _userManager.UpdateAsync(user);
+                
+                _logger.LogInformation("Authentication successful for user {UserId} ({Email}) from IP {IpAddress}", user.Id, user.Email, ipAddress);
+                
+                return new Response<AuthenticationResponse>(response, $"Authenticated {user.UserName}");
             }
-            var result = await _signInManager.PasswordSignInAsync(user.UserName, request.Password, false, lockoutOnFailure: false);
-            if (!result.Succeeded)
+            catch (ApiException)
             {
-                throw new ApiException($"Invalid Credentials for '{request.Email}'.");
+                throw; // Re-throw ApiException as-is
             }
-            if (!user.EmailConfirmed)
+            catch (Exception ex)
             {
-                throw new ApiException($"Account Not Confirmed for '{request.Email}'.");
+                _logger.LogError(ex, "Unexpected error during authentication for email {Email} from IP {IpAddress}", request.Email, ipAddress);
+                throw new ApiException("An error occurred during authentication. Please try again.");
             }
-            JwtSecurityToken jwtSecurityToken = await GenerateJWToken(user);
-            AuthenticationResponse response = new AuthenticationResponse();
-            response.Id = user.Id.ToString();
-            response.JWToken = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
-            response.Email = user.Email;
-            response.UserName = user.UserName;
-            var rolesList = await _userManager.GetRolesAsync(user).ConfigureAwait(false);
-            response.Roles = rolesList.ToList();
-            response.IsVerified = user.EmailConfirmed;
-            var refreshToken = GenerateRefreshToken(ipAddress);
-            response.RefreshToken = refreshToken.Token;
-            return new Response<AuthenticationResponse>(response, $"Authenticated {user.UserName}");
         }
 
         public async Task<Response<string>> RegisterAsync(RegisterRequest request, string origin)
@@ -101,7 +136,9 @@ public class AccountService : IAccountService
                 }
                 else
                 {
-                    throw new ApiException($"{result.Errors}");
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    _logger.LogError("User registration failed for email {Email}: {Errors}", request.Email, errors);
+                    throw new ApiException($"Registration failed: {errors}");
                 }
             }
             else
@@ -225,6 +262,107 @@ public class AccountService : IAccountService
             else
             {
                 throw new ApiException($"Error occured while reseting the password.");
+            }
+        }
+
+        public async Task<Response<AuthenticationResponse>> RefreshTokenAsync(RefreshTokenRequest request, string ipAddress)
+        {
+            try
+            {
+                _logger.LogInformation("Refresh token attempt from IP: {IpAddress}", ipAddress);
+                
+                var user = await _userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken == request.RefreshToken);
+                
+                if (user == null)
+                {
+                    _logger.LogWarning("Refresh token failed: Invalid token from IP {IpAddress}", ipAddress);
+                    throw new ApiException("Invalid refresh token");
+                }
+
+                var refreshToken = new RefreshToken
+                {
+                    Token = request.RefreshToken,
+                    Expires = user.RefreshTokenExpiryTime ?? DateTime.UtcNow.AddDays(-1),
+                    Created = DateTime.UtcNow.AddDays(-7), // Assume created 7 days ago
+                    CreatedByIp = ipAddress
+                };
+
+                if (!refreshToken.IsActive)
+                {
+                    _logger.LogWarning("Refresh token failed: Token expired for user {UserId} from IP {IpAddress}", user.Id, ipAddress);
+                    throw new ApiException("Refresh token has expired");
+                }
+
+                // Generate new JWT token
+                var jwtToken = await GenerateJWToken(user);
+                var newRefreshToken = GenerateRefreshToken(ipAddress);
+
+                // Revoke old refresh token
+                user.RefreshToken = null;
+                user.RefreshTokenExpiryTime = null;
+                await _userManager.UpdateAsync(user);
+
+                // Set new refresh token
+                user.RefreshToken = newRefreshToken.Token;
+                user.RefreshTokenExpiryTime = newRefreshToken.Expires;
+                await _userManager.UpdateAsync(user);
+
+                var response = new AuthenticationResponse
+                {
+                    Id = user.Id.ToString(),
+                    JWToken = new JwtSecurityTokenHandler().WriteToken(jwtToken),
+                    Email = user.Email,
+                    UserName = user.UserName,
+                    Roles = (await _userManager.GetRolesAsync(user)).ToList(),
+                    IsVerified = user.EmailConfirmed,
+                    RefreshToken = newRefreshToken.Token
+                };
+
+                _logger.LogInformation("Refresh token successful for user {UserId} ({Email}) from IP {IpAddress}", user.Id, user.Email, ipAddress);
+
+                return new Response<AuthenticationResponse>(response, "Token refreshed successfully");
+            }
+            catch (ApiException)
+            {
+                throw; // Re-throw ApiException as-is
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error during token refresh from IP {IpAddress}", ipAddress);
+                throw new ApiException("An error occurred during token refresh. Please try again.");
+            }
+        }
+
+        public async Task<Response<string>> RevokeTokenAsync(string token, string ipAddress)
+        {
+            try
+            {
+                _logger.LogInformation("Token revocation attempt from IP: {IpAddress}", ipAddress);
+                
+                var user = await _userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken == token);
+                
+                if (user == null)
+                {
+                    _logger.LogWarning("Token revocation failed: Invalid token from IP {IpAddress}", ipAddress);
+                    throw new ApiException("Invalid refresh token");
+                }
+
+                user.RefreshToken = null;
+                user.RefreshTokenExpiryTime = null;
+                await _userManager.UpdateAsync(user);
+
+                _logger.LogInformation("Token revoked successfully for user {UserId} ({Email}) from IP {IpAddress}", user.Id, user.Email, ipAddress);
+
+                return new Response<string>("Token revoked successfully");
+            }
+            catch (ApiException)
+            {
+                throw; // Re-throw ApiException as-is
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error during token revocation from IP {IpAddress}", ipAddress);
+                throw new ApiException("An error occurred during token revocation. Please try again.");
             }
         }
     }

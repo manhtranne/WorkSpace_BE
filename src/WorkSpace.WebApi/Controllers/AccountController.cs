@@ -48,6 +48,24 @@ namespace WorkSpace.WebApi.Controllers
 
             return Ok(await _accountService.ResetPassword(model));
         }
+        
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken(RefreshTokenRequest request)
+        {
+            return Ok(await _accountService.RefreshTokenAsync(request, GenerateIPAddress()));
+        }
+        
+        [HttpPost("revoke-token")]
+        public async Task<IActionResult> RevokeToken([FromBody] string token)
+        {
+            return Ok(await _accountService.RevokeTokenAsync(token, GenerateIPAddress()));
+        }
+        
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout([FromBody] string refreshToken)
+        {
+            return Ok(await _accountService.RevokeTokenAsync(refreshToken, GenerateIPAddress()));
+        }
         private string GenerateIPAddress()
         {
             if (Request.Headers.ContainsKey("X-Forwarded-For"))

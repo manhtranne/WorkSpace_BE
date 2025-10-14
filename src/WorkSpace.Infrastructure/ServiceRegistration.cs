@@ -34,6 +34,11 @@ public static class ServiceRegistration
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IDateTimeService, DateTimeService>();
+
+        services.AddScoped<ISearchService, SearchService>();
+        services.AddScoped<ILookupService, LookupService>();
+        services.AddScoped<IWorkSpaceService, WorkSpaceService>();
+
         
         services.AddIdentityCore<AppUser>()
             .AddRoles<AppRole>()
@@ -43,6 +48,7 @@ public static class ServiceRegistration
         #endregion
         
         services.Configure<JWTSettings>(configuration.GetSection("JWTSettings"));
+        services.Configure<MailSettings>(configuration.GetSection("MailSettings"));
         services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
