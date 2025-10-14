@@ -172,7 +172,7 @@ public class SearchService : ISearchService
                 ResultsCount = total,
                 ClientIp = null,
                 UserAgent = null,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
                 QueryText = req.QueryText,
             });
             await _ctx.SaveChangesAsync();
