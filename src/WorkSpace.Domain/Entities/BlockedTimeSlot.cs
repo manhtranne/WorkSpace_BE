@@ -5,7 +5,7 @@ namespace WorkSpace.Domain.Entities;
 
 public class BlockedTimeSlot : AuditableBaseEntity
 {
-    public int WorkspaceId { get; set; }
+    public int WorkSpaceRoomId { get; set; }
 
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
@@ -15,6 +15,5 @@ public class BlockedTimeSlot : AuditableBaseEntity
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    // Navigation properties
-    public virtual WorkSpace? Workspace { get; set; }
+    public virtual WorkSpaceRoom? WorkSpaceRoom { get; set; }
 }

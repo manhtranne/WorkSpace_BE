@@ -5,7 +5,7 @@ namespace WorkSpace.Domain.Entities;
 
 public class AvailabilitySchedule  : AuditableBaseEntity
 {
-    public int WorkspaceId { get; set; }
+    public int WorkSpaceRoomId { get; set; }
 
     public DayOfWeek DayOfWeek { get; set; }
 
@@ -17,6 +17,5 @@ public class AvailabilitySchedule  : AuditableBaseEntity
 
     public bool IsAvailable { get; set; } = true;
 
-    // Navigation properties
-    public virtual WorkSpace? Workspace { get; set; }
+    public virtual WorkSpaceRoom? WorkSpaceRoom { get; set; }
 }

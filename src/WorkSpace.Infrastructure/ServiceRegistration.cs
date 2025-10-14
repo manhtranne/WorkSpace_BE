@@ -33,10 +33,17 @@ public static class ServiceRegistration
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IDateTimeService, DateTimeService>();
+<<<<<<< Updated upstream
 
         services.AddScoped<ISearchService, SearchService>();
         services.AddScoped<ILookupService, LookupService>();
         services.AddScoped<IWorkSpaceService, WorkSpaceService>();
+=======
+        
+        services.AddScoped<ISearchService, SearchService>(); 
+        services.AddScoped<IWorkSpaceSeeder, WorkSpaceSeeder>();
+
+>>>>>>> Stashed changes
 
         services.AddIdentityCore<AppUser>()
             .AddRoles<AppRole>()

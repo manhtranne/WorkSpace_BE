@@ -7,11 +7,30 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\WorkSpace.Application\WorkSpace.Application.csproj" />
-      <ProjectReference Include="..\WorkSpace.Domain\WorkSpace.Domain.csproj" />
+      <Content Include="appsettings.Development.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Include="appsettings.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\WorkSpace.Application\WorkSpace.Application.csproj" />
+      <ProjectReference Include="..\WorkSpace.Domain\WorkSpace.Domain.csproj" />
+    </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.20" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.20" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.20" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.20" PrivateAssets="all" />
+	</ItemGroup>
+
+	<ItemGroup>
       <PackageReference Include="MailKit" Version="4.14.0" />
       <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.20" />
       <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.20" />

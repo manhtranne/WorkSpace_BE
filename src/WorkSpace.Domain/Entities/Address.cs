@@ -9,8 +9,13 @@ public class Address : AuditableBaseEntity
     [MaxLength(255)]
     public string? Street { get; set; }
 
+    [Required]
     [MaxLength(100)]
-    public string? City { get; set; }
+    public string? Ward { get; set; } 
+
+    [Required]
+    [MaxLength(100)]
+    public string? District { get; set; }
 
     [MaxLength(100)]
     public string? State { get; set; }
@@ -26,7 +31,7 @@ public class Address : AuditableBaseEntity
 
     [Required]
     [MaxLength(100)]
-    public string? Country { get; set; }
+    public string? Country { get; set; }="Việt Nam";
 
     public double Latitude { get; set; }
     public double Longitude { get; set; }
