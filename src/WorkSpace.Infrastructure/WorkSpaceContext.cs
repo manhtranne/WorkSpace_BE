@@ -30,8 +30,6 @@ public class WorkSpaceContext : IdentityDbContext<AppUser, AppRole, int>
     public DbSet<BlockedTimeSlot> BlockedTimeSlots { get; set; }
     public DbSet<WorkSpaceFavorite> WorkSpaceFavorites { get; set; }
     public DbSet<Post> Posts { get; set; }
-    public DbSet<SearchQueryHistory> SearchQueryHistories { get; set; }
-
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -188,58 +186,8 @@ public class WorkSpaceContext : IdentityDbContext<AppUser, AppRole, int>
                 .WithMany(u => u.Posts)
                 .HasForeignKey(p => p.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
-        // Address – index for Ward
-        modelBuilder.Entity<Address>(e =>
-        {
-            e.Property(a => a.District).HasMaxLength(100);
-            e.Property(a => a.Ward).HasMaxLength(100);
-            e.HasIndex(a => a.Ward);
-            e.HasIndex(a => new { a.District, a.Ward });
-        });
-
-        // WorkSpaces – index for IsFeatured/Price/Capacity
-        modelBuilder.Entity<Domain.Entities.WorkSpace>(e =>
-        {
-            e.HasIndex(w => w.IsFeatured);
-            e.HasIndex(w => w.PricePerHour);
-            e.HasIndex(w => w.Capacity);
-        });
-
-
-        modelBuilder.Entity<SearchQueryHistory>(e =>
-        {
-            e.ToTable("SearchQueryHistories");
-            e.HasKey(x => x.Id);
-
-            e.Property(x => x.Ward).HasMaxLength(100);
-            e.HasIndex(x => x.Ward);
-
-            e.Property(x => x.Date)
-             .HasColumnType("date");
-
-            e.Property(x => x.StartTime)
-             .HasColumnType("time");
-
-            e.Property(x => x.EndTime)
-             .HasColumnType("time");
-
-            e.Property(x => x.AmenityIdsCsv).HasMaxLength(1000);
-            e.Property(x => x.QueryText).HasMaxLength(500);
-
-            e.HasIndex(x => new { x.Date, x.StartTime, x.EndTime });
-            e.HasIndex(x => x.CreatedAt);
-        });
-        modelBuilder.Entity<Domain.Entities.WorkSpace>(e =>
-        {
-            e.HasIndex(w => w.IsFeatured);
-            e.HasIndex(w => w.PricePerHour);
-            e.HasIndex(w => w.Capacity);
-
-            e.HasIndex(w => w.Title);
-        });
-
-
-        modelBuilder.Entity<IdentityUserClaim<int>>().ToTable("AppUserClaims").HasKey(x => x.Id);
+            
+            modelBuilder.Entity<IdentityUserClaim<int>>().ToTable("AppUserClaims").HasKey(x => x.Id);
 
             modelBuilder.Entity<IdentityRoleClaim<int>>().ToTable("AppRoleClaims")
                 .HasKey(x => x.Id);

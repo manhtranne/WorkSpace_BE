@@ -18,12 +18,6 @@ public class Address : AuditableBaseEntity
     [MaxLength(20)]
     public string? PostalCode { get; set; }
 
-    [MaxLength(100)]
-    public string District { get; set; }   
-
-    [MaxLength(100)]
-    public string Ward { get; set; }      
-
     [Required]
     [MaxLength(100)]
     public string? Country { get; set; }
