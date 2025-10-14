@@ -1,6 +1,4 @@
-﻿
-
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using WorkSpace.Application.DTOs.Search;
 using WorkSpace.Application.Interfaces.Services;
 using WorkSpace.Application.Wrappers;
