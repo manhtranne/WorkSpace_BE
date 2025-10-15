@@ -1,4 +1,5 @@
 ﻿
+
 using System.Collections.Generic;
 
 namespace WorkSpace.Application.DTOs.WorkSpaces
@@ -12,6 +13,7 @@ namespace WorkSpace.Application.DTOs.WorkSpaces
         public string? HostName { get; set; }
         public string? AddressLine { get; set; }
         public string? City { get; set; }
+        public string? District { get; set; }
         public string? Country { get; set; }
         public bool IsActive { get; set; }
         public bool IsVerified { get; set; }

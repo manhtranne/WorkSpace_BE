@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿
+
+using Microsoft.EntityFrameworkCore;
 using WorkSpace.Application.DTOs.WorkSpaces;
 using WorkSpace.Application.Interfaces.Repositories;
 using WorkSpace.Domain.Entities;
@@ -51,14 +53,11 @@ namespace WorkSpace.Infrastructure.Repositories
                 .AsNoTracking()
                 .AsQueryable();
 
-            // Apply filter 
             if (filter.WorkSpaceRoomTypeId is int typeId)
             {
                 query = query.Where(x => x.WorkSpaceRoomTypeId == typeId);
             }
 
-            // --- SỬA LỖI TẠI ĐÂY ---
-            // Thay thế filter theo City bằng District
             if (!string.IsNullOrWhiteSpace(filter.City))
             {
                 query = query.Where(x => x.WorkSpace.Address!.District == filter.City);
@@ -90,6 +89,7 @@ namespace WorkSpace.Infrastructure.Repositories
                 query = query.Where(x => !x.BlockedTimeSlots.Any(b =>
                 !(b.EndTime <= start || b.StartTime >= end))
                 && x.AvailabilitySchedules.Any(a =>
+                    a.DayOfWeek == start.DayOfWeek && 
                     a.StartTime <= start.TimeOfDay && a.EndTime >= end.TimeOfDay
                     )
                 );

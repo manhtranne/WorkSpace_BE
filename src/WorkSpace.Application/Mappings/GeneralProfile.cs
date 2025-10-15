@@ -21,8 +21,8 @@ namespace WorkSpace.Application.Mappings
             // WorkSpace Mappings
             CreateMap<CreateWorkSpaceRequest, WorkSpace.Domain.Entities.WorkSpace>();
             CreateMap<WorkSpace.Domain.Entities.WorkSpace, WorkSpaceDetailDto>()
-                .ForMember(d => d.AddressLine, o => o.MapFrom(s => $"{s.Address!.Street}, {s.Address.Ward}, {s.Address.District}")) // Gộp địa chỉ cho đầy đủ hơn
-                .ForMember(d => d.City, o => o.MapFrom(s => s.Address!.District)) // << SỬA LỖI TẠI ĐÂY
+                .ForMember(d => d.AddressLine, o => o.MapFrom(s => $"{s.Address!.Street}, {s.Address.Ward}, {s.Address.District}"))
+                .ForMember(d => d.District, o => o.MapFrom(s => s.Address!.District)) // <-- ĐÃ SỬA
                 .ForMember(d => d.Country, o => o.MapFrom(s => s.Address!.Country))
                 .ForMember(d => d.HostName, o => o.MapFrom(s => s.Host.User.GetFullName()))
                 .ForMember(d => d.Rooms, o => o.MapFrom(s => s.WorkSpaceRooms));
@@ -30,7 +30,7 @@ namespace WorkSpace.Application.Mappings
             // WorkSpaceRoom Mappings
             CreateMap<WorkSpaceRoom, WorkSpaceRoomListItemDto>()
                 .ForMember(d => d.WorkSpaceTitle, o => o.MapFrom(s => s.WorkSpace.Title))
-                .ForMember(d => d.City, o => o.MapFrom(s => s.WorkSpace.Address.District)) // << SỬA LỖI TẠI ĐÂY
+                .ForMember(d => d.District, o => o.MapFrom(s => s.WorkSpace.Address.District)) // <-- ĐÃ SỬA
                 .ForMember(d => d.ThumbnailUrl, o => o.MapFrom(s => s.WorkSpaceRoomImages.FirstOrDefault().ImageUrl))
                 .ForMember(d => d.AverageRating, o => o.MapFrom(s => s.Reviews.Any() ? s.Reviews.Average(r => r.Rating) : 0))
                 .ForMember(d => d.RatingCount, o => o.MapFrom(s => s.Reviews.Count));
@@ -43,8 +43,6 @@ namespace WorkSpace.Application.Mappings
                 .ForMember(d => d.Amenities, o => o.MapFrom(s => s.WorkSpaceRoomAmenities.Select(a => a.Amenity!.Name)));
         }
     }
-
-    // HostProfileDto vẫn giữ nguyên như cũ
     public class HostProfileDto
     {
         public int Id { get; set; }
