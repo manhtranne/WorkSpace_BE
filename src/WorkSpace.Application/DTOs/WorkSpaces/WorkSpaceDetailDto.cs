@@ -1,12 +1,20 @@
-﻿namespace WorkSpace.Application.DTOs.WorkSpaces;
+﻿
+using System.Collections.Generic;
 
-public class WorkSpaceDetailDto: WorkSpaceListItemDto
+namespace WorkSpace.Application.DTOs.WorkSpaces
 {
-    public string? AddressLine { get; set; }
-    public string? City { get; set; }
-    public string? Country { get; set; }
-    public IEnumerable<string> Images { get; set; } = Enumerable.Empty<string>();
-    public IEnumerable<string> Amenities { get; set; } = Enumerable.Empty<string>();
-    public double Rating { get; set; }
-    public int RatingCount { get; set; }
+    public class WorkSpaceDetailDto
+    {
+        public int Id { get; set; }
+        public string Title { get; set; } = default!;
+        public string? Description { get; set; }
+        public int HostId { get; set; }
+        public string? HostName { get; set; }
+        public string? AddressLine { get; set; }
+        public string? City { get; set; }
+        public string? Country { get; set; }
+        public bool IsActive { get; set; }
+        public bool IsVerified { get; set; }
+        public IEnumerable<WorkSpaceRoomListItemDto> Rooms { get; set; } = Enumerable.Empty<WorkSpaceRoomListItemDto>();
+    }
 }

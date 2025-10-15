@@ -1,30 +1,36 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using WorkSpace.Domain.Common;
 
-namespace WorkSpace.Domain.Entities;
-
-public class Address : AuditableBaseEntity
+namespace WorkSpace.Domain.Entities
 {
-    [Required]
-    [MaxLength(255)]
-    public string? Street { get; set; }
+    public class Address : AuditableBaseEntity
+    {
+        [Required]
+        [MaxLength(255)]
+        public string? Street { get; set; }
 
-    [MaxLength(100)]
-    public string? City { get; set; }
+        [Required]
+        [MaxLength(100)]
+        public string? Ward { get; set; } // << THAY ĐỔI: Phường/Xã
 
-    [MaxLength(100)]
-    public string? State { get; set; }
+        [Required]
+        [MaxLength(100)]
+        public string? District { get; set; } 
 
-    [MaxLength(20)]
-    public string? PostalCode { get; set; }
+        [MaxLength(100)]
+        public string? State { get; set; } 
 
-    [Required]
-    [MaxLength(100)]
-    public string? Country { get; set; }
+        [MaxLength(20)]
+        public string? PostalCode { get; set; }
 
-    public double Latitude { get; set; }
-    public double Longitude { get; set; }
+        [Required]
+        [MaxLength(100)]
+        public string? Country { get; set; }
 
-    // Navigation properties
-    public virtual List<WorkSpace> Workspaces { get; set; } = new();
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+
+        // Navigation properties
+        public virtual List<WorkSpace> Workspaces { get; set; } = new();
+    }
 }

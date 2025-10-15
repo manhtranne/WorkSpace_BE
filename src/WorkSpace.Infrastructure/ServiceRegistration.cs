@@ -36,10 +36,10 @@ public static class ServiceRegistration
         services.AddScoped<IDateTimeService, DateTimeService>();
 
         services.AddScoped<ISearchService, SearchService>();
-        services.AddScoped<ILookupService, LookupService>();
-        services.AddScoped<IWorkSpaceService, WorkSpaceService>();
+        services.AddScoped<ISearchService, SearchService>(); 
+        services.AddScoped<IWorkSpaceSeeder, WorkSpaceSeeder>();
 
-        
+
         services.AddIdentityCore<AppUser>()
             .AddRoles<AppRole>()
             .AddEntityFrameworkStores<WorkSpaceContext>()

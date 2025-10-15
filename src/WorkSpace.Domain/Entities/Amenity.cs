@@ -16,5 +16,5 @@ public class Amenity : AuditableBaseEntity
     public string? IconClass { get; set; } // For UI
 
     // Navigation properties
-    public virtual List<WorkspaceAmenity> WorkspaceAmenities { get; set; } = new();
+    public virtual List<WorkSpaceRoomAmenity> WorkspaceAmenities { get; set; } = new();
 }

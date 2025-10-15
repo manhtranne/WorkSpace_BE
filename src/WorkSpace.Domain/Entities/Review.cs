@@ -7,7 +7,7 @@ public class Review : AuditableBaseEntity
 {
     public int BookingId { get; set; }
     public int UserId { get; set; }
-    public int WorkspaceId { get; set; }
+    public int WorkSpaceRoomId { get; set; }
 
     [Range(1, 5)]
     public int Rating { get; set; }
@@ -22,5 +22,5 @@ public class Review : AuditableBaseEntity
     // Navigation properties
     public virtual Booking? Booking { get; set; }
     public virtual AppUser? User { get; set; }
-    public virtual WorkSpace? Workspace { get; set; }
+    public virtual WorkSpaceRoom? WorkSpaceRoom { get; set; }
 }
