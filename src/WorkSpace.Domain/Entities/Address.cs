@@ -13,10 +13,6 @@ namespace WorkSpace.Domain.Entities
         [MaxLength(100)]
         public string? Ward { get; set; } // << THAY ĐỔI: Phường/Xã
 
-        [Required]
-        [MaxLength(100)]
-        public string? District { get; set; } 
-
         [MaxLength(100)]
         public string? State { get; set; } 
 

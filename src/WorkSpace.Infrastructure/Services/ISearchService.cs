@@ -7,5 +7,6 @@ namespace WorkSpace.Application.Interfaces.Services
     {
         Task<PagedResponse<IEnumerable<WorkSpaceRoomListItemDto>>> SearchWorkSpaceRoomsAsync(SearchRequestDto request);
         Task<IEnumerable<string>> GetLocationSuggestionsAsync(string query);
+        Task<IEnumerable<string>> GetAllWardsAsync();
     }
 }

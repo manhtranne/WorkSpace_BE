@@ -10,7 +10,6 @@ namespace WorkSpace.Application.DTOs.WorkSpaces
         public string WorkSpaceTitle { get; set; } = default!;
 
         public string? City { get; set; }
-        public string? District { get; set; } 
 
         public string? ThumbnailUrl { get; set; }
         public decimal PricePerDay { get; set; }

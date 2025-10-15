@@ -34,14 +34,18 @@ namespace WorkSpace.Infrastructure.Services
                 .Take(5)
                 .ToListAsync();
 
-            var districts = await _context.Addresses
-                .Where(a => a.District.Contains(query))
-                .Select(a => a.District)
+            return wards;
+        }
+
+        public async Task<IEnumerable<string>> GetAllWardsAsync()
+        {
+            var wards = await _context.Addresses
+                .Select(a => a.Ward)
                 .Distinct()
-                .Take(5)
+                .OrderBy(w => w)
                 .ToListAsync();
 
-            return districts.Concat(wards).Distinct();
+            return wards;
         }
 
         public async Task<PagedResponse<IEnumerable<WorkSpaceRoomListItemDto>>> SearchWorkSpaceRoomsAsync(SearchRequestDto request)
@@ -55,8 +59,7 @@ namespace WorkSpace.Infrastructure.Services
 
             if (!string.IsNullOrWhiteSpace(request.LocationQuery))
             {
-                query = query.Where(r => r.WorkSpace.Address.Ward.Contains(request.LocationQuery) ||
-                                         r.WorkSpace.Address.District.Contains(request.LocationQuery));
+                query = query.Where(r => r.WorkSpace.Address.Ward.Contains(request.LocationQuery));
             }
 
       
