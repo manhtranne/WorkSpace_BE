@@ -24,7 +24,7 @@ namespace WorkSpace.Infrastructure.Repositories
             int pageSize,
             bool? isVerified,
             string? companyName,
-            string? city, // Tham số 'city' bây giờ sẽ được dùng để tìm theo 'District'
+            string? city, // Tham số 'city' được dùng để tìm theo Ward
             CancellationToken cancellationToken)
         {
             var query = _hosts
@@ -45,11 +45,10 @@ namespace WorkSpace.Infrastructure.Repositories
                 query = query.Where(h => h.CompanyName!.Contains(companyName));
             }
 
-            // --- SỬA LỖI TẠI ĐÂY ---
-            // Thay thế query theo City bằng District
+            // Filter by city (using Ward field)
             if (!string.IsNullOrEmpty(city))
             {
-                query = query.Where(h => h.Workspaces.Any(w => w.Address!.District == city));
+                query = query.Where(h => h.Workspaces.Any(w => w.Address!.Ward == city));
             }
 
             return await query

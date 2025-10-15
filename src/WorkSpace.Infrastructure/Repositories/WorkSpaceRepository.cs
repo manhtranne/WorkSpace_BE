@@ -60,7 +60,7 @@ namespace WorkSpace.Infrastructure.Repositories
 
             if (!string.IsNullOrWhiteSpace(filter.City))
             {
-                query = query.Where(x => x.WorkSpace.Address!.District == filter.City);
+                query = query.Where(x => x.WorkSpace.Address!.Ward == filter.City);
             }
 
             if (filter.MinPricePerDay.HasValue)
