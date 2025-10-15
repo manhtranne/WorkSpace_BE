@@ -7,11 +7,12 @@ public class Post : AuditableBaseEntity
 {
     [MaxLength(200)]
     public string? Title { get; set; }
-    [MaxLength(500)]
+
+    [MaxLength(int.MaxValue)] 
     public string? ContentMarkdown { get; set; }
-    [MaxLength(500)]
+
+    [MaxLength(int.MaxValue)] 
     public string? ContentHtml { get; set; }
-    [MaxLength(200)]
     public string? ImageData { get; set; }
 
     public int UserId { get; set; }

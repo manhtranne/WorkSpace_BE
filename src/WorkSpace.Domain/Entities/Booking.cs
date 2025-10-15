@@ -10,7 +10,7 @@ public class Booking : AuditableBaseEntity
     public required string BookingCode { get; set; } // Unique code for reference
 
     public int CustomerId { get; set; }
-    public int WorkspaceId { get; set; }
+    public int WorkSpaceRoomId { get; set; }
 
     public DateTimeOffset StartTimeUtc { get; set; }
     public DateTimeOffset EndTimeUtc { get; set; }
@@ -39,7 +39,7 @@ public class Booking : AuditableBaseEntity
 
     // Navigation properties
     public virtual AppUser? Customer { get; set; }
-    public virtual WorkSpace? Workspace { get; set; }
+    public virtual WorkSpaceRoom? WorkSpaceRoom { get; set; }
     public virtual BookingStatus? BookingStatus { get; set; }
     public virtual Payment? Payment { get; set; }
     public virtual List<BookingParticipant> BookingParticipants { get; set; } = new();

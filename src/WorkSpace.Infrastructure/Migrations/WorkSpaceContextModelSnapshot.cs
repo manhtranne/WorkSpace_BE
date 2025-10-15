@@ -131,10 +131,6 @@ namespace WorkSpace.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("City")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<string>("Country")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -182,10 +178,6 @@ namespace WorkSpace.Infrastructure.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Ward");
-
-                    b.HasIndex("District", "Ward");
 
                     b.ToTable("Addresses");
                 });
@@ -396,12 +388,12 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Property<TimeSpan>("StartTime")
                         .HasColumnType("time");
 
-                    b.Property<int>("WorkspaceId")
+                    b.Property<int>("WorkSpaceRoomId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("WorkspaceId");
+                    b.HasIndex("WorkSpaceRoomId");
 
                     b.ToTable("AvailabilitySchedules");
                 });
@@ -439,12 +431,12 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("WorkspaceId")
+                    b.Property<int>("WorkSpaceRoomId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("WorkspaceId");
+                    b.HasIndex("WorkSpaceRoomId");
 
                     b.ToTable("BlockedTimeSlots");
                 });
@@ -522,7 +514,7 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Property<decimal>("TotalPrice")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("WorkspaceId")
+                    b.Property<int>("WorkSpaceRoomId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -534,7 +526,7 @@ namespace WorkSpace.Infrastructure.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.HasIndex("WorkspaceId");
+                    b.HasIndex("WorkSpaceRoomId");
 
                     b.ToTable("Bookings");
                 });
@@ -727,12 +719,12 @@ namespace WorkSpace.Infrastructure.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ContentHtml")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasMaxLength(2147483647)
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ContentMarkdown")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasMaxLength(2147483647)
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTimeOffset>("CreateUtc")
                         .HasColumnType("datetimeoffset");
@@ -741,8 +733,7 @@ namespace WorkSpace.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ImageData")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("LastModifiedById")
                         .HasColumnType("int");
@@ -905,7 +896,7 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.Property<int>("WorkspaceId")
+                    b.Property<int>("WorkSpaceRoomId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -915,73 +906,9 @@ namespace WorkSpace.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("WorkspaceId");
+                    b.HasIndex("WorkSpaceRoomId");
 
                     b.ToTable("Reviews");
-                });
-
-            modelBuilder.Entity("WorkSpace.Domain.Entities.SearchQueryHistory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AmenityIdsCsv")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("ClientIp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateOnly?>("Date")
-                        .HasColumnType("date");
-
-                    b.Property<TimeOnly?>("EndTime")
-                        .HasColumnType("time");
-
-                    b.Property<int?>("Participants")
-                        .HasColumnType("int");
-
-                    b.Property<decimal?>("PriceMax")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("PriceMin")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("QueryText")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<int?>("ResultsCount")
-                        .HasColumnType("int");
-
-                    b.Property<TimeOnly?>("StartTime")
-                        .HasColumnType("time");
-
-                    b.Property<string>("UserAgent")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Ward")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedAt");
-
-                    b.HasIndex("Ward");
-
-                    b.HasIndex("Date", "StartTime", "EndTime");
-
-                    b.ToTable("SearchQueryHistories", (string)null);
                 });
 
             modelBuilder.Entity("WorkSpace.Domain.Entities.WorkSpace", b =>
@@ -995,17 +922,8 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Property<int>("AddressId")
                         .HasColumnType("int");
 
-                    b.Property<double>("Area")
-                        .HasColumnType("float");
-
-                    b.Property<int>("Capacity")
-                        .HasColumnType("int");
-
                     b.Property<DateTimeOffset>("CreateUtc")
                         .HasColumnType("datetimeoffset");
-
-                    b.Property<TimeOnly>("CreatedAt")
-                        .HasColumnType("time");
 
                     b.Property<int?>("CreatedById")
                         .HasColumnType("int");
@@ -1020,9 +938,6 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsFeatured")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsVerified")
                         .HasColumnType("bit");
 
@@ -1032,38 +947,16 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("LastModifiedUtc")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<decimal>("PricePerDay")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("PricePerHour")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("PricePerMonth")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<int>("WorkspaceTypeId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("AddressId");
 
-                    b.HasIndex("Capacity");
-
                     b.HasIndex("HostId");
-
-                    b.HasIndex("IsFeatured");
-
-                    b.HasIndex("PricePerHour");
-
-                    b.HasIndex("Title");
-
-                    b.HasIndex("WorkspaceTypeId");
 
                     b.ToTable("Workspaces");
                 });
@@ -1098,12 +991,18 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.ToTable("WorkSpaceFavorites");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkspaceAmenity", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkSpaceRoom", b =>
                 {
-                    b.Property<int>("WorkspaceId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("AmenityId")
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<double>("Area")
+                        .HasColumnType("float");
+
+                    b.Property<int>("Capacity")
                         .HasColumnType("int");
 
                     b.Property<DateTimeOffset>("CreateUtc")
@@ -1112,10 +1011,14 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Property<int?>("CreatedById")
                         .HasColumnType("int");
 
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
-                    b.Property<bool>("IsAvailable")
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsVerified")
                         .HasColumnType("bit");
 
                     b.Property<int?>("LastModifiedById")
@@ -1124,14 +1027,36 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("LastModifiedUtc")
                         .HasColumnType("datetimeoffset");
 
-                    b.HasKey("WorkspaceId", "AmenityId");
+                    b.Property<decimal>("PricePerDay")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.HasIndex("AmenityId");
+                    b.Property<decimal>("PricePerHour")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.ToTable("WorkspaceAmenities");
+                    b.Property<decimal>("PricePerMonth")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<int>("WorkSpaceId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WorkSpaceRoomTypeId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WorkSpaceId");
+
+                    b.HasIndex("WorkSpaceRoomTypeId");
+
+                    b.ToTable("WorkSpaceRooms");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkspaceImage", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkSpaceRoomImage", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1159,17 +1084,17 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("LastModifiedUtc")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<int>("WorkspaceId")
+                    b.Property<int>("WorkSpaceRoomId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("WorkspaceId");
+                    b.HasIndex("WorkSpaceRoomId");
 
-                    b.ToTable("WorkspaceImages");
+                    b.ToTable("WorkSpaceRoomImages");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkspaceType", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkSpaceRoomType", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1200,7 +1125,50 @@ namespace WorkSpace.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("WorkspaceTypes");
+                    b.ToTable("WorkSpaceRoomTypes");
+                });
+
+            modelBuilder.Entity("WorkSpaceRoomAmenity", b =>
+                {
+                    b.Property<int>("WorkspaceId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AmenityId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("AmenityId1")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("CreateUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsAvailable")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("LastModifiedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("LastModifiedUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("WorkSpaceRoomId")
+                        .HasColumnType("int");
+
+                    b.HasKey("WorkspaceId", "AmenityId");
+
+                    b.HasIndex("AmenityId");
+
+                    b.HasIndex("AmenityId1");
+
+                    b.HasIndex("WorkSpaceRoomId");
+
+                    b.ToTable("WorkSpaceRoomAmenities");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -1256,24 +1224,24 @@ namespace WorkSpace.Infrastructure.Migrations
 
             modelBuilder.Entity("WorkSpace.Domain.Entities.AvailabilitySchedule", b =>
                 {
-                    b.HasOne("WorkSpace.Domain.Entities.WorkSpace", "Workspace")
+                    b.HasOne("WorkSpace.Domain.Entities.WorkSpaceRoom", "WorkSpaceRoom")
                         .WithMany("AvailabilitySchedules")
-                        .HasForeignKey("WorkspaceId")
+                        .HasForeignKey("WorkSpaceRoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Workspace");
+                    b.Navigation("WorkSpaceRoom");
                 });
 
             modelBuilder.Entity("WorkSpace.Domain.Entities.BlockedTimeSlot", b =>
                 {
-                    b.HasOne("WorkSpace.Domain.Entities.WorkSpace", "Workspace")
+                    b.HasOne("WorkSpace.Domain.Entities.WorkSpaceRoom", "WorkSpaceRoom")
                         .WithMany("BlockedTimeSlots")
-                        .HasForeignKey("WorkspaceId")
+                        .HasForeignKey("WorkSpaceRoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Workspace");
+                    b.Navigation("WorkSpaceRoom");
                 });
 
             modelBuilder.Entity("WorkSpace.Domain.Entities.Booking", b =>
@@ -1290,9 +1258,9 @@ namespace WorkSpace.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("WorkSpace.Domain.Entities.WorkSpace", "Workspace")
+                    b.HasOne("WorkSpace.Domain.Entities.WorkSpaceRoom", "WorkSpaceRoom")
                         .WithMany("Bookings")
-                        .HasForeignKey("WorkspaceId")
+                        .HasForeignKey("WorkSpaceRoomId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -1300,7 +1268,7 @@ namespace WorkSpace.Infrastructure.Migrations
 
                     b.Navigation("Customer");
 
-                    b.Navigation("Workspace");
+                    b.Navigation("WorkSpaceRoom");
                 });
 
             modelBuilder.Entity("WorkSpace.Domain.Entities.BookingParticipant", b =>
@@ -1388,9 +1356,9 @@ namespace WorkSpace.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("WorkSpace.Domain.Entities.WorkSpace", "Workspace")
+                    b.HasOne("WorkSpace.Domain.Entities.WorkSpaceRoom", "WorkSpaceRoom")
                         .WithMany("Reviews")
-                        .HasForeignKey("WorkspaceId")
+                        .HasForeignKey("WorkSpaceRoomId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -1398,7 +1366,7 @@ namespace WorkSpace.Infrastructure.Migrations
 
                     b.Navigation("User");
 
-                    b.Navigation("Workspace");
+                    b.Navigation("WorkSpaceRoom");
                 });
 
             modelBuilder.Entity("WorkSpace.Domain.Entities.WorkSpace", b =>
@@ -1415,17 +1383,9 @@ namespace WorkSpace.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("WorkSpace.Domain.Entities.WorkspaceType", "WorkspaceType")
-                        .WithMany("Workspaces")
-                        .HasForeignKey("WorkspaceTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("Address");
 
                     b.Navigation("Host");
-
-                    b.Navigation("WorkspaceType");
                 });
 
             modelBuilder.Entity("WorkSpace.Domain.Entities.WorkSpaceFavorite", b =>
@@ -1447,34 +1407,57 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Navigation("Workspace");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkspaceAmenity", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkSpaceRoom", b =>
+                {
+                    b.HasOne("WorkSpace.Domain.Entities.WorkSpace", "WorkSpace")
+                        .WithMany("WorkSpaceRooms")
+                        .HasForeignKey("WorkSpaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WorkSpace.Domain.Entities.WorkSpaceRoomType", "WorkSpaceRoomType")
+                        .WithMany("WorkSpaceRooms")
+                        .HasForeignKey("WorkSpaceRoomTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("WorkSpace");
+
+                    b.Navigation("WorkSpaceRoomType");
+                });
+
+            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkSpaceRoomImage", b =>
+                {
+                    b.HasOne("WorkSpace.Domain.Entities.WorkSpaceRoom", "WorkSpaceRoom")
+                        .WithMany("WorkSpaceRoomImages")
+                        .HasForeignKey("WorkSpaceRoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("WorkSpaceRoom");
+                });
+
+            modelBuilder.Entity("WorkSpaceRoomAmenity", b =>
                 {
                     b.HasOne("WorkSpace.Domain.Entities.Amenity", "Amenity")
-                        .WithMany("WorkspaceAmenities")
+                        .WithMany()
                         .HasForeignKey("AmenityId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("WorkSpace.Domain.Entities.WorkSpace", "Workspace")
+                    b.HasOne("WorkSpace.Domain.Entities.Amenity", null)
                         .WithMany("WorkspaceAmenities")
-                        .HasForeignKey("WorkspaceId")
+                        .HasForeignKey("AmenityId1");
+
+                    b.HasOne("WorkSpace.Domain.Entities.WorkSpaceRoom", "WorkSpaceRoom")
+                        .WithMany("WorkSpaceRoomAmenities")
+                        .HasForeignKey("WorkSpaceRoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Amenity");
 
-                    b.Navigation("Workspace");
-                });
-
-            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkspaceImage", b =>
-                {
-                    b.HasOne("WorkSpace.Domain.Entities.WorkSpace", "Workspace")
-                        .WithMany("WorkspaceImages")
-                        .HasForeignKey("WorkspaceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Workspace");
+                    b.Navigation("WorkSpaceRoom");
                 });
 
             modelBuilder.Entity("WorkSpace.Domain.Entities.Address", b =>
@@ -1530,6 +1513,13 @@ namespace WorkSpace.Infrastructure.Migrations
 
             modelBuilder.Entity("WorkSpace.Domain.Entities.WorkSpace", b =>
                 {
+                    b.Navigation("WorkSpaceFavorites");
+
+                    b.Navigation("WorkSpaceRooms");
+                });
+
+            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkSpaceRoom", b =>
+                {
                     b.Navigation("AvailabilitySchedules");
 
                     b.Navigation("BlockedTimeSlots");
@@ -1538,16 +1528,14 @@ namespace WorkSpace.Infrastructure.Migrations
 
                     b.Navigation("Reviews");
 
-                    b.Navigation("WorkSpaceFavorites");
+                    b.Navigation("WorkSpaceRoomAmenities");
 
-                    b.Navigation("WorkspaceAmenities");
-
-                    b.Navigation("WorkspaceImages");
+                    b.Navigation("WorkSpaceRoomImages");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkspaceType", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkSpaceRoomType", b =>
                 {
-                    b.Navigation("Workspaces");
+                    b.Navigation("WorkSpaceRooms");
                 });
 #pragma warning restore 612, 618
         }

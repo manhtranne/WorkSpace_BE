@@ -1,24 +1,26 @@
-﻿using AutoMapper;
+﻿
+using AutoMapper;
 using MediatR;
 using WorkSpace.Application.DTOs.WorkSpaces;
 using WorkSpace.Application.Interfaces.Repositories;
 using WorkSpace.Application.Wrappers;
 
-namespace WorkSpace.Application.Features.WorkSpace.Queries;
-
-public record GetWorkSpaceByIdQuery(int Id) : IRequest<Response<WorkSpaceDetailDto>>; 
-
-public class GetWorkSpaceByIdHandler(IWorkSpaceRepository repository,
-    IMapper mapper) : IRequestHandler<GetWorkSpaceByIdQuery, Response<WorkSpaceDetailDto>>
+namespace WorkSpace.Application.Features.WorkSpace.Queries
 {
-    public async Task<Response<WorkSpaceDetailDto>> Handle(GetWorkSpaceByIdQuery request, CancellationToken cancellationToken)
+    public record GetWorkSpaceByIdQuery(int Id) : IRequest<Response<WorkSpaceDetailDto>>;
+
+    public class GetWorkSpaceByIdHandler(IWorkSpaceRepository repository,
+        IMapper mapper) : IRequestHandler<GetWorkSpaceByIdQuery, Response<WorkSpaceDetailDto>>
     {
-        var entity = await repository.GetByIdWithDetailsAsync(request.Id);
-        if (entity == null)
+        public async Task<Response<WorkSpaceDetailDto>> Handle(GetWorkSpaceByIdQuery request, CancellationToken cancellationToken)
         {
-            return new Response<WorkSpaceDetailDto>($"WorkSpace with Id {request.Id} not found.");
+            var entity = await repository.GetByIdWithDetailsAsync(request.Id, cancellationToken);
+            if (entity == null)
+            {
+                return new Response<WorkSpaceDetailDto>($"WorkSpace with Id {request.Id} not found.");
+            }
+            var dto = mapper.Map<WorkSpaceDetailDto>(entity);
+            return new Response<WorkSpaceDetailDto>(dto);
         }
-        var dto = mapper.Map<WorkSpaceDetailDto>(entity);
-        return new Response<WorkSpaceDetailDto>(dto);
     }
 }
