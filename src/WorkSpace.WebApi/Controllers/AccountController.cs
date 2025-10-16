@@ -18,20 +18,23 @@ namespace WorkSpace.WebApi.Controllers
         // API Request URL: POST /api/accounts/login
         public async Task<IActionResult> AuthenticateAsync(AuthenticationRequest request)
         {
-            return Ok(await _accountService.AuthenticateAsync(request, GenerateIPAddress()));
+            var result = await _accountService.AuthenticateAsync(request, GenerateIPAddress());
+            return Ok(result.Data);
         }
         [HttpPost("register")]
         // API Request URL: POST /api/accounts/register
         public async Task<IActionResult> RegisterAsync(RegisterRequest request)
         {
             var origin = GetOrigin();
-            return Ok(await _accountService.RegisterAsync(request, origin));
+            var result = await _accountService.RegisterAsync(request, origin, GenerateIPAddress());
+            return Ok(result.Data);
         }
         [HttpGet("confirm-email")]
         // API Request URL: GET /api/accounts/confirm-email
         public async Task<IActionResult> ConfirmEmailAsync([FromQuery] string userId, [FromQuery] string code)
         {
-            return Ok(await _accountService.ConfirmEmailAsync(userId, code));
+            var result = await _accountService.ConfirmEmailAsync(userId, code);
+            return Ok(result.Data);
         }
         [HttpPost("forgot-password")]
         // API Request URL: POST /api/accounts/forgot-password
@@ -45,26 +48,29 @@ namespace WorkSpace.WebApi.Controllers
         // API Request URL: POST /api/accounts/reset-password
         public async Task<IActionResult> ResetPassword(ResetPasswordRequest model)
         {
-
-            return Ok(await _accountService.ResetPassword(model));
+            var result = await _accountService.ResetPassword(model);
+            return Ok(result.Data);
         }
         
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken(RefreshTokenRequest request)
         {
-            return Ok(await _accountService.RefreshTokenAsync(request, GenerateIPAddress()));
+            var result = await _accountService.RefreshTokenAsync(request, GenerateIPAddress());
+            return Ok(result.Data);
         }
         
         [HttpPost("revoke-token")]
         public async Task<IActionResult> RevokeToken([FromBody] string token)
         {
-            return Ok(await _accountService.RevokeTokenAsync(token, GenerateIPAddress()));
+            var result = await _accountService.RevokeTokenAsync(token, GenerateIPAddress());
+            return Ok(result.Data);
         }
         
         [HttpPost("logout")]
         public async Task<IActionResult> Logout([FromBody] string refreshToken)
         {
-            return Ok(await _accountService.RevokeTokenAsync(refreshToken, GenerateIPAddress()));
+            var result = await _accountService.RevokeTokenAsync(refreshToken, GenerateIPAddress());
+            return Ok(result.Data);
         }
         private string GenerateIPAddress()
         {

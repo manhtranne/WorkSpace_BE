@@ -71,7 +71,15 @@ public static class WebApplicationBuilderExtensions
             });
         });
         
-        builder.Services.AddControllers();
+        builder.Services.AddControllers()
+        .AddJsonOptions(opt =>
+        {
+            // Không sinh $id, $values, vẫn tránh vòng lặp
+            opt.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+            opt.JsonSerializerOptions.WriteIndented = true; // Format đẹp hơn
+            opt.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull; // Bỏ qua null
+            opt.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase; // camelCase
+        });
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(c =>
         {

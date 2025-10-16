@@ -106,7 +106,7 @@ public class AccountService : IAccountService
             }
         }
 
-        public async Task<Response<string>> RegisterAsync(RegisterRequest request, string origin)
+        public async Task<Response<AuthenticationResponse>> RegisterAsync(RegisterRequest request, string origin, string ipAddress)
         {
             var userWithSameUserName = await _userManager.FindByNameAsync(request.UserName);
             if (userWithSameUserName != null)
@@ -142,7 +142,28 @@ public class AccountService : IAccountService
                     //     Subject = "Confirm Registration" 
                     // });
                     
-                    return new Response<string>(user.Id.ToString(), message: $"User Registered successfully. Email: {user.Email}");
+                    _logger.LogInformation("User registered successfully: {UserId} ({Email})", user.Id, user.Email);
+                    
+                    // Auto login after registration - Generate JWT token
+                    JwtSecurityToken jwtSecurityToken = await GenerateJWToken(user);
+                    AuthenticationResponse response = new AuthenticationResponse();
+                    response.Id = user.Id.ToString();
+                    response.JWToken = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+                    response.Email = user.Email;
+                    response.UserName = user.UserName;
+                    var rolesList = await _userManager.GetRolesAsync(user).ConfigureAwait(false);
+                    response.Roles = rolesList.ToList();
+                    response.IsVerified = user.EmailConfirmed;
+                    var refreshToken = GenerateRefreshToken(ipAddress);
+                    response.RefreshToken = refreshToken.Token;
+                    
+                    // Save refresh token to database
+                    user.RefreshToken = refreshToken.Token;
+                    user.RefreshTokenExpiryTime = refreshToken.Expires;
+                    user.LastLoginDate = DateTime.UtcNow;
+                    await _userManager.UpdateAsync(user);
+                    
+                    return new Response<AuthenticationResponse>(response, $"User registered and authenticated successfully");
                 }
                 else
                 {

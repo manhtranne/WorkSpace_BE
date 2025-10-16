@@ -33,7 +33,7 @@ namespace WorkSpace.WebApi.Controllers.v1
         public async Task<IActionResult> SearchWorkSpaces([FromQuery] SearchRequestDto request)
         {
             var result = await _searchService.SearchWorkSpaceRoomsAsync(request);
-            return Ok(result);
+            return Ok(result.Data);
         }
     }
 }
