@@ -13,7 +13,8 @@ namespace WorkSpace.WebApi.Controllers.v1
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id, CancellationToken cancellationToken)
         {
-            return Ok(await Mediator.Send(new GetWorkSpaceByIdQuery(id), cancellationToken));
+            var result = await Mediator.Send(new GetWorkSpaceByIdQuery(id), cancellationToken);
+            return Ok(result.Data);
         }
 
   
@@ -38,7 +39,7 @@ namespace WorkSpace.WebApi.Controllers.v1
                 desiredStartUtc, desiredEndUtc);
 
             var result = await Mediator.Send(new GetWorkSpaceRoomsPagedQuery(filter, pageNumber, pageSize), cancellationToken);
-            return Ok(result);
+            return Ok(result.Data);
         }
 
 
@@ -55,7 +56,7 @@ namespace WorkSpace.WebApi.Controllers.v1
         public async Task<IActionResult> Create([FromBody] CreateWorkSpaceRequest request, CancellationToken cancellationToken)
         {
             var result = await Mediator.Send(new CreateWorkSpaceCommand(request), cancellationToken);
-            return Ok(result);
+            return Ok(result.Data);
         }
     }
 }

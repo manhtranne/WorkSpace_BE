@@ -6,13 +6,11 @@ namespace WorkSpace.Domain.Entities;
 [Table("AppUsers")]
 public class AppUser : IdentityUser<int>
 {
-    [Required]
     [MaxLength(100)]
-    public required string FirstName { get; set; }
+    public string? FirstName { get; set; }
         
-    [Required]
     [MaxLength(100)]
-    public required string LastName { get; set; }
+    public string? LastName { get; set; }
     public bool IsActive { get; set; }
     [MaxLength(150)]
     public string? RefreshToken { get; set; }
@@ -35,6 +33,9 @@ public class AppUser : IdentityUser<int>
 
     public string GetFullName()
     {
-        return this.FirstName + " " + this.LastName;
+        if (string.IsNullOrEmpty(FirstName) && string.IsNullOrEmpty(LastName))
+            return UserName ?? "Unknown";
+            
+        return $"{FirstName ?? ""} {LastName ?? ""}".Trim();
     }
 }

@@ -36,7 +36,50 @@ public static class WebApplicationBuilderExtensions
             .AddEntityFrameworkStores<WorkSpaceContext>()  
             .AddDefaultTokenProviders();
         builder.Services.AddAuthentication();
-        builder.Services.AddControllers();
+        
+        // Add CORS
+        var allowedOrigins = builder.Configuration.GetSection("CorsSettings:AllowedOrigins").Get<string[]>() 
+                             ?? Array.Empty<string>();
+        
+        builder.Services.AddCors(options =>
+        {
+            // Policy cho Development - Allow all
+            options.AddPolicy("AllowAll", policy =>
+            {
+                policy.AllowAnyOrigin()
+                      .AllowAnyMethod()
+                      .AllowAnyHeader();
+            });
+            
+            // Policy cho Production - Chỉ cho phép origins cụ thể
+            options.AddPolicy("Production", policy =>
+            {
+                if (allowedOrigins.Length > 0)
+                {
+                    policy.WithOrigins(allowedOrigins)
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials();
+                }
+                else
+                {
+                    // Fallback nếu không có config
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                }
+            });
+        });
+        
+        builder.Services.AddControllers()
+        .AddJsonOptions(opt =>
+        {
+            // Không sinh $id, $values, vẫn tránh vòng lặp
+            opt.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+            opt.JsonSerializerOptions.WriteIndented = true; // Format đẹp hơn
+            opt.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull; // Bỏ qua null
+            opt.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase; // camelCase
+        });
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(c =>
         {
