@@ -2,8 +2,7 @@
 {
     public class SearchRequestDto
     {
-        public int PageNumber { get; set; } = 1;
-        public int PageSize { get; set; } = 20;
+
         public string? LocationQuery { get; set; }
         public DateTime? StartTime { get; set; }
         public DateTime? EndTime { get; set; }

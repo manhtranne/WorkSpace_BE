@@ -1,5 +1,4 @@
-﻿// src/WorkSpace.Infrastructure/Services/SearchService.cs
-
+﻿
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using WorkSpace.Application.DTOs.WorkSpaces;
@@ -7,6 +6,11 @@ using WorkSpace.Application.Interfaces.Services;
 using WorkSpace.Application.Wrappers;
 using WorkSpace.Domain.Entities;
 using WorkSpace.Infrastructure;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
 namespace WorkSpace.Infrastructure.Services
 {
     public class SearchService : ISearchService
@@ -48,27 +52,29 @@ namespace WorkSpace.Infrastructure.Services
             return wards;
         }
 
-        public async Task<PagedResponse<IEnumerable<WorkSpaceRoomListItemDto>>> SearchWorkSpaceRoomsAsync(SearchRequestDto request)
+        public async Task<Response<IEnumerable<WorkSpaceRoomListItemDto>>> SearchWorkSpaceRoomsAsync(SearchRequestDto request)
         {
+
             var query = _context.WorkSpaceRooms
                 .Include(r => r.WorkSpace)
                     .ThenInclude(w => w.Address)
                 .Include(r => r.WorkSpaceRoomImages)
                 .Include(r => r.Reviews)
+                .Include(r => r.BlockedTimeSlots) 
+                .Include(r => r.AvailabilitySchedules) 
                 .AsQueryable();
 
+    
             if (!string.IsNullOrWhiteSpace(request.LocationQuery))
             {
                 query = query.Where(r => r.WorkSpace.Address.Ward.Contains(request.LocationQuery));
             }
 
-      
             if (request.Capacity.HasValue && request.Capacity > 0)
             {
                 query = query.Where(r => r.Capacity >= request.Capacity.Value);
             }
 
-    
             if (request.MinPrice.HasValue)
             {
                 query = query.Where(r => r.PricePerDay >= request.MinPrice.Value);
@@ -78,7 +84,6 @@ namespace WorkSpace.Infrastructure.Services
                 query = query.Where(r => r.PricePerDay <= request.MaxPrice.Value);
             }
 
- 
             if (!string.IsNullOrWhiteSpace(request.Keyword))
             {
                 query = query.Where(r => r.Title.Contains(request.Keyword) ||
@@ -94,41 +99,44 @@ namespace WorkSpace.Infrastructure.Services
                 }
             }
 
-      
+            var potentialRooms = await query.ToListAsync();
+
+            IEnumerable<WorkSpaceRoom> finalRooms = potentialRooms;
+
             if (request.StartTime.HasValue && request.EndTime.HasValue)
             {
                 var startTime = request.StartTime.Value;
                 var endTime = request.EndTime.Value;
 
-                query = query.Where(room =>
-              
-                    !room.BlockedTimeSlots.Any(slot =>
-                        (slot.StartTime < endTime && slot.EndTime > startTime)
-                    ) &&
+                finalRooms = potentialRooms.Where(room =>
+                {
+                    
+                    bool isBlocked = room.BlockedTimeSlots.Any(slot =>
+                        slot.StartTime < endTime && slot.EndTime > startTime);
 
-                    !Enumerable.Range(0, (endTime.Date - startTime.Date).Days + 1)
-                                .Select(offset => startTime.Date.AddDays(offset))
-                                .Any(date => !room.AvailabilitySchedules.Any(schedule =>
-                                     schedule.DayOfWeek == date.DayOfWeek &&
-                                     schedule.StartTime <= (date == startTime.Date ? startTime.TimeOfDay : TimeSpan.Zero) &&
-                                     schedule.EndTime >= (date == endTime.Date ? endTime.TimeOfDay : new TimeSpan(23, 59, 59))
-                                ))
-                );
+                    if (isBlocked) return false;
+
+                    for (var date = startTime.Date; date <= endTime.Date; date = date.AddDays(1))
+                    {
+                        var dayOfWeek = date.DayOfWeek;
+
+                        var checkStartTime = (date == startTime.Date) ? startTime.TimeOfDay : TimeSpan.Zero;
+                        var checkEndTime = (date == endTime.Date) ? endTime.TimeOfDay : new TimeSpan(23, 59, 59);
+
+                        bool isAvailableOnThisDay = room.AvailabilitySchedules.Any(s =>
+                            s.DayOfWeek == dayOfWeek &&
+                            s.StartTime <= checkStartTime &&
+                            s.EndTime >= checkEndTime);
+
+                        if (!isAvailableOnThisDay) return false;
+                    }
+
+                    return true;
+                }).ToList();
             }
 
-            var totalRecords = await query.CountAsync();
-
-            var rooms = await query
-                .Skip((request.PageNumber - 1) * request.PageSize)
-                .Take(request.PageSize)
-                .ToListAsync();
-
-            var dtoList = _mapper.Map<IEnumerable<WorkSpaceRoomListItemDto>>(rooms);
-
-            return new PagedResponse<IEnumerable<WorkSpaceRoomListItemDto>>(dtoList, request.PageNumber, request.PageSize)
-            {
-                Message = $"Found {totalRecords} records."
-            };
+            var dtoList = _mapper.Map<IEnumerable<WorkSpaceRoomListItemDto>>(finalRooms);
+            return new Response<IEnumerable<WorkSpaceRoomListItemDto>>(dtoList, $"Found {dtoList.Count()} records.");
         }
     }
 }
