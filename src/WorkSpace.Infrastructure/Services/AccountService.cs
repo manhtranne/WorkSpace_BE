@@ -116,8 +116,6 @@ public class AccountService : IAccountService
             var user = new AppUser()
             {
                 Email = request.Email,
-                FirstName = request.FirstName,
-                LastName = request.LastName,
                 UserName = request.UserName,
                 DateCreated = DateTime.UtcNow,
                 IsActive = true,
