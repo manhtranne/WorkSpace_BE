@@ -29,7 +29,7 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(wards);
         }
 
-        [HttpGet("workspacerooms")]
+        [HttpGet("workspaces")]
         public async Task<IActionResult> SearchWorkSpaces([FromQuery] SearchRequestDto request)
         {
             var result = await _searchService.SearchWorkSpaceRoomsAsync(request);
