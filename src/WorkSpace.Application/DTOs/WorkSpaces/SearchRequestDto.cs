@@ -11,6 +11,6 @@
         public decimal? MinPrice { get; set; }
         public decimal? MaxPrice { get; set; }
         public List<string>? Amenities { get; set; }
-        public string? Keyword { get; set; } // Dùng để search theo tên workspace, room type...
+        public string? Keyword { get; set; } 
     }
 }

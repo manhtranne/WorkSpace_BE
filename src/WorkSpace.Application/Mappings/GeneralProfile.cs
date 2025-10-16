@@ -10,7 +10,6 @@ namespace WorkSpace.Application.Mappings
     {
         public GeneralProfile()
         {
-            // HostProfile mappings
             CreateMap<CreateHostProfileCommand, HostProfile>();
             CreateMap<HostProfile, HostProfileDto>()
                 .ForMember(d => d.UserName, o => o.MapFrom(s => s.User!.UserName))
@@ -18,19 +17,18 @@ namespace WorkSpace.Application.Mappings
                 .ForMember(d => d.TotalWorkspaces, o => o.MapFrom(s => s.Workspaces.Count))
                 .ForMember(d => d.ActiveWorkspaces, o => o.MapFrom(s => s.Workspaces.Count(w => w.IsActive)));
 
-            // WorkSpace Mappings
             CreateMap<CreateWorkSpaceRequest, WorkSpace.Domain.Entities.WorkSpace>();
             CreateMap<WorkSpace.Domain.Entities.WorkSpace, WorkSpaceDetailDto>()
                 .ForMember(d => d.AddressLine, o => o.MapFrom(s => $"{s.Address!.Street}, {s.Address.Ward}, {s.Address.District}"))
-                .ForMember(d => d.District, o => o.MapFrom(s => s.Address!.District)) // <-- ĐÃ SỬA
+                .ForMember(d => d.District, o => o.MapFrom(s => s.Address!.District)) 
                 .ForMember(d => d.Country, o => o.MapFrom(s => s.Address!.Country))
                 .ForMember(d => d.HostName, o => o.MapFrom(s => s.Host.User.GetFullName()))
                 .ForMember(d => d.Rooms, o => o.MapFrom(s => s.WorkSpaceRooms));
 
-            // WorkSpaceRoom Mappings
+      
             CreateMap<WorkSpaceRoom, WorkSpaceRoomListItemDto>()
                 .ForMember(d => d.WorkSpaceTitle, o => o.MapFrom(s => s.WorkSpace.Title))
-                .ForMember(d => d.District, o => o.MapFrom(s => s.WorkSpace.Address.District)) // <-- ĐÃ SỬA
+                .ForMember(d => d.District, o => o.MapFrom(s => s.WorkSpace.Address.District)) 
                 .ForMember(d => d.ThumbnailUrl, o => o.MapFrom(s => s.WorkSpaceRoomImages.FirstOrDefault().ImageUrl))
                 .ForMember(d => d.AverageRating, o => o.MapFrom(s => s.Reviews.Any() ? s.Reviews.Average(r => r.Rating) : 0))
                 .ForMember(d => d.RatingCount, o => o.MapFrom(s => s.Reviews.Count));

@@ -1,8 +1,8 @@
-﻿// src/WorkSpace.Application/DTOs/WorkSpaces/WorkSpaceFilter.cs
+﻿
 namespace WorkSpace.Application.DTOs.WorkSpaces;
 
 public record WorkSpaceFilter(
-    int? WorkSpaceRoomTypeId, // Changed from WorkSpaceTypeId
+    int? WorkSpaceRoomTypeId,
     string? City,
     decimal? MinPricePerDay,
     decimal? MaxPricePerDay,

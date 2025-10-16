@@ -1,5 +1,4 @@
-﻿// src/WorkSpace.Infrastructure/Services/SearchService.cs
-
+﻿
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using WorkSpace.Application.DTOs.WorkSpaces;
