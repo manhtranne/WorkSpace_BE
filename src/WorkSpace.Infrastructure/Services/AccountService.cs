@@ -127,10 +127,22 @@ public class AccountService : IAccountService
                 if (result.Succeeded)
                 {
                     await _userManager.AddToRoleAsync(user, Roles.Basic.ToString());
-                    var verificationUri = await SendVerificationEmail(user, origin);
-                    //TODO: Attach Email Service here and configure it via appsettings
-                    await _emailService.SendAsync(new Application.DTOs.Email.EmailRequest() { From = "mail@codewithmukesh.com", To = user.Email, Body = $"Please confirm your account by visiting this URL {verificationUri}", Subject = "Confirm Registration" });
-                    return new Response<string>(user.Id.ToString(), message: $"User Registered. Please confirm your account by visiting this URL {verificationUri}");
+                    
+                    // Auto confirm email for now (skip email verification)
+                    var emailConfirmToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    await _userManager.ConfirmEmailAsync(user, emailConfirmToken);
+                    
+                    // TODO: Enable email verification later when SMTP is configured
+                    // var verificationUri = await SendVerificationEmail(user, origin);
+                    // await _emailService.SendAsync(new Application.DTOs.Email.EmailRequest() 
+                    // { 
+                    //     From = "mail@codewithmukesh.com", 
+                    //     To = user.Email, 
+                    //     Body = $"Please confirm your account by visiting this URL {verificationUri}", 
+                    //     Subject = "Confirm Registration" 
+                    // });
+                    
+                    return new Response<string>(user.Id.ToString(), message: $"User Registered successfully. Email: {user.Email}");
                 }
                 else
                 {
