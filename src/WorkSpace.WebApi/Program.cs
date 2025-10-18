@@ -34,8 +34,26 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Use CORS - Phải đặt TRƯỚC UseAuthentication
+if (app.Environment.IsDevelopment())
+{
+    // Development: Allow all origins for easier testing
+    app.UseCors("AllowAll");
+}
+else
+{
+    // Production: Only allow specific origins from appsettings
+    app.UseCors("Production");
+}
+app.UseCors(cors =>
+{
+    cors.AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials()
+        .SetIsOriginAllowed(origin => true);
+});
 
-
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();

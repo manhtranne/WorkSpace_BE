@@ -32,6 +32,13 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(wards);
         }
 
+        [HttpGet("workspacerooms")]
+        public async Task<IActionResult> SearchWorkSpaces([FromQuery] SearchRequestDto request)
+        {
+            var wards = await _searchService.GetAllWardsAsync();
+            return Ok(wards);
+        }
+
         [HttpGet("workspaces")]
         public async Task<IActionResult> SearchWorkSpaces(
             [FromQuery] string ward,
@@ -55,7 +62,7 @@ namespace WorkSpace.WebApi.Controllers.v1
                 Keyword = keyword
             };
             var result = await _searchService.SearchWorkSpaceRoomsAsync(request);
-            return Ok(result);
+            return Ok(result.Data);
         }
     }
 }

@@ -106,7 +106,7 @@ public class AccountService : IAccountService
             }
         }
 
-        public async Task<Response<string>> RegisterAsync(RegisterRequest request, string origin)
+        public async Task<Response<AuthenticationResponse>> RegisterAsync(RegisterRequest request, string origin, string ipAddress)
         {
             var userWithSameUserName = await _userManager.FindByNameAsync(request.UserName);
             if (userWithSameUserName != null)
@@ -116,8 +116,6 @@ public class AccountService : IAccountService
             var user = new AppUser()
             {
                 Email = request.Email,
-                FirstName = request.FirstName,
-                LastName = request.LastName,
                 UserName = request.UserName,
                 DateCreated = DateTime.UtcNow,
                 IsActive = true,
@@ -129,10 +127,43 @@ public class AccountService : IAccountService
                 if (result.Succeeded)
                 {
                     await _userManager.AddToRoleAsync(user, Roles.Basic.ToString());
-                    var verificationUri = await SendVerificationEmail(user, origin);
-                    //TODO: Attach Email Service here and configure it via appsettings
-                    await _emailService.SendAsync(new Application.DTOs.Email.EmailRequest() { From = "mail@codewithmukesh.com", To = user.Email, Body = $"Please confirm your account by visiting this URL {verificationUri}", Subject = "Confirm Registration" });
-                    return new Response<string>(user.Id.ToString(), message: $"User Registered. Please confirm your account by visiting this URL {verificationUri}");
+                    
+                    // Auto confirm email for now (skip email verification)
+                    var emailConfirmToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    await _userManager.ConfirmEmailAsync(user, emailConfirmToken);
+                    
+                    // TODO: Enable email verification later when SMTP is configured
+                    // var verificationUri = await SendVerificationEmail(user, origin);
+                    // await _emailService.SendAsync(new Application.DTOs.Email.EmailRequest() 
+                    // { 
+                    //     From = "mail@codewithmukesh.com", 
+                    //     To = user.Email, 
+                    //     Body = $"Please confirm your account by visiting this URL {verificationUri}", 
+                    //     Subject = "Confirm Registration" 
+                    // });
+                    
+                    _logger.LogInformation("User registered successfully: {UserId} ({Email})", user.Id, user.Email);
+                    
+                    // Auto login after registration - Generate JWT token
+                    JwtSecurityToken jwtSecurityToken = await GenerateJWToken(user);
+                    AuthenticationResponse response = new AuthenticationResponse();
+                    response.Id = user.Id.ToString();
+                    response.JWToken = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+                    response.Email = user.Email;
+                    response.UserName = user.UserName;
+                    var rolesList = await _userManager.GetRolesAsync(user).ConfigureAwait(false);
+                    response.Roles = rolesList.ToList();
+                    response.IsVerified = user.EmailConfirmed;
+                    var refreshToken = GenerateRefreshToken(ipAddress);
+                    response.RefreshToken = refreshToken.Token;
+                    
+                    // Save refresh token to database
+                    user.RefreshToken = refreshToken.Token;
+                    user.RefreshTokenExpiryTime = refreshToken.Expires;
+                    user.LastLoginDate = DateTime.UtcNow;
+                    await _userManager.UpdateAsync(user);
+                    
+                    return new Response<AuthenticationResponse>(response, $"User registered and authenticated successfully");
                 }
                 else
                 {

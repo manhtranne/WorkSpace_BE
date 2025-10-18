@@ -17,7 +17,8 @@ public class HostProfileController : BaseApiController
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateHostProfileCommand command)
     {
-        return Ok(await Mediator.Send(command));
+        var result = await Mediator.Send(command);
+        return Ok(result.Data);
     }
 
     /// <summary>
@@ -26,7 +27,8 @@ public class HostProfileController : BaseApiController
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        return Ok(await Mediator.Send(new GetHostProfileByIdQuery(id)));
+        var result = await Mediator.Send(new GetHostProfileByIdQuery(id));
+        return Ok(result.Data);
     }
 
     /// <summary>
@@ -49,7 +51,8 @@ public class HostProfileController : BaseApiController
             City = city
         };
         
-        return Ok(await Mediator.Send(query));
+        var result = await Mediator.Send(query);
+        return Ok(result.Data);
     }
 
     /// <summary>
@@ -59,7 +62,8 @@ public class HostProfileController : BaseApiController
     public async Task<IActionResult> Update(int id, [FromBody] UpdateHostProfileCommand command)
     {
         command.Id = id;
-        return Ok(await Mediator.Send(command));
+        var result = await Mediator.Send(command);
+        return Ok(result.Data);
     }
 
     /// <summary>
@@ -68,7 +72,8 @@ public class HostProfileController : BaseApiController
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        return Ok(await Mediator.Send(new DeleteHostProfileCommand(id)));
+        var result = await Mediator.Send(new DeleteHostProfileCommand(id));
+        return Ok(result.Data);
     }
 
     /// <summary>
@@ -85,6 +90,6 @@ public class HostProfileController : BaseApiController
         };
         
         var result = await Mediator.Send(query);
-        return Ok(result);
+        return Ok(result.Data);
     }
 }
