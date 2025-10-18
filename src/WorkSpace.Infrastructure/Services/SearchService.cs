@@ -1,5 +1,4 @@
-﻿
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using WorkSpace.Application.DTOs.WorkSpaces;
 using WorkSpace.Application.Interfaces.Services;
@@ -54,17 +53,15 @@ namespace WorkSpace.Infrastructure.Services
 
         public async Task<Response<IEnumerable<WorkSpaceRoomListItemDto>>> SearchWorkSpaceRoomsAsync(SearchRequestDto request)
         {
-
             var query = _context.WorkSpaceRooms
                 .Include(r => r.WorkSpace)
                     .ThenInclude(w => w.Address)
                 .Include(r => r.WorkSpaceRoomImages)
                 .Include(r => r.Reviews)
-                .Include(r => r.BlockedTimeSlots) 
-                .Include(r => r.AvailabilitySchedules) 
+                .Include(r => r.BlockedTimeSlots)
+                .Include(r => r.AvailabilitySchedules)
                 .AsQueryable();
 
-    
             if (!string.IsNullOrWhiteSpace(request.LocationQuery))
             {
                 query = query.Where(r => r.WorkSpace.Address.Ward.Contains(request.LocationQuery));
@@ -100,7 +97,6 @@ namespace WorkSpace.Infrastructure.Services
             }
 
             var potentialRooms = await query.ToListAsync();
-
             IEnumerable<WorkSpaceRoom> finalRooms = potentialRooms;
 
             if (request.StartTime.HasValue && request.EndTime.HasValue)
@@ -116,24 +112,28 @@ namespace WorkSpace.Infrastructure.Services
 
                     if (isBlocked) return false;
 
+                  
                     for (var date = startTime.Date; date <= endTime.Date; date = date.AddDays(1))
                     {
                         var dayOfWeek = date.DayOfWeek;
+                        var schedule = room.AvailabilitySchedules.FirstOrDefault(s => s.DayOfWeek == dayOfWeek);
 
-                        var checkStartTime = (date == startTime.Date) ? startTime.TimeOfDay : TimeSpan.Zero;
-                        var checkEndTime = (date == endTime.Date) ? endTime.TimeOfDay : new TimeSpan(23, 59, 59);
+                        if (schedule == null || !schedule.IsAvailable) return false;
 
-                        bool isAvailableOnThisDay = room.AvailabilitySchedules.Any(s =>
-                            s.DayOfWeek == dayOfWeek &&
-                            s.StartTime <= checkStartTime &&
-                            s.EndTime >= checkEndTime);
+                      
+                        var requestedStartOfDay = (date == startTime.Date) ? startTime.TimeOfDay : TimeSpan.Zero;
+                        var requestedEndOfDay = (date == endTime.Date) ? endTime.TimeOfDay : new TimeSpan(23, 59, 59);
 
-                        if (!isAvailableOnThisDay) return false;
+                        if (requestedEndOfDay <= schedule.StartTime || requestedStartOfDay >= schedule.EndTime)
+                        {
+                            return false;
+                        }
                     }
 
                     return true;
                 }).ToList();
             }
+
 
             var dtoList = _mapper.Map<IEnumerable<WorkSpaceRoomListItemDto>>(finalRooms);
             return new Response<IEnumerable<WorkSpaceRoomListItemDto>>(dtoList, $"Found {dtoList.Count()} records.");
