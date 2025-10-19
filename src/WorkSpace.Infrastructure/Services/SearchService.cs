@@ -30,16 +30,18 @@ namespace WorkSpace.Infrastructure.Services
                     .ThenInclude(w => w.Address)
                 .Include(r => r.WorkSpaceRoomImages)
                 .Include(r => r.Reviews)
-                .Include(r => r.BlockedTimeSlots)
-                .Include(r => r.AvailabilitySchedules)
+                .Include(r => r.BlockedTimeSlots) 
+                                                  
                 .Include(r => r.WorkSpaceRoomType)
                 .Include(r => r.WorkSpaceRoomAmenities)
                     .ThenInclude(wra => wra.Amenity)
                 .Where(r => r.IsActive && r.WorkSpace.IsActive)
                 .AsQueryable();
 
-         
-            if (!string.IsNullOrWhiteSpace(request.Ward)) { query = query.Where(r => r.WorkSpace.Address.Ward.Contains(request.Ward)); }
+            if (!string.IsNullOrWhiteSpace(request.Ward))
+            {
+                query = query.Where(r => r.WorkSpace.Address.Ward.Contains(request.Ward));
+            }
             if (request.Capacity.HasValue && request.Capacity > 0) { query = query.Where(r => r.Capacity >= request.Capacity.Value); }
             if (request.MinPrice.HasValue) { query = query.Where(r => r.PricePerDay >= request.MinPrice.Value); }
             if (request.MaxPrice.HasValue) { query = query.Where(r => r.PricePerDay <= request.MaxPrice.Value); }
@@ -51,74 +53,31 @@ namespace WorkSpace.Infrastructure.Services
 
             IEnumerable<WorkSpaceRoom> finalRooms = potentialRooms;
 
-           
             if (request.HasDateTimeFilter())
             {
-                DateTime effectiveStartTime = request.StartTime ?? DateTime.MinValue; 
-                DateTime effectiveEndTime = request.EndTime ?? DateTime.MaxValue; 
+                DateTime effectiveStartTime = request.StartTime ?? DateTime.MinValue;
+                DateTime effectiveEndTime = request.EndTime ?? DateTime.MaxValue;
 
-              
                 if (request.StartTime.HasValue && request.EndTime.HasValue && effectiveEndTime <= effectiveStartTime)
                 {
-              
-                    return new Response<IEnumerable<WorkSpaceRoomListItemDto>>("End time must be after start time.")
-                    {
-                        Succeeded = false
-                    };
+                    return new Response<IEnumerable<WorkSpaceRoomListItemDto>>("End time must be after start time.") { Succeeded = false };
                 }
 
-                finalRooms = potentialRooms.Where(room => IsRoomAvailableInRange(room, effectiveStartTime, effectiveEndTime)).ToList();
+      
+                finalRooms = potentialRooms.Where(room =>
+                    !room.BlockedTimeSlots.Any(slot =>
+                        slot.StartTime < effectiveEndTime && slot.EndTime > effectiveStartTime 
+                    )
+                ).ToList();
             }
-
-
+  
 
             var dtoList = _mapper.Map<IEnumerable<WorkSpaceRoomListItemDto>>(finalRooms);
-            int count = dtoList.Count(); 
+            int count = dtoList.Count();
             return new Response<IEnumerable<WorkSpaceRoomListItemDto>>(dtoList, $"Found {count} records matching criteria.");
         }
 
-
- 
-        private bool IsRoomAvailableInRange(WorkSpaceRoom room, DateTime requestedStartTime, DateTime requestedEndTime)
-        {
-            bool isBlocked = room.BlockedTimeSlots.Any(slot =>
-               slot.StartTime < requestedEndTime && slot.EndTime > requestedStartTime 
-           );
-
-            if (isBlocked) return false;
-
-          
-            DateOnly requestStartDate = DateOnly.FromDateTime(requestedStartTime.Date);
-            DateOnly requestEndDate = DateOnly.FromDateTime(requestedEndTime.Date);
-            TimeOnly requestStartTimeOfDay = TimeOnly.FromTimeSpan(requestedStartTime.TimeOfDay);
-            TimeOnly requestEndTimeOfDay = TimeOnly.FromTimeSpan(requestedEndTime.TimeOfDay);
-
-            for (var date = requestStartDate; date <= requestEndDate; date = date.AddDays(1))
-            {
-                var dayOfWeek = date.DayOfWeek;
-                var schedule = room.AvailabilitySchedules.FirstOrDefault(s => s.DayOfWeek == dayOfWeek && s.IsAvailable);
-
-                if (schedule == null) return false;
-
-            
-                TimeOnly checkStartTime = (date == requestStartDate) ? requestStartTimeOfDay : TimeOnly.MinValue; 
-                TimeOnly checkEndTime = (date == requestEndDate) ? requestEndTimeOfDay : TimeOnly.MaxValue;   
-
-             
-                TimeOnly scheduleStartTime = TimeOnly.FromTimeSpan(schedule.StartTime);
-                TimeOnly scheduleEndTime = TimeOnly.FromTimeSpan(schedule.EndTime);
-
-      
-                if (Math.Max(checkStartTime.Ticks, scheduleStartTime.Ticks) >= Math.Min(checkEndTime.Ticks, scheduleEndTime.Ticks))
-                {
-               
-                    return false;
-                }
-            }
-
-            return true;
-        }
-  
+   
 
         public async Task<IEnumerable<string>> GetLocationSuggestionsAsync(string query)
         {
@@ -130,7 +89,7 @@ namespace WorkSpace.Infrastructure.Services
                 .Where(a => a.Ward != null && a.Ward.Contains(query))
                 .Select(a => a.Ward!)
                 .Distinct()
-                .Take(5) 
+                .Take(5)
                 .ToListAsync();
             return wards;
         }
@@ -141,7 +100,7 @@ namespace WorkSpace.Infrastructure.Services
                 .Where(a => a.Ward != null)
                 .Select(a => a.Ward!)
                 .Distinct()
-                .OrderBy(w => w) 
+                .OrderBy(w => w)
                 .ToListAsync();
             return wards;
         }
