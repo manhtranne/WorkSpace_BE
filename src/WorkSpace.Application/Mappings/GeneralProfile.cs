@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using System.Linq;
+using WorkSpace.Application.DTOs.Amenities;
 using WorkSpace.Application.DTOs.Users;
 using WorkSpace.Application.DTOs.WorkSpaces;
 using WorkSpace.Application.Features.HostProfile.Commands.CreateHostProfile;
@@ -12,6 +13,10 @@ namespace WorkSpace.Application.Mappings
         public GeneralProfile()
         {
             CreateMap<AppUser, UserDto>();
+            
+            // Amenity mappings
+            CreateMap<Amenity, AmenityDto>();
+            
             // HostProfile mappings
             CreateMap<CreateHostProfileCommand, HostProfile>();
             CreateMap<HostProfile, HostProfileDto>()
