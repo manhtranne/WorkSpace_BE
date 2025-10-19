@@ -25,7 +25,7 @@ public class HostProfile : AuditableBaseEntity
 
     public bool IsVerified { get; set; } = false;
 
-    // Navigation properties
+  
     public virtual AppUser? User { get; set; }
     public virtual List<WorkSpace> Workspaces { get; set; } = new();
 }

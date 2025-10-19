@@ -11,8 +11,8 @@ namespace WorkSpace.Infrastructure
         {
         }
 
-        // DbSets for original entities
-        public DbSet<WorkSpace.Domain.Entities.WorkSpace> Workspaces { get; set; } // << ĐÃ SỬA
+
+        public DbSet<WorkSpace.Domain.Entities.WorkSpace> Workspaces { get; set; }
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<HostProfile> HostProfiles { get; set; }
         public DbSet<Review> Reviews { get; set; }
@@ -23,94 +23,85 @@ namespace WorkSpace.Infrastructure
         public DbSet<BookingParticipant> BookingParticipants { get; set; }
         public DbSet<Promotion> Promotions { get; set; }
         public DbSet<PromotionUsage> PromotionUsages { get; set; }
-        public DbSet<AvailabilitySchedule> AvailabilitySchedules { get; set; }
         public DbSet<BlockedTimeSlot> BlockedTimeSlots { get; set; }
         public DbSet<WorkSpaceFavorite> WorkSpaceFavorites { get; set; }
         public DbSet<Post> Posts { get; set; }
-
-        // DbSets for new/modified entities based on your request
         public DbSet<WorkSpaceRoom> WorkSpaceRooms { get; set; }
         public DbSet<WorkSpaceRoomType> WorkSpaceRoomTypes { get; set; }
         public DbSet<WorkSpaceRoomImage> WorkSpaceRoomImages { get; set; }
         public DbSet<WorkSpaceRoomAmenity> WorkSpaceRoomAmenities { get; set; }
+
+        public DbSet<WorkSpaceType> WorkSpaceTypes { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            #region New Schema Configuration
+            #region Schema Configuration
 
-            // WorkSpace -> WorkSpaceRoom (1-N)
-            modelBuilder.Entity<WorkSpace.Domain.Entities.WorkSpace>() // << ĐÃ SỬA
+    
+            modelBuilder.Entity<WorkSpaceType>()
+                .HasMany(wt => wt.Workspaces)
+                .WithOne(w => w.WorkSpaceType)
+                .HasForeignKey(w => w.WorkSpaceTypeId)
+                .OnDelete(DeleteBehavior.Restrict); 
+
+        
+            modelBuilder.Entity<WorkSpace.Domain.Entities.WorkSpace>()
                 .HasMany(w => w.WorkSpaceRooms)
                 .WithOne(wr => wr.WorkSpace)
                 .HasForeignKey(wr => wr.WorkSpaceId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // WorkSpaceRoomType -> WorkSpaceRoom (1-N)
             modelBuilder.Entity<WorkSpaceRoomType>()
                 .HasMany(wrt => wrt.WorkSpaceRooms)
                 .WithOne(wr => wr.WorkSpaceRoomType)
                 .HasForeignKey(wr => wr.WorkSpaceRoomTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // WorkSpaceRoomAmenity (N-N between WorkSpaceRoom and Amenity)
             modelBuilder.Entity<WorkSpaceRoomAmenity>()
                     .HasKey(wra => new { wra.WorkspaceId, wra.AmenityId });
 
             modelBuilder.Entity<WorkSpaceRoomAmenity>()
                 .HasOne(wra => wra.WorkSpaceRoom)
                 .WithMany(wr => wr.WorkSpaceRoomAmenities)
-                .HasForeignKey(wra => wra.WorkSpaceRoomId)
+                .HasForeignKey(wra => wra.WorkSpaceRoomId) 
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<WorkSpaceRoomAmenity>()
                 .HasOne(wra => wra.Amenity)
-                .WithMany() // No navigation property back from Amenity if not needed
+                .WithMany(a => a.WorkspaceAmenities)
                 .HasForeignKey(wra => wra.AmenityId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // WorkSpaceRoomImage (1-N from WorkSpaceRoom)
             modelBuilder.Entity<WorkSpaceRoomImage>()
                 .HasOne(wri => wri.WorkSpaceRoom)
                 .WithMany(wr => wr.WorkSpaceRoomImages)
                 .HasForeignKey(wri => wri.WorkSpaceRoomId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Booking now relates to WorkSpaceRoom
+         
             modelBuilder.Entity<Booking>()
                 .HasOne(b => b.WorkSpaceRoom)
                 .WithMany(wr => wr.Bookings)
                 .HasForeignKey(b => b.WorkSpaceRoomId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Review now relates to WorkSpaceRoom
             modelBuilder.Entity<Review>()
                 .HasOne(r => r.WorkSpaceRoom)
                 .WithMany(wr => wr.Reviews)
                 .HasForeignKey(r => r.WorkSpaceRoomId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // AvailabilitySchedule now relates to WorkSpaceRoom
-            modelBuilder.Entity<AvailabilitySchedule>()
-                .HasOne(a => a.WorkSpaceRoom)
-                .WithMany(wr => wr.AvailabilitySchedules)
-                .HasForeignKey(a => a.WorkSpaceRoomId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // BlockedTimeSlot now relates to WorkSpaceRoom
+           
             modelBuilder.Entity<BlockedTimeSlot>()
                 .HasOne(b => b.WorkSpaceRoom)
                 .WithMany(wr => wr.BlockedTimeSlots)
                 .HasForeignKey(b => b.WorkSpaceRoomId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            #endregion
-
-            #region Original Schema Configuration (with adjustments)
-
-            // WorkSpaceFavorite (N-N)
+         
             modelBuilder.Entity<WorkSpaceFavorite>()
                 .HasKey(wf => new { wf.WorkspaceId, wf.UserId });
             modelBuilder.Entity<WorkSpaceFavorite>()
@@ -124,14 +115,13 @@ namespace WorkSpace.Infrastructure
                 .HasForeignKey(wf => wf.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Address (1-N)
+         
             modelBuilder.Entity<Address>()
                 .HasMany(a => a.Workspaces)
                 .WithOne(w => w.Address)
                 .HasForeignKey(w => w.AddressId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // HostProfile (1-N) & (1-1)
             modelBuilder.Entity<HostProfile>()
                 .HasMany(h => h.Workspaces)
                 .WithOne(w => w.Host)
@@ -143,7 +133,7 @@ namespace WorkSpace.Infrastructure
                 .HasForeignKey<HostProfile>(h => h.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Booking (remaining relationships)
+       
             modelBuilder.Entity<Booking>()
                 .HasOne(b => b.Customer)
                 .WithMany(u => u.Bookings)
@@ -163,7 +153,7 @@ namespace WorkSpace.Infrastructure
                 .HasForeignKey(bp => bp.BookingId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Review (remaining relationships)
+       
             modelBuilder.Entity<Review>()
                 .HasOne(r => r.User)
                 .WithMany(u => u.Reviews)
@@ -178,14 +168,13 @@ namespace WorkSpace.Infrastructure
                 .HasIndex(r => r.BookingId)
                 .IsUnique();
 
-            // Payment (1-1 with Booking)
             modelBuilder.Entity<Payment>()
                 .HasOne(p => p.Booking)
                 .WithOne(b => b.Payment)
                 .HasForeignKey<Payment>(p => p.BookingId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // PromotionUsage
+   
             modelBuilder.Entity<PromotionUsage>()
                 .HasOne(pu => pu.Promotion)
                 .WithMany(p => p.PromotionUsages)
@@ -202,7 +191,7 @@ namespace WorkSpace.Infrastructure
                 .HasForeignKey(pu => pu.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Post
+      
             modelBuilder.Entity<Post>()
                 .HasOne(p => p.User)
                 .WithMany(u => u.Posts)
@@ -224,7 +213,7 @@ namespace WorkSpace.Infrastructure
                 var tableName = entityType.GetTableName() ?? string.Empty;
                 if (tableName.StartsWith("AspNet"))
                 {
-                    entityType.SetTableName(tableName.Substring(6));
+                    entityType.SetTableName(tableName.Substring(6)); 
                 }
             }
 

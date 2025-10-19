@@ -19,14 +19,14 @@ public class Payment : AuditableBaseEntity
 
     [Required]
     [StringLength(20)]
-    public string Status { get; set; } = "Pending"; // Pending, Completed, Failed
+    public string Status { get; set; } = "Pending"; 
 
     [StringLength(255)]
-    public string? TransactionId { get; set; } // Mã giao dịch từ VNPay
+    public string? TransactionId { get; set; } 
 
     [StringLength(2000)]
-    public string? PaymentResponse { get; set; } // JSON response từ VNPay
+    public string? PaymentResponse { get; set; } 
 
-    // Navigation properties
+
     public virtual Booking? Booking { get; set; }
 }

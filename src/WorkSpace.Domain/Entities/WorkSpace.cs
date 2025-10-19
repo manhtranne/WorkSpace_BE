@@ -19,12 +19,17 @@ namespace WorkSpace.Domain.Entities
         [Required]
         public int AddressId { get; set; }
 
+        [Required] 
+        public int? WorkSpaceTypeId { get; set; }
+
         public bool IsActive { get; set; } = true;
         public bool IsVerified { get; set; } = false;
 
         // Navigation properties
         public virtual Address? Address { get; set; }
         public virtual HostProfile? Host { get; set; }
+        
+        public virtual WorkSpaceType? WorkSpaceType { get; set; }
         public virtual List<WorkSpaceRoom> WorkSpaceRooms { get; set; } = new();
         public virtual List<WorkSpaceFavorite> WorkSpaceFavorites { get; set; } = new();
     }

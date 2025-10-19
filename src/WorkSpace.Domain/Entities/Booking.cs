@@ -7,7 +7,7 @@ public class Booking : AuditableBaseEntity
 {
     [Required]
     [MaxLength(50)]
-    public required string BookingCode { get; set; } // Unique code for reference
+    public required string BookingCode { get; set; } 
 
     public int CustomerId { get; set; }
     public int WorkSpaceRoomId { get; set; }

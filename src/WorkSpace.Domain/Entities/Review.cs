@@ -16,10 +16,10 @@ public class Review : AuditableBaseEntity
     public string? Comment { get; set; }
     
 
-    public bool IsVerified { get; set; } = false; // Verified as actual customer
+    public bool IsVerified { get; set; } = false; 
     public bool IsPublic { get; set; } = true;
 
-    // Navigation properties
+
     public virtual Booking? Booking { get; set; }
     public virtual AppUser? User { get; set; }
     public virtual WorkSpaceRoom? WorkSpaceRoom { get; set; }

@@ -50,6 +50,8 @@ namespace WorkSpace.Infrastructure.Repositories
                 .Include(wr => wr.WorkSpace)
                 .ThenInclude(w => w.Address)
                 .Include(wr => wr.WorkSpaceRoomImages)
+  
+                .Include(wr => wr.BlockedTimeSlots)
                 .AsNoTracking()
                 .AsQueryable();
 
@@ -58,7 +60,8 @@ namespace WorkSpace.Infrastructure.Repositories
                 query = query.Where(x => x.WorkSpaceRoomTypeId == typeId);
             }
 
-            if (!string.IsNullOrWhiteSpace(filter.City))
+         
+            if (!string.IsNullOrWhiteSpace(filter.City)) 
             {
                 query = query.Where(x => x.WorkSpace.Address!.Ward == filter.City);
             }
@@ -81,19 +84,21 @@ namespace WorkSpace.Infrastructure.Repositories
                 query = query.Where(x => x.IsVerified && x.WorkSpace.IsVerified);
             }
 
+   
             if (filter.DesiredStartUtc.HasValue && filter.DesiredEndUtc.HasValue)
             {
-                var start = filter.DesiredStartUtc.Value.UtcDateTime;
-                var end = filter.DesiredEndUtc.Value.UtcDateTime;
+             
+                var start = filter.DesiredStartUtc.Value;
+                var end = filter.DesiredEndUtc.Value;
+
 
                 query = query.Where(x => !x.BlockedTimeSlots.Any(b =>
-                !(b.EndTime <= start || b.StartTime >= end))
-                && x.AvailabilitySchedules.Any(a =>
-                    a.DayOfWeek == start.DayOfWeek && 
-                    a.StartTime <= start.TimeOfDay && a.EndTime >= end.TimeOfDay
-                    )
+                    b.StartTime < end.UtcDateTime && b.EndTime > start.UtcDateTime
+
+                   )
                 );
             }
+     
 
             var total = await query.CountAsync(cancellationToken);
             var items = await query

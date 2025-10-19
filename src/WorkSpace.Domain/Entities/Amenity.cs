@@ -7,13 +7,13 @@ public class Amenity : AuditableBaseEntity
 {
     [Required]
     [MaxLength(100)]
-    public required string Name { get; set; } // WiFi, Projector, Coffee, etc.
+    public required string Name { get; set; } 
 
     [MaxLength(255)]
     public string? Description { get; set; }
 
     [MaxLength(50)]
-    public string? IconClass { get; set; } // For UI
+    public string? IconClass { get; set; } 
 
     // Navigation properties
     public virtual List<WorkSpaceRoomAmenity> WorkspaceAmenities { get; set; } = new();
