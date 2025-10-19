@@ -16,6 +16,6 @@ public class Post : AuditableBaseEntity
     public string? ImageData { get; set; }
 
     public int UserId { get; set; }
-    // Navigation property
+
     public virtual AppUser? User { get; set; }
 }

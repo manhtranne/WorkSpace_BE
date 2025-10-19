@@ -14,17 +14,17 @@ public class Promotion : AuditableBaseEntity
     public string Description { get; set; }
 
     public decimal DiscountValue { get; set; }
-    public string? DiscountType { get; set; } // Percentage, FixedAmount
+    public string? DiscountType { get; set; } 
 
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
 
-    public int UsageLimit { get; set; } = 0; // 0 = unlimited
+    public int UsageLimit { get; set; } = 0; 
     public int UsedCount { get; set; } = 0;
 
     public bool IsActive { get; set; } = true;
     
 
-    // Navigation properties
+
     public virtual List<PromotionUsage> PromotionUsages { get; set; } = new();
 }

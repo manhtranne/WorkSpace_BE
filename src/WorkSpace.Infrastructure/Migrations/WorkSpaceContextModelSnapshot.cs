@@ -349,48 +349,6 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Entities.AvailabilitySchedule", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTimeOffset>("CreateUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int?>("CreatedById")
-                        .HasColumnType("int");
-
-                    b.Property<int>("DayOfWeek")
-                        .HasColumnType("int");
-
-                    b.Property<TimeSpan>("EndTime")
-                        .HasColumnType("time");
-
-                    b.Property<bool>("IsAvailable")
-                        .HasColumnType("bit");
-
-                    b.Property<int?>("LastModifiedById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset?>("LastModifiedUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<TimeSpan>("StartTime")
-                        .HasColumnType("time");
-
-                    b.Property<int>("WorkSpaceRoomId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("WorkSpaceRoomId");
-
-                    b.ToTable("AvailabilitySchedules");
-                });
-
             modelBuilder.Entity("WorkSpace.Domain.Entities.BlockedTimeSlot", b =>
                 {
                     b.Property<int>("Id")
@@ -945,11 +903,17 @@ namespace WorkSpace.Infrastructure.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<int?>("WorkSpaceTypeId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AddressId");
 
                     b.HasIndex("HostId");
+
+                    b.HasIndex("WorkSpaceTypeId");
 
                     b.ToTable("Workspaces");
                 });
@@ -1121,15 +1085,46 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.ToTable("WorkSpaceRoomTypes");
                 });
 
+            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkSpaceType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset>("CreateUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int?>("LastModifiedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("LastModifiedUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("WorkSpaceTypes");
+                });
+
             modelBuilder.Entity("WorkSpaceRoomAmenity", b =>
                 {
                     b.Property<int>("WorkspaceId")
                         .HasColumnType("int");
 
                     b.Property<int>("AmenityId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("AmenityId1")
                         .HasColumnType("int");
 
                     b.Property<DateTimeOffset>("CreateUtc")
@@ -1156,8 +1151,6 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.HasKey("WorkspaceId", "AmenityId");
 
                     b.HasIndex("AmenityId");
-
-                    b.HasIndex("AmenityId1");
 
                     b.HasIndex("WorkSpaceRoomId");
 
@@ -1213,17 +1206,6 @@ namespace WorkSpace.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("WorkSpace.Domain.Entities.AvailabilitySchedule", b =>
-                {
-                    b.HasOne("WorkSpace.Domain.Entities.WorkSpaceRoom", "WorkSpaceRoom")
-                        .WithMany("AvailabilitySchedules")
-                        .HasForeignKey("WorkSpaceRoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("WorkSpaceRoom");
                 });
 
             modelBuilder.Entity("WorkSpace.Domain.Entities.BlockedTimeSlot", b =>
@@ -1376,9 +1358,17 @@ namespace WorkSpace.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("WorkSpace.Domain.Entities.WorkSpaceType", "WorkSpaceType")
+                        .WithMany("Workspaces")
+                        .HasForeignKey("WorkSpaceTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Address");
 
                     b.Navigation("Host");
+
+                    b.Navigation("WorkSpaceType");
                 });
 
             modelBuilder.Entity("WorkSpace.Domain.Entities.WorkSpaceFavorite", b =>
@@ -1433,14 +1423,10 @@ namespace WorkSpace.Infrastructure.Migrations
             modelBuilder.Entity("WorkSpaceRoomAmenity", b =>
                 {
                     b.HasOne("WorkSpace.Domain.Entities.Amenity", "Amenity")
-                        .WithMany()
+                        .WithMany("WorkspaceAmenities")
                         .HasForeignKey("AmenityId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("WorkSpace.Domain.Entities.Amenity", null)
-                        .WithMany("WorkspaceAmenities")
-                        .HasForeignKey("AmenityId1");
 
                     b.HasOne("WorkSpace.Domain.Entities.WorkSpaceRoom", "WorkSpaceRoom")
                         .WithMany("WorkSpaceRoomAmenities")
@@ -1513,8 +1499,6 @@ namespace WorkSpace.Infrastructure.Migrations
 
             modelBuilder.Entity("WorkSpace.Domain.Entities.WorkSpaceRoom", b =>
                 {
-                    b.Navigation("AvailabilitySchedules");
-
                     b.Navigation("BlockedTimeSlots");
 
                     b.Navigation("Bookings");
@@ -1529,6 +1513,11 @@ namespace WorkSpace.Infrastructure.Migrations
             modelBuilder.Entity("WorkSpace.Domain.Entities.WorkSpaceRoomType", b =>
                 {
                     b.Navigation("WorkSpaceRooms");
+                });
+
+            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkSpaceType", b =>
+                {
+                    b.Navigation("Workspaces");
                 });
 #pragma warning restore 612, 618
         }

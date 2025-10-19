@@ -19,7 +19,6 @@ namespace WorkSpace.Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Street = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     Ward = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    District = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     State = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     PostalCode = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
                     Country = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
@@ -119,8 +118,8 @@ namespace WorkSpace.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    FirstName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    FirstName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    LastName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     RefreshToken = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
                     RefreshTokenExpiryTime = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -164,6 +163,24 @@ namespace WorkSpace.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_WorkSpaceRoomTypes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "WorkSpaceTypes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    CreatedById = table.Column<int>(type: "int", nullable: true),
+                    LastModifiedById = table.Column<int>(type: "int", nullable: true),
+                    CreateUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    LastModifiedUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_WorkSpaceTypes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -338,6 +355,7 @@ namespace WorkSpace.Infrastructure.Migrations
                     Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     HostId = table.Column<int>(type: "int", nullable: false),
                     AddressId = table.Column<int>(type: "int", nullable: false),
+                    WorkSpaceTypeId = table.Column<int>(type: "int", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     IsVerified = table.Column<bool>(type: "bit", nullable: false),
                     CreatedById = table.Column<int>(type: "int", nullable: true),
@@ -358,6 +376,12 @@ namespace WorkSpace.Infrastructure.Migrations
                         name: "FK_Workspaces_HostProfiles_HostId",
                         column: x => x.HostId,
                         principalTable: "HostProfiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Workspaces_WorkSpaceTypes_WorkSpaceTypeId",
+                        column: x => x.WorkSpaceTypeId,
+                        principalTable: "WorkSpaceTypes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -426,33 +450,6 @@ namespace WorkSpace.Infrastructure.Migrations
                         name: "FK_WorkSpaceRooms_Workspaces_WorkSpaceId",
                         column: x => x.WorkSpaceId,
                         principalTable: "Workspaces",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AvailabilitySchedules",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    WorkSpaceRoomId = table.Column<int>(type: "int", nullable: false),
-                    DayOfWeek = table.Column<int>(type: "int", nullable: false),
-                    StartTime = table.Column<TimeSpan>(type: "time", nullable: false),
-                    EndTime = table.Column<TimeSpan>(type: "time", nullable: false),
-                    IsAvailable = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedById = table.Column<int>(type: "int", nullable: true),
-                    LastModifiedById = table.Column<int>(type: "int", nullable: true),
-                    CreateUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    LastModifiedUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AvailabilitySchedules", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AvailabilitySchedules_WorkSpaceRooms_WorkSpaceRoomId",
-                        column: x => x.WorkSpaceRoomId,
-                        principalTable: "WorkSpaceRooms",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -543,7 +540,6 @@ namespace WorkSpace.Infrastructure.Migrations
                     AmenityId = table.Column<int>(type: "int", nullable: false),
                     WorkSpaceRoomId = table.Column<int>(type: "int", nullable: false),
                     IsAvailable = table.Column<bool>(type: "bit", nullable: false),
-                    AmenityId1 = table.Column<int>(type: "int", nullable: true),
                     Id = table.Column<int>(type: "int", nullable: false),
                     CreatedById = table.Column<int>(type: "int", nullable: true),
                     LastModifiedById = table.Column<int>(type: "int", nullable: true),
@@ -559,11 +555,6 @@ namespace WorkSpace.Infrastructure.Migrations
                         principalTable: "Amenities",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_WorkSpaceRoomAmenities_Amenities_AmenityId1",
-                        column: x => x.AmenityId1,
-                        principalTable: "Amenities",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_WorkSpaceRoomAmenities_WorkSpaceRooms_WorkSpaceRoomId",
                         column: x => x.WorkSpaceRoomId,
@@ -747,11 +738,6 @@ namespace WorkSpace.Infrastructure.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AvailabilitySchedules_WorkSpaceRoomId",
-                table: "AvailabilitySchedules",
-                column: "WorkSpaceRoomId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_BlockedTimeSlots_WorkSpaceRoomId",
                 table: "BlockedTimeSlots",
                 column: "WorkSpaceRoomId");
@@ -860,11 +846,6 @@ namespace WorkSpace.Infrastructure.Migrations
                 column: "AmenityId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_WorkSpaceRoomAmenities_AmenityId1",
-                table: "WorkSpaceRoomAmenities",
-                column: "AmenityId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_WorkSpaceRoomAmenities_WorkSpaceRoomId",
                 table: "WorkSpaceRoomAmenities",
                 column: "WorkSpaceRoomId");
@@ -893,6 +874,11 @@ namespace WorkSpace.Infrastructure.Migrations
                 name: "IX_Workspaces_HostId",
                 table: "Workspaces",
                 column: "HostId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Workspaces_WorkSpaceTypeId",
+                table: "Workspaces",
+                column: "WorkSpaceTypeId");
         }
 
         /// <inheritdoc />
@@ -912,9 +898,6 @@ namespace WorkSpace.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "AppUserTokens");
-
-            migrationBuilder.DropTable(
-                name: "AvailabilitySchedules");
 
             migrationBuilder.DropTable(
                 name: "BlockedTimeSlots");
@@ -972,6 +955,9 @@ namespace WorkSpace.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "HostProfiles");
+
+            migrationBuilder.DropTable(
+                name: "WorkSpaceTypes");
 
             migrationBuilder.DropTable(
                 name: "Users");

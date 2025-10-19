@@ -34,7 +34,7 @@ namespace WorkSpace.Domain.Entities
         public virtual List<WorkSpaceRoomAmenity> WorkSpaceRoomAmenities { get; set; } = new();
         public virtual List<Booking> Bookings { get; set; } = new();
         public virtual List<Review> Reviews { get; set; } = new();
-        public virtual List<AvailabilitySchedule> AvailabilitySchedules { get; set; } = new();
+   
         public virtual List<BlockedTimeSlot> BlockedTimeSlots { get; set; } = new();
     }
 }

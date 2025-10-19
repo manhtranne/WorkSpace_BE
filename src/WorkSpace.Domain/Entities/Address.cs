@@ -11,7 +11,7 @@ namespace WorkSpace.Domain.Entities
 
         [Required]
         [MaxLength(100)]
-        public string? Ward { get; set; } // << THAY ĐỔI: Phường/Xã
+        public string? Ward { get; set; } 
 
         [MaxLength(100)]
         public string? State { get; set; } 
@@ -26,7 +26,7 @@ namespace WorkSpace.Domain.Entities
         public double Latitude { get; set; }
         public double Longitude { get; set; }
 
-        // Navigation properties
+   
         public virtual List<WorkSpace> Workspaces { get; set; } = new();
     }
 }

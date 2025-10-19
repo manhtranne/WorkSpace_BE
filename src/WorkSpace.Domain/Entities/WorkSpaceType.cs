@@ -1,10 +1,11 @@
 ﻿
 using System.ComponentModel.DataAnnotations;
 using WorkSpace.Domain.Common;
+using System.Collections.Generic;
 
 namespace WorkSpace.Domain.Entities
 {
-    public class WorkSpaceRoomType : AuditableBaseEntity
+    public class WorkSpaceType : AuditableBaseEntity
     {
         [Required]
         [MaxLength(100)]
@@ -13,7 +14,7 @@ namespace WorkSpace.Domain.Entities
         [MaxLength(500)]
         public string? Description { get; set; }
 
-        // Navigation properties
-        public virtual List<WorkSpaceRoom> WorkSpaceRooms { get; set; } = new();
+   
+        public virtual List<WorkSpace> Workspaces { get; set; } = new();
     }
 }
