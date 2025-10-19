@@ -17,6 +17,19 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(result.Data);
         }
 
+        [HttpGet("{id}/detail")]
+        public async Task<IActionResult> GetDetailById(
+            [FromRoute] int id,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await Mediator.Send(new GetWorkSpaceDetailQuery(id), cancellationToken);
+            
+            if (result == null)
+                return NotFound(new { message = $"Workspace with ID {id} not found" });
+            
+            return Ok(result);
+        }
+
   
         [HttpGet("rooms")]
         public async Task<IActionResult> GetPagedRooms(

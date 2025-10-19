@@ -21,9 +21,17 @@ namespace WorkSpace.Infrastructure.Repositories
             return await _context.Workspaces
                 .Include(w => w.Address)
                 .Include(w => w.Host)
-                .ThenInclude(h => h.User)
+                    .ThenInclude(h => h.User)
+                .Include(w => w.WorkSpaceType)
                 .Include(w => w.WorkSpaceRooms)
-                .ThenInclude(wr => wr.WorkSpaceRoomType)
+                    .ThenInclude(wr => wr.WorkSpaceRoomType)
+                .Include(w => w.WorkSpaceRooms)
+                    .ThenInclude(wr => wr.WorkSpaceRoomImages)
+                .Include(w => w.WorkSpaceRooms)
+                    .ThenInclude(wr => wr.WorkSpaceRoomAmenities)
+                        .ThenInclude(wra => wra.Amenity)
+                .Include(w => w.WorkSpaceRooms)
+                    .ThenInclude(wr => wr.Reviews)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(w => w.Id == id, cancellationToken);
         }
