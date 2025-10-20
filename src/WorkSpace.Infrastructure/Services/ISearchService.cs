@@ -7,7 +7,7 @@ namespace WorkSpace.Application.Interfaces.Services
 {
     public interface ISearchService
     {
-        Task<Response<IEnumerable<WorkSpaceRoomListItemDto>>> SearchWorkSpaceRoomsAsync(SearchRequestDto request);
+        Task<Response<IEnumerable<WorkSpaceSearchResultDto>>> SearchWorkSpacesAsync(SearchRequestDto request);
         Task<IEnumerable<string>> GetLocationSuggestionsAsync(string query);
         Task<IEnumerable<string>> GetAllWardsAsync();
     }

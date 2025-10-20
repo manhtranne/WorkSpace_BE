@@ -26,8 +26,9 @@ public static class ServiceRegistration
         services.AddScoped(typeof(IWorkSpaceRepository), typeof(WorkSpaceRepository));
         services.AddTransient(typeof(IGenericRepositoryAsync<>), typeof(GenericRepositoryAsync<>));
         services.AddTransient(typeof(IHostProfileAsyncRepository), typeof(HostProfileAsyncProfileAsyncRepository));
+        services.AddTransient(typeof(IWorkSpaceFavoriteRepository), typeof(WorkSpaceFavoriteRepository));
         #endregion
-        
+
         #region Services
 
         services.AddScoped<IWorkSpaceSeeder, WorkSpaceSeeder>();

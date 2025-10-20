@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using WorkSpace.Application.DTOs.WorkSpaces;
-using WorkSpace.Application.Interfaces.Services; 
+using WorkSpace.Application.Interfaces.Services;
 using WorkSpace.Application.Wrappers;
 using WorkSpace.Domain.Entities;
-using WorkSpace.Infrastructure; 
+using WorkSpace.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,35 +23,53 @@ namespace WorkSpace.Infrastructure.Services
             _mapper = mapper;
         }
 
-        public async Task<Response<IEnumerable<WorkSpaceRoomListItemDto>>> SearchWorkSpaceRoomsAsync(SearchRequestDto request)
+        public async Task<Response<IEnumerable<WorkSpaceSearchResultDto>>> SearchWorkSpacesAsync(SearchRequestDto request)
         {
-            var query = _context.WorkSpaceRooms
-                .Include(r => r.WorkSpace)
-                    .ThenInclude(w => w.Address)
-                .Include(r => r.WorkSpaceRoomImages)
-                .Include(r => r.Reviews)
-                .Include(r => r.BlockedTimeSlots) 
-                                                  
-                .Include(r => r.WorkSpaceRoomType)
-                .Include(r => r.WorkSpaceRoomAmenities)
-                    .ThenInclude(wra => wra.Amenity)
-                .Where(r => r.IsActive && r.WorkSpace.IsActive)
+            var query = _context.Workspaces
+                .Include(w => w.Address)
+                .Include(w => w.WorkSpaceRooms)
+                    .ThenInclude(r => r.WorkSpaceRoomAmenities)
+                        .ThenInclude(wra => wra.Amenity)
+                .Include(w => w.WorkSpaceRooms)
+                    .ThenInclude(r => r.BlockedTimeSlots)
+                .Where(w => w.IsActive && w.IsVerified)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(request.Ward))
             {
-                query = query.Where(r => r.WorkSpace.Address.Ward.Contains(request.Ward));
+                query = query.Where(w => w.Address.Ward.Contains(request.Ward));
             }
-            if (request.Capacity.HasValue && request.Capacity > 0) { query = query.Where(r => r.Capacity >= request.Capacity.Value); }
-            if (request.MinPrice.HasValue) { query = query.Where(r => r.PricePerDay >= request.MinPrice.Value); }
-            if (request.MaxPrice.HasValue) { query = query.Where(r => r.PricePerDay <= request.MaxPrice.Value); }
-            if (!string.IsNullOrWhiteSpace(request.Keyword)) { query = query.Where(r => r.Title.Contains(request.Keyword) || (r.Description != null && r.Description.Contains(request.Keyword)) || r.WorkSpace.Title.Contains(request.Keyword) || (r.WorkSpace.Description != null && r.WorkSpace.Description.Contains(request.Keyword)) || r.WorkSpaceRoomType.Name.Contains(request.Keyword)); }
-            if (request.Amenities != null && request.Amenities.Any()) { foreach (var amenityName in request.Amenities) { query = query.Where(r => r.WorkSpaceRoomAmenities.Any(wra => wra.Amenity.Name == amenityName && wra.IsAvailable)); } }
 
+            if (!string.IsNullOrWhiteSpace(request.Keyword))
+            {
+                query = query.Where(w => w.Title.Contains(request.Keyword)
+                                         || (w.Description != null && w.Description.Contains(request.Keyword)));
+            }
 
-            var potentialRooms = await query.ToListAsync();
+  
+            if (request.Capacity.HasValue && request.Capacity > 0)
+            {
+                query = query.Where(w => w.WorkSpaceRooms.Any(r => r.Capacity >= request.Capacity.Value && r.IsActive));
+            }
 
-            IEnumerable<WorkSpaceRoom> finalRooms = potentialRooms;
+            if (request.MinPrice.HasValue)
+            {
+                query = query.Where(w => w.WorkSpaceRooms.Any(r => r.PricePerDay >= request.MinPrice.Value && r.IsActive));
+            }
+
+            if (request.MaxPrice.HasValue)
+            {
+                query = query.Where(w => w.WorkSpaceRooms.Any(r => r.PricePerDay <= request.MaxPrice.Value && r.IsActive));
+            }
+
+            if (request.Amenities != null && request.Amenities.Any())
+            {
+                foreach (var amenityName in request.Amenities)
+                {
+                    query = query.Where(w => w.WorkSpaceRooms.Any(r =>
+                        r.WorkSpaceRoomAmenities.Any(wra => wra.Amenity.Name == amenityName && wra.IsAvailable) && r.IsActive));
+                }
+            }
 
             if (request.HasDateTimeFilter())
             {
@@ -60,24 +78,36 @@ namespace WorkSpace.Infrastructure.Services
 
                 if (request.StartTime.HasValue && request.EndTime.HasValue && effectiveEndTime <= effectiveStartTime)
                 {
-                    return new Response<IEnumerable<WorkSpaceRoomListItemDto>>("End time must be after start time.") { Succeeded = false };
+                    return new Response<IEnumerable<WorkSpaceSearchResultDto>>("End time must be after start time.") { Succeeded = false };
                 }
 
-      
-                finalRooms = potentialRooms.Where(room =>
+               
+                query = query.Where(w => w.WorkSpaceRooms.Any(room =>
+                    room.IsActive &&
                     !room.BlockedTimeSlots.Any(slot =>
-                        slot.StartTime < effectiveEndTime && slot.EndTime > effectiveStartTime 
+                        slot.StartTime < effectiveEndTime && slot.EndTime > effectiveStartTime
                     )
-                ).ToList();
+                ));
             }
-  
 
-            var dtoList = _mapper.Map<IEnumerable<WorkSpaceRoomListItemDto>>(finalRooms);
+            var workspaces = await query
+                .Distinct() 
+                .ToListAsync();
+
+       
+            var dtoList = workspaces.Select(w => new WorkSpaceSearchResultDto
+            {
+                Id = w.Id,
+                Title = w.Title,
+                Description = w.Description,
+                Ward = w.Address?.Ward, 
+                Street = w.Address?.Street 
+            }).ToList();
+
             int count = dtoList.Count();
-            return new Response<IEnumerable<WorkSpaceRoomListItemDto>>(dtoList, $"Found {count} records matching criteria.");
+            return new Response<IEnumerable<WorkSpaceSearchResultDto>>(dtoList, $"Found {count} records matching criteria.");
         }
 
-   
 
         public async Task<IEnumerable<string>> GetLocationSuggestionsAsync(string query)
         {
