@@ -146,5 +146,21 @@ namespace WorkSpace.Infrastructure.Repositories
                 .Select(x => x.Room)
                 .ToListAsync(cancellationToken);
         }
+
+        public async Task<IReadOnlyList<Domain.Entities.WorkSpace>> GetWorkSpacesByTypeNameAsync(string typeName, CancellationToken cancellationToken = default)
+        {
+            return await _context.Workspaces
+                .Include(w => w.Address)
+                .Include(w => w.Host)
+                    .ThenInclude(h => h.User)
+                .Include(w => w.WorkSpaceType)
+                .Include(w => w.WorkSpaceRooms)
+                .AsNoTracking()
+                .Where(w => w.WorkSpaceType != null && w.WorkSpaceType.Name == typeName)
+                .OrderByDescending(w => w.IsVerified)
+                .ThenByDescending(w => w.IsActive)
+                .ThenByDescending(w => w.CreateUtc)
+                .ToListAsync(cancellationToken);
+        }
     }
 }

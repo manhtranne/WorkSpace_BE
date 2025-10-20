@@ -38,6 +38,14 @@ namespace WorkSpace.Application.Mappings
                 .ForMember(d => d.HostName, o => o.MapFrom(s => s.Host.User.GetFullName()))
                 .ForMember(d => d.Rooms, o => o.MapFrom(s => s.WorkSpaceRooms));
 
+            CreateMap<WorkSpace.Domain.Entities.WorkSpace, WorkSpaceListItemDto>()
+                .ForMember(d => d.HostName, o => o.MapFrom(s => s.Host != null && s.Host.User != null ? s.Host.User.GetFullName() : null))
+                .ForMember(d => d.WorkSpaceTypeName, o => o.MapFrom(s => s.WorkSpaceType != null ? s.WorkSpaceType.Name : null))
+                .ForMember(d => d.AddressLine, o => o.MapFrom(s => s.Address != null ? $"{s.Address.Street}, {s.Address.Ward}" : null))
+                .ForMember(d => d.City, o => o.MapFrom(s => s.Address != null ? s.Address.Ward : null))
+                .ForMember(d => d.TotalRooms, o => o.MapFrom(s => s.WorkSpaceRooms.Count))
+                .ForMember(d => d.ActiveRooms, o => o.MapFrom(s => s.WorkSpaceRooms.Count(r => r.IsActive)));
+
             // WorkSpaceRoom Mappings (Chi con map cho ListItem)
             CreateMap<WorkSpaceRoom, WorkSpaceRoomListItemDto>()
                 .ForMember(d => d.WorkSpaceTitle, o => o.MapFrom(s => s.WorkSpace.Title))

@@ -9,6 +9,20 @@ namespace WorkSpace.WebApi.Controllers.v1
     [Route("api/v1/workspaces")]
     public class WorkSpaceController : BaseApiController
     {
+        [HttpGet("by-type")]
+        public async Task<IActionResult> GetAllByType(
+            [FromQuery] string? type = null,
+            CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(type))
+            {
+                return BadRequest(new { message = "WorkSpace type name is required. Use query parameter: ?type=YourTypeName" });
+            }
+
+            var result = await Mediator.Send(new GetWorkSpacesByTypeQuery(type), cancellationToken);
+            return Ok(result);
+        }
+
         [HttpGet("featured")]
         public async Task<IActionResult> GetFeatured(
             [FromQuery] int count = 5,
