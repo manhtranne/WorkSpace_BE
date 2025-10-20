@@ -5,6 +5,8 @@ using Serilog;
 using WorkSpace.Domain.Entities;
 using WorkSpace.Infrastructure;
 using WorkSpace.WebApi.Middlewares;
+using WorkSpace.Application.Interfaces.Services;
+using WorkSpace.WebApi.Services;
 
 namespace WorkSpace.WebApi.Extensions;
 
@@ -15,29 +17,28 @@ public static class WebApplicationBuilderExtensions
         builder.Services.AddDbContext<WorkSpaceContext>(options =>
             options.UseSqlServer(
                 builder.Configuration.GetConnectionString("DefaultConnection"),
-                b => b.MigrationsAssembly("WorkSpace.Infrastructure") // nếu migrations nằm ở Infrastructure
+                b => b.MigrationsAssembly("WorkSpace.Infrastructure") 
             )
         );
         builder.Services
             .AddIdentity<AppUser, AppRole>(options =>
             {
-                // Cấu hình password requirements
+              
                 options.Password.RequireDigit = false;
                 options.Password.RequireLowercase = false;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
                 options.Password.RequiredLength = 6;
                 options.Password.RequiredUniqueChars = 1;
-                
-                // Cấu hình user requirements
+
                 options.User.RequireUniqueEmail = true;
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
             })
             .AddEntityFrameworkStores<WorkSpaceContext>()  
             .AddDefaultTokenProviders();
         builder.Services.AddAuthentication();
-        
-        // Add CORS
+        builder.Services.AddScoped<IAuthenticatedUserService, AuthenticatedUserService>();
+
         var allowedOrigins = builder.Configuration.GetSection("CorsSettings:AllowedOrigins").Get<string[]>() 
                              ?? Array.Empty<string>();
         

@@ -65,7 +65,7 @@ public class GetWorkSpaceDetailQueryHandler(
                     
                     Amenities = room.WorkSpaceRoomAmenities
                         .Where(a => a.Amenity != null)
-                        .Select(a => new RoomAmenityDto
+                        .Select(a => new SimpleRoomAmenityDto
                         {
                             Id = a.Amenity!.Id,
                             Name = a.Amenity.Name,

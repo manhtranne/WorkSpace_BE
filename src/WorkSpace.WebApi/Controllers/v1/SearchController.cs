@@ -1,11 +1,9 @@
-﻿
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using WorkSpace.Application.DTOs.WorkSpaces;
 using WorkSpace.Application.Interfaces.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-
 
 namespace WorkSpace.WebApi.Controllers.v1
 {
@@ -37,24 +35,24 @@ namespace WorkSpace.WebApi.Controllers.v1
         [HttpGet("workspaces")]
         public async Task<IActionResult> SearchWorkSpaceRooms(
              [FromQuery] string? ward,
-       
+
              [FromQuery] DateTime? startTime,
              [FromQuery] DateTime? endTime,
-       
+
              [FromQuery] int? capacity,
              [FromQuery] decimal? minPrice = null,
              [FromQuery] decimal? maxPrice = null,
              [FromQuery] List<string>? amenities = null,
              [FromQuery] string? keyword = null)
         {
-    
+
             var request = new SearchRequestDto
             {
                 Ward = ward,
-          
+
                 StartTime = startTime,
                 EndTime = endTime,
-           
+
                 Capacity = capacity,
                 MinPrice = minPrice,
                 MaxPrice = maxPrice,
@@ -62,17 +60,16 @@ namespace WorkSpace.WebApi.Controllers.v1
                 Keyword = keyword
             };
 
-            var result = await _searchService.SearchWorkSpaceRoomsAsync(request);
+            var result = await _searchService.SearchWorkSpacesAsync(request);
 
             if (result.Succeeded)
             {
-                return Ok(result.Data);
+                return Ok(result.Data); 
             }
             else
             {
                 return BadRequest(new { Message = result.Message ?? "Search failed." });
             }
         }
-
     }
 }

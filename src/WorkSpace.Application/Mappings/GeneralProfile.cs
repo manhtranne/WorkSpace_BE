@@ -13,10 +13,10 @@ namespace WorkSpace.Application.Mappings
         public GeneralProfile()
         {
             CreateMap<AppUser, UserDto>();
-            
+
             // Amenity mappings
             CreateMap<Amenity, AmenityDto>();
-            
+
             // HostProfile mappings
             CreateMap<CreateHostProfileCommand, HostProfile>();
             CreateMap<HostProfile, HostProfileDto>()
@@ -33,21 +33,18 @@ namespace WorkSpace.Application.Mappings
                 .ForMember(d => d.HostName, o => o.MapFrom(s => s.Host.User.GetFullName()))
                 .ForMember(d => d.Rooms, o => o.MapFrom(s => s.WorkSpaceRooms));
 
-            // WorkSpaceRoom Mappings
+            // WorkSpaceRoom Mappings (Chi con map cho ListItem)
             CreateMap<WorkSpaceRoom, WorkSpaceRoomListItemDto>()
                 .ForMember(d => d.WorkSpaceTitle, o => o.MapFrom(s => s.WorkSpace.Title))
                 .ForMember(d => d.ThumbnailUrl, o => o.MapFrom(s => s.WorkSpaceRoomImages.FirstOrDefault().ImageUrl))
                 .ForMember(d => d.AverageRating, o => o.MapFrom(s => s.Reviews.Any() ? s.Reviews.Average(r => r.Rating) : 0))
                 .ForMember(d => d.RatingCount, o => o.MapFrom(s => s.Reviews.Count));
 
-            CreateMap<WorkSpaceRoom, WorkSpaceRoomDetailDto>()
-                .IncludeBase<WorkSpaceRoom, WorkSpaceRoomListItemDto>()
-                .ForMember(d => d.AddressLine, o => o.MapFrom(s => $"{s.WorkSpace.Address.Street}, {s.WorkSpace.Address.Ward}"))
-                .ForMember(d => d.Country, o => o.MapFrom(s => s.WorkSpace.Address.Country))
-                .ForMember(d => d.Images, o => o.MapFrom(s => s.WorkSpaceRoomImages.Select(i => i.ImageUrl)))
-                .ForMember(d => d.Amenities, o => o.MapFrom(s => s.WorkSpaceRoomAmenities.Select(a => a.Amenity!.Name)));
+            // DA XOA: CreateMap<WorkSpaceRoom, WorkSpaceRoomDetailDto>()
+            // Ly do: Da map thu cong trong GetWorkSpaceRoomDetailQueryHandler
         }
     }
+
     public class HostProfileDto
     {
         public int Id { get; set; }
