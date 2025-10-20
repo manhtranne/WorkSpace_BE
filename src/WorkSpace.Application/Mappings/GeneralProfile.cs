@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using System.Linq;
 using WorkSpace.Application.DTOs.Amenities;
+using WorkSpace.Application.DTOs.Promotions;
 using WorkSpace.Application.DTOs.Users;
 using WorkSpace.Application.DTOs.WorkSpaces;
 using WorkSpace.Application.Features.HostProfile.Commands.CreateHostProfile;
@@ -16,6 +17,10 @@ namespace WorkSpace.Application.Mappings
 
             // Amenity mappings
             CreateMap<Amenity, AmenityDto>();
+
+            // Promotion mappings
+            CreateMap<Promotion, PromotionDto>()
+                .ForMember(d => d.RemainingUsage, o => o.MapFrom(s => s.UsageLimit == 0 ? int.MaxValue : s.UsageLimit - s.UsedCount));
 
             // HostProfile mappings
             CreateMap<CreateHostProfileCommand, HostProfile>();
