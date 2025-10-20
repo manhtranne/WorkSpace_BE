@@ -123,5 +123,28 @@ namespace WorkSpace.Infrastructure.Repositories
             return await _context.Workspaces.AnyAsync(x =>
                 x.HostId == hostId && x.Title == title, cancellationToken);
         }
+
+        public async Task<IReadOnlyList<WorkSpaceRoom>> GetFeaturedRoomsAsync(int count = 5, CancellationToken cancellationToken = default)
+        {
+            return await _context.WorkSpaceRooms
+                .Include(wr => wr.WorkSpace)
+                    .ThenInclude(w => w.Address)
+                .Include(wr => wr.WorkSpaceRoomImages)
+                .Include(wr => wr.Reviews)
+                .AsNoTracking()
+                .Where(wr => wr.IsActive && wr.IsVerified 
+                            && wr.WorkSpace.IsActive && wr.WorkSpace.IsVerified)
+                .Select(wr => new 
+                {
+                    Room = wr,
+                    AverageRating = wr.Reviews.Any() ? wr.Reviews.Average(r => r.Rating) : 0,
+                    ReviewCount = wr.Reviews.Count
+                })
+                .OrderByDescending(x => x.AverageRating)
+                .ThenByDescending(x => x.ReviewCount)
+                .Take(count)
+                .Select(x => x.Room)
+                .ToListAsync(cancellationToken);
+        }
     }
 }

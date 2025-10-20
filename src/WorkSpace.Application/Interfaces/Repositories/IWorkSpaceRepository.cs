@@ -18,5 +18,7 @@ namespace WorkSpace.Application.Interfaces.Repositories
         Task<bool> ExistsTitleForHostAsync(int hostId, string title, CancellationToken cancellationToken = default);
 
         Task<WorkSpaceRoom?> GetRoomByIdWithDetailsAsync(int roomId, CancellationToken cancellationToken = default);
+
+        Task<IReadOnlyList<WorkSpaceRoom>> GetFeaturedRoomsAsync(int count = 5, CancellationToken cancellationToken = default);
     }
 }

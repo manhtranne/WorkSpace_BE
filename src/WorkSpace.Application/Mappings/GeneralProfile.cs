@@ -36,6 +36,7 @@ namespace WorkSpace.Application.Mappings
             // WorkSpaceRoom Mappings (Chi con map cho ListItem)
             CreateMap<WorkSpaceRoom, WorkSpaceRoomListItemDto>()
                 .ForMember(d => d.WorkSpaceTitle, o => o.MapFrom(s => s.WorkSpace.Title))
+                .ForMember(d => d.City, o => o.MapFrom(s => s.WorkSpace.Address != null ? s.WorkSpace.Address.Ward : null))
                 .ForMember(d => d.ThumbnailUrl, o => o.MapFrom(s => s.WorkSpaceRoomImages.FirstOrDefault().ImageUrl))
                 .ForMember(d => d.AverageRating, o => o.MapFrom(s => s.Reviews.Any() ? s.Reviews.Average(r => r.Rating) : 0))
                 .ForMember(d => d.RatingCount, o => o.MapFrom(s => s.Reviews.Count));
