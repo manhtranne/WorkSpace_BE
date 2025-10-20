@@ -9,7 +9,15 @@ namespace WorkSpace.WebApi.Controllers.v1
     [Route("api/v1/workspaces")]
     public class WorkSpaceController : BaseApiController
     {
-       
+        [HttpGet("featured")]
+        public async Task<IActionResult> GetFeatured(
+            [FromQuery] int count = 5,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await Mediator.Send(new GetFeaturedWorkSpaceRoomsQuery(count), cancellationToken);
+            return Ok(result.Data);
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id, CancellationToken cancellationToken)
         {
