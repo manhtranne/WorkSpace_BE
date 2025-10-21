@@ -25,9 +25,9 @@ public static class ServiceRegistration
         #region Repositories
         services.AddScoped(typeof(IWorkSpaceRepository), typeof(WorkSpaceRepository));
         services.AddTransient(typeof(IGenericRepositoryAsync<>), typeof(GenericRepositoryAsync<>));
-        services.AddTransient(typeof(IHostProfileAsyncRepository), typeof(HostProfileAsyncProfileAsyncRepository));
-        services.AddTransient(typeof(IWorkSpaceFavoriteRepository), typeof(WorkSpaceFavoriteRepository));
-        services.AddTransient(typeof(IPromotionRepository), typeof(PromotionRepository));
+        services.AddScoped(typeof(IHostProfileAsyncRepository), typeof(HostProfileAsyncProfileAsyncRepository));
+        services.AddScoped(typeof(IWorkSpaceFavoriteRepository), typeof(WorkSpaceFavoriteRepository));
+        services.AddScoped(typeof(IPromotionRepository), typeof(PromotionRepository));
         #endregion
 
         #region Services
