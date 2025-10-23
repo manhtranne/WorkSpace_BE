@@ -22,5 +22,12 @@ namespace WorkSpace.Application.Interfaces.Repositories
         Task<IReadOnlyList<WorkSpaceRoom>> GetFeaturedRoomsAsync(int count = 5, CancellationToken cancellationToken = default);
 
         Task<IReadOnlyList<Domain.Entities.WorkSpace>> GetWorkSpacesByTypeNameAsync(string typeName, CancellationToken cancellationToken = default);
+
+        Task<(IReadOnlyList<WorkSpaceRoom> Rooms, int TotalCount)> GetAvailableRoomsAsync(
+            CheckAvailableRoomsRequestInternal request,
+            int pageNumber,
+            int pageSize,
+            CancellationToken cancellationToken = default
+        );
     }
 }
