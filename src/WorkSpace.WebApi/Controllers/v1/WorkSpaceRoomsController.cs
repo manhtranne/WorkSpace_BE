@@ -26,21 +26,7 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(result.Data);
         }
 
-        /// <summary>
-        /// Check available rooms based on start time and end time
-        /// </summary>
-        /// <param name="request">Request containing start time and end time</param>
-        /// <param name="workSpaceRoomTypeId">Filter by room type (optional)</param>
-        /// <param name="ward">Filter by ward/district (optional)</param>
-        /// <param name="minPricePerDay">Minimum price per day (optional)</param>
-        /// <param name="maxPricePerDay">Maximum price per day (optional)</param>
-        /// <param name="minCapacity">Minimum capacity (optional)</param>
-        /// <param name="onlyVerified">Show only verified rooms (default: true)</param>
-        /// <param name="onlyActive">Show only active rooms (default: true)</param>
-        /// <param name="pageNumber">Page number (default: 1)</param>
-        /// <param name="pageSize">Page size (default: 10)</param>
-        /// <param name="cancellationToken">Cancellation token</param>
-        /// <returns>List of available rooms</returns>
+       
         [HttpPost("check-availability")]
         public async Task<IActionResult> CheckAvailableRooms(
             [FromBody] CheckAvailableRoomsRequest request,

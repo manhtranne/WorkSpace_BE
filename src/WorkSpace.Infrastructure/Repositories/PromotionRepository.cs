@@ -13,7 +13,7 @@ namespace WorkSpace.Infrastructure.Repositories
             _context = dbContext;
         }
 
-        public async Task<IReadOnlyList<Promotion>> GetActivePromotionsAsync(int count = 5, CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<Promotion>> GetActivePromotionsAsync(CancellationToken cancellationToken = default)
         {
             var now = DateTime.UtcNow;
 
@@ -25,7 +25,6 @@ namespace WorkSpace.Infrastructure.Repositories
                             && (p.UsageLimit == 0 || p.UsedCount < p.UsageLimit))
                 .OrderByDescending(p => p.EndDate)
                 .ThenByDescending(p => p.DiscountValue)
-                .Take(count)
                 .ToListAsync(cancellationToken);
         }
     }

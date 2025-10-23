@@ -8,10 +8,9 @@ namespace WorkSpace.WebApi.Controllers.v1
     {
         [HttpGet("active")]
         public async Task<IActionResult> GetActivePromotions(
-            [FromQuery] int count = 5,
             CancellationToken cancellationToken = default)
         {
-            var result = await Mediator.Send(new GetActivePromotionsQuery(count), cancellationToken);
+            var result = await Mediator.Send(new GetActivePromotionsQuery(), cancellationToken);
             return Ok(result);
         }
     }
