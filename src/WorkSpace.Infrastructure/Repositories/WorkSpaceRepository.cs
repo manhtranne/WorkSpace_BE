@@ -162,5 +162,91 @@ namespace WorkSpace.Infrastructure.Repositories
                 .ThenByDescending(w => w.CreateUtc)
                 .ToListAsync(cancellationToken);
         }
+
+        public async Task<(IReadOnlyList<WorkSpaceRoom> Rooms, int TotalCount)> GetAvailableRoomsAsync(
+            WorkSpace.Application.DTOs.WorkSpaces.CheckAvailableRoomsRequestInternal request,
+            int pageNumber,
+            int pageSize,
+            CancellationToken cancellationToken = default)
+        {
+            var startUtc = request.StartTime.UtcDateTime;
+            var endUtc = request.EndTime.UtcDateTime;
+
+            var query = _context.WorkSpaceRooms
+                .Include(wr => wr.WorkSpace)
+                    .ThenInclude(w => w.Address)
+                .Include(wr => wr.WorkSpaceRoomType)
+                .Include(wr => wr.WorkSpaceRoomImages)
+                .Include(wr => wr.WorkSpaceRoomAmenities)
+                    .ThenInclude(wra => wra.Amenity)
+                .Include(wr => wr.Reviews)
+                .Include(wr => wr.BlockedTimeSlots)
+                .Include(wr => wr.Bookings)
+                    .ThenInclude(b => b.BookingStatus)
+                .AsNoTracking()
+                .AsQueryable();
+
+            // Apply base filters
+            if (request.OnlyActive)
+            {
+                query = query.Where(wr => wr.IsActive && wr.WorkSpace.IsActive);
+            }
+
+            if (request.OnlyVerified)
+            {
+                query = query.Where(wr => wr.IsVerified && wr.WorkSpace.IsVerified);
+            }
+
+            if (request.WorkSpaceRoomTypeId.HasValue)
+            {
+                query = query.Where(wr => wr.WorkSpaceRoomTypeId == request.WorkSpaceRoomTypeId.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.Ward))
+            {
+                query = query.Where(wr => wr.WorkSpace.Address != null && wr.WorkSpace.Address.Ward == request.Ward);
+            }
+
+            if (request.MinPricePerDay.HasValue)
+            {
+                query = query.Where(wr => wr.PricePerDay >= request.MinPricePerDay.Value);
+            }
+
+            if (request.MaxPricePerDay.HasValue)
+            {
+                query = query.Where(wr => wr.PricePerDay <= request.MaxPricePerDay.Value);
+            }
+
+            if (request.MinCapacity.HasValue)
+            {
+                query = query.Where(wr => wr.Capacity >= request.MinCapacity.Value);
+            }
+
+            // Filter out rooms that have overlapping blocked time slots
+            query = query.Where(wr => !wr.BlockedTimeSlots.Any(bts =>
+                bts.StartTime < endUtc && bts.EndTime > startUtc
+            ));
+
+            // Filter out rooms that have overlapping bookings with confirmed/pending status
+            // Assuming booking status names: "Confirmed", "Pending", "CheckedIn" mean the room is occupied
+            query = query.Where(wr => !wr.Bookings.Any(b =>
+                b.StartTimeUtc < endUtc && b.EndTimeUtc > startUtc &&
+                b.BookingStatus != null &&
+                (b.BookingStatus.Name == "Confirmed" || 
+                 b.BookingStatus.Name == "Pending" || 
+                 b.BookingStatus.Name == "CheckedIn")
+            ));
+
+            var totalCount = await query.CountAsync(cancellationToken);
+
+            var rooms = await query
+                .OrderByDescending(wr => wr.IsVerified)
+                .ThenBy(wr => wr.PricePerDay)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+            return (rooms, totalCount);
+        }
     }
 }

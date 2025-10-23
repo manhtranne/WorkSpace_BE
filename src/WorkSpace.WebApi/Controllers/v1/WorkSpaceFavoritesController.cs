@@ -1,34 +1,77 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WorkSpace.Application.DTOs.WorkSpaces;
-using WorkSpace.Application.Features.Favorites.Commands;
 using System.Threading.Tasks;
+using WorkSpace.Application.Interfaces.Repositories;
+using TravelBooking.Extensions;
 
 namespace WorkSpace.WebApi.Controllers.v1
 {
-    [Route("api/v1/favorites")]
-    public class WorkSpaceFavoritesController : BaseApiController
+    [Authorize]
+    [Route("api/v1/workspacefavorite")]
+    [ApiController]
+    public class WorkSpaceFavoritesController : ControllerBase
     {
-      
-        [HttpPost]
-        [Authorize] 
-        public async Task<IActionResult> Create(
-            [FromBody] CreateFavoriteRequest request,
-            CancellationToken cancellationToken)
+        private readonly IWorkSpaceFavoriteRepository _workSpaceFavoriteRepository;
+
+        public WorkSpaceFavoritesController(IWorkSpaceFavoriteRepository workSpaceFavoriteRepository)
         {
-            var command = new CreateFavoriteCommand
-            {
-                WorkSpaceId = request.WorkSpaceId
-            };
-
-            var result = await Mediator.Send(command, cancellationToken);
-
-            if (!result.Succeeded)
-            {
-                return BadRequest(result);
-            }
-
-            return Ok(result);
+            _workSpaceFavoriteRepository = workSpaceFavoriteRepository;
         }
+
+        [HttpPost]
+        public async Task<IActionResult> AddToFavorites(int workSpaceId)
+        {
+            var userId = User.GetUserId();
+            if (userId == null)
+            {
+                return Unauthorized("User not authenticated");
+            }
+            var result = await _workSpaceFavoriteRepository.AddToFavoritesAsync(workSpaceId, userId);
+            if (result)
+                return Ok(new { message = "Workspace added to favorites." });
+            return BadRequest(new { message = "Failed to add workspace to favorites." });
+        }
+
+        [HttpDelete("{workSpaceId}")]
+        public async Task<IActionResult> RemoveFromFavorites(int workSpaceId)
+        {
+            var userId = User.GetUserId();
+            if (userId == null)
+            {
+                return Unauthorized("User not authenticated");
+            }
+            var result = await _workSpaceFavoriteRepository.RemoveFromFavoritesAsync(workSpaceId, userId);
+            if (result)
+                return Ok(new { message = "Workspace removed from favorites." });
+            return BadRequest(new { message = "Failed to remove workspace from favorites." });
+        }
+
+        [HttpGet("isfavorite/{workSpaceId}")]
+        public async Task<IActionResult> IsFavorite(int workSpaceId)
+        {
+            var userId = User.GetUserId();
+            if (userId == null)
+            {
+                return Unauthorized("User not authenticated");
+            }
+            var isFavorite = await _workSpaceFavoriteRepository.IsFavoriteAsync(workSpaceId, userId);
+            return Ok(new { isFavorite });
+        }
+
+        [HttpGet("userfavorites")]
+        public async Task<IActionResult> GetFavoriteWorkSpaces()
+        {
+            var userId = User.GetUserId();
+            if (userId == null)
+            {
+                return Unauthorized("User not authenticated");
+            }
+            var favoriteWorkSpaces = await _workSpaceFavoriteRepository.GetFavoriteWorkSpacesAsync(userId);
+            return Ok(favoriteWorkSpaces);
+
+
+        }
+
     }
 }
