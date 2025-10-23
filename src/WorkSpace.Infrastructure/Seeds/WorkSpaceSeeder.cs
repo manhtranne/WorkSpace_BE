@@ -39,6 +39,9 @@ public class WorkSpaceSeeder(WorkSpaceContext context, UserManager<AppUser> user
             ct: ct
         );
 
+        // Seed BookingStatuses
+        await SeedBookingStatusesAsync(ct);
+
     }
     
    
@@ -102,5 +105,65 @@ private async Task CreateRoleIfNotExistsAsync(string roleName, string displayNam
                 throw new InvalidOperationException($"Add roles '{string.Join(",", toAdd)}' to '{email}' failed: {errors}");
             }
         }
+    }
+
+    private async Task SeedBookingStatusesAsync(CancellationToken ct)
+    {
+        if (await context.BookingStatuses.AnyAsync(ct)) return;
+
+        var bookingStatuses = new[]
+        {
+            new BookingStatus
+            {
+                Name = "Pending",
+                Description = "Booking is awaiting confirmation or payment",
+                CreateUtc = DateTimeOffset.UtcNow
+            },
+            new BookingStatus
+            {
+                Name = "Confirmed",
+                Description = "Booking has been confirmed and paid",
+                CreateUtc = DateTimeOffset.UtcNow
+            },
+            new BookingStatus
+            {
+                Name = "InProgress",
+                Description = "Booking is currently in progress",
+                CreateUtc = DateTimeOffset.UtcNow
+            },
+            new BookingStatus
+            {
+                Name = "Completed",
+                Description = "Booking has been completed successfully",
+                CreateUtc = DateTimeOffset.UtcNow
+            },
+            new BookingStatus
+            {
+                Name = "Cancelled",
+                Description = "Booking has been cancelled",
+                CreateUtc = DateTimeOffset.UtcNow
+            },
+            new BookingStatus
+            {
+                Name = "Expired",
+                Description = "Booking has expired without confirmation",
+                CreateUtc = DateTimeOffset.UtcNow
+            },
+            new BookingStatus
+            {
+                Name = "NoShow",
+                Description = "Customer did not show up for confirmed booking",
+                CreateUtc = DateTimeOffset.UtcNow
+            },
+            new BookingStatus
+            {
+                Name = "Refunded",
+                Description = "Booking has been cancelled and refunded",
+                CreateUtc = DateTimeOffset.UtcNow
+            }
+        };
+
+        await context.BookingStatuses.AddRangeAsync(bookingStatuses, ct);
+        await context.SaveChangesAsync(ct);
     }
 }

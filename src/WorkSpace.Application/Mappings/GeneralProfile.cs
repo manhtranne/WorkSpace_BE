@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using System.Linq;
 using WorkSpace.Application.DTOs.Amenities;
+using WorkSpace.Application.DTOs.BookingStatus;
 using WorkSpace.Application.DTOs.Promotions;
 using WorkSpace.Application.DTOs.Users;
 using WorkSpace.Application.DTOs.WorkSpaces;
@@ -17,6 +18,10 @@ namespace WorkSpace.Application.Mappings
 
             // Amenity mappings
             CreateMap<Amenity, AmenityDto>();
+
+            // BookingStatus mappings
+            CreateMap<BookingStatus, BookingStatusDto>()
+                .ForMember(d => d.TotalBookings, o => o.MapFrom(s => s.Bookings.Count));
 
             // Promotion mappings
             CreateMap<Promotion, PromotionDto>()
