@@ -28,6 +28,7 @@ public static class ServiceRegistration
         services.AddScoped(typeof(IHostProfileAsyncRepository), typeof(HostProfileAsyncProfileAsyncRepository));
         services.AddScoped(typeof(IWorkSpaceFavoriteRepository), typeof(WorkSpaceFavoriteRepository));
         services.AddScoped(typeof(IPromotionRepository), typeof(PromotionRepository));
+        services.AddScoped(typeof(IBookingStatusRepository), typeof(BookingStatusRepository));
         #endregion
 
         #region Services
