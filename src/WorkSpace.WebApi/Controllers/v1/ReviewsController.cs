@@ -1,19 +1,21 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WorkSpace.Application.DTOs.Reviews; 
+using WorkSpace.Application.DTOs.Reviews;
 using WorkSpace.Application.Features.Reviews.Commands.CreateReview;
 using WorkSpace.Application.Wrappers;
-using TravelBooking.Extensions; 
+using TravelBooking.Extensions;
 
 namespace WorkSpace.WebApi.Controllers.v1
 {
-    [Route("api/v1/reviews")]
+   
+    [Route("api/v1/bookings/{bookingId}/reviews")]
     [ApiController]
-    [Authorize] 
+    [Authorize]
     public class ReviewsController : BaseApiController
     {
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateReviewDto request)
+       
+        public async Task<IActionResult> Create([FromRoute] int bookingId, [FromBody] CreateReviewDto request)
         {
             var userId = User.GetUserId();
 
@@ -24,6 +26,7 @@ namespace WorkSpace.WebApi.Controllers.v1
 
             var command = new CreateReviewCommand
             {
+                BookingId = bookingId, 
                 Dto = request,
                 UserId = userId
             };
