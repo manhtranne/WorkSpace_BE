@@ -4,7 +4,7 @@ namespace WorkSpace.Application.Interfaces.Repositories
 {
     public interface IPromotionRepository : IGenericRepositoryAsync<Promotion>
     {
-        Task<IReadOnlyList<Promotion>> GetActivePromotionsAsync(int count = 5, CancellationToken cancellationToken = default);
+        Task<IReadOnlyList<Promotion>> GetActivePromotionsAsync(CancellationToken cancellationToken = default);
     }
 }
 
