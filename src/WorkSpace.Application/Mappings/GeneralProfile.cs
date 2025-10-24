@@ -5,6 +5,7 @@ using WorkSpace.Application.DTOs.BookingStatus;
 using WorkSpace.Application.DTOs.Promotions;
 using WorkSpace.Application.DTOs.Users;
 using WorkSpace.Application.DTOs.WorkSpaces;
+using WorkSpace.Application.DTOs.WorkSpaceTypes;
 using WorkSpace.Application.Features.HostProfile.Commands.CreateHostProfile;
 using WorkSpace.Domain.Entities;
 
@@ -18,6 +19,9 @@ namespace WorkSpace.Application.Mappings
 
             // Amenity mappings
             CreateMap<Amenity, AmenityDto>();
+
+            // WorkSpaceType mappings
+            CreateMap<WorkSpaceType, WorkSpaceTypeDto>();
 
             // BookingStatus mappings
             CreateMap<BookingStatus, BookingStatusDto>()
