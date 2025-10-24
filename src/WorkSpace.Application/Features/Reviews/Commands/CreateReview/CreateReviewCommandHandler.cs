@@ -25,14 +25,14 @@ namespace WorkSpace.Application.Features.Reviews.Commands.CreateReview
 
         public async Task<Response<int>> Handle(CreateReviewCommand request, CancellationToken cancellationToken)
         {
-            var booking = await _bookingRepository.GetByIdAsync(request.Dto.BookingId, cancellationToken);
+        
+            var booking = await _bookingRepository.GetByIdAsync(request.BookingId, cancellationToken);
 
             if (booking == null)
             {
-                throw new ApiException($"Booking with ID {request.Dto.BookingId} not found.");
+                throw new ApiException($"Booking with ID {request.BookingId} not found.");
             }
 
-      
             if (booking.CustomerId != request.UserId)
             {
                 throw new ApiException("You are not authorized to review this booking.");
@@ -43,14 +43,13 @@ namespace WorkSpace.Application.Features.Reviews.Commands.CreateReview
                 throw new ApiException("This booking has already been reviewed.");
             }
 
-   
             var review = new Review
             {
-                BookingId = booking.Id,
+                BookingId = booking.Id, 
                 UserId = request.UserId,
                 WorkSpaceRoomId = booking.WorkSpaceRoomId,
                 Rating = request.Dto.Rating,
-                Comment = request.Dto.Comment,
+                Comment = request.Dto.Comment, 
                 IsVerified = false,
                 IsPublic = true,
                 CreateUtc = _dateTimeService.NowUtc
@@ -58,7 +57,6 @@ namespace WorkSpace.Application.Features.Reviews.Commands.CreateReview
 
             await _reviewRepository.AddAsync(review, cancellationToken);
 
-           
             booking.IsReviewed = true;
             await _bookingRepository.UpdateAsync(booking, cancellationToken);
 

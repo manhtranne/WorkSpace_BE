@@ -20,9 +20,6 @@ namespace WorkSpace.Application.Mappings
             // Amenity mappings
             CreateMap<Amenity, AmenityDto>();
 
-            // WorkSpaceType mappings
-            CreateMap<WorkSpaceType, WorkSpaceTypeDto>();
-
             // BookingStatus mappings
             CreateMap<BookingStatus, BookingStatusDto>()
                 .ForMember(d => d.TotalBookings, o => o.MapFrom(s => s.Bookings.Count));
