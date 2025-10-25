@@ -28,10 +28,8 @@ public static class ServiceRegistration
         services.AddScoped(typeof(IHostProfileAsyncRepository), typeof(HostProfileAsyncProfileAsyncRepository));
         services.AddScoped(typeof(IWorkSpaceFavoriteRepository), typeof(WorkSpaceFavoriteRepository));
         services.AddScoped(typeof(IPromotionRepository), typeof(PromotionRepository));
-<<<<<<< HEAD
-=======
         services.AddScoped(typeof(IBookingStatusRepository), typeof(BookingStatusRepository));
->>>>>>> origin/main
+        services.AddScoped(typeof(IWorkSpaceTypeRepository), typeof(WorkSpaceTypeRepository));
         #endregion
 
         #region Services
