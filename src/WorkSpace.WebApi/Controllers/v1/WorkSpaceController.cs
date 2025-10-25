@@ -23,6 +23,15 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(result);
         }
 
+        [HttpGet("types/{typeId}")]
+        public async Task<IActionResult> GetAllByTypeId(
+            [FromRoute] int typeId,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await Mediator.Send(new GetWorkSpacesByTypeIdQuery(typeId), cancellationToken);
+            return Ok(result);
+        }
+
         [HttpGet("featured")]
         public async Task<IActionResult> GetFeatured(
             [FromQuery] int count = 5,

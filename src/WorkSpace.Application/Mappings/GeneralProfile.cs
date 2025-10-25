@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using System.Linq;
 using WorkSpace.Application.DTOs.Amenities;
+using WorkSpace.Application.DTOs.BookingStatus;
 using WorkSpace.Application.DTOs.Promotions;
 using WorkSpace.Application.DTOs.Users;
 using WorkSpace.Application.DTOs.WorkSpaces;
+using WorkSpace.Application.DTOs.WorkSpaceTypes;
 using WorkSpace.Application.Features.HostProfile.Commands.CreateHostProfile;
 using WorkSpace.Domain.Entities;
 
@@ -17,6 +19,10 @@ namespace WorkSpace.Application.Mappings
 
             // Amenity mappings
             CreateMap<Amenity, AmenityDto>();
+
+            // BookingStatus mappings
+            CreateMap<BookingStatus, BookingStatusDto>()
+                .ForMember(d => d.TotalBookings, o => o.MapFrom(s => s.Bookings.Count));
 
             // Promotion mappings
             CreateMap<Promotion, PromotionDto>()
@@ -53,6 +59,20 @@ namespace WorkSpace.Application.Mappings
                 .ForMember(d => d.ThumbnailUrl, o => o.MapFrom(s => s.WorkSpaceRoomImages.FirstOrDefault().ImageUrl))
                 .ForMember(d => d.AverageRating, o => o.MapFrom(s => s.Reviews.Any() ? s.Reviews.Average(r => r.Rating) : 0))
                 .ForMember(d => d.RatingCount, o => o.MapFrom(s => s.Reviews.Count));
+
+            // Available Room Mapping
+            CreateMap<WorkSpaceRoom, AvailableRoomDto>()
+                .ForMember(d => d.WorkSpaceTitle, o => o.MapFrom(s => s.WorkSpace.Title))
+                .ForMember(d => d.Street, o => o.MapFrom(s => s.WorkSpace.Address != null ? s.WorkSpace.Address.Street : null))
+                .ForMember(d => d.Ward, o => o.MapFrom(s => s.WorkSpace.Address != null ? s.WorkSpace.Address.Ward : null))
+                .ForMember(d => d.State, o => o.MapFrom(s => s.WorkSpace.Address != null ? s.WorkSpace.Address.State : null))
+                .ForMember(d => d.Country, o => o.MapFrom(s => s.WorkSpace.Address != null ? s.WorkSpace.Address.Country : null))
+                .ForMember(d => d.WorkSpaceRoomTypeName, o => o.MapFrom(s => s.WorkSpaceRoomType != null ? s.WorkSpaceRoomType.Name : ""))
+                .ForMember(d => d.ThumbnailUrl, o => o.MapFrom(s => s.WorkSpaceRoomImages.FirstOrDefault() != null ? s.WorkSpaceRoomImages.FirstOrDefault().ImageUrl : null))
+                .ForMember(d => d.ImageUrls, o => o.MapFrom(s => s.WorkSpaceRoomImages.Select(img => img.ImageUrl).ToList()))
+                .ForMember(d => d.AverageRating, o => o.MapFrom(s => s.Reviews.Any() ? s.Reviews.Average(r => r.Rating) : 0))
+                .ForMember(d => d.ReviewCount, o => o.MapFrom(s => s.Reviews.Count))
+                .ForMember(d => d.Amenities, o => o.MapFrom(s => s.WorkSpaceRoomAmenities.Select(a => a.Amenity.Name).ToList()));
 
             // DA XOA: CreateMap<WorkSpaceRoom, WorkSpaceRoomDetailDto>()
             // Ly do: Da map thu cong trong GetWorkSpaceRoomDetailQueryHandler

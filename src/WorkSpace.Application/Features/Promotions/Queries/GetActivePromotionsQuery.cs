@@ -5,7 +5,7 @@ using WorkSpace.Application.Interfaces.Repositories;
 
 namespace WorkSpace.Application.Features.Promotions.Queries
 {
-    public record GetActivePromotionsQuery(int Count = 5) : IRequest<IEnumerable<PromotionDto>>;
+    public record GetActivePromotionsQuery() : IRequest<IEnumerable<PromotionDto>>;
 
     public class GetActivePromotionsHandler(
         IPromotionRepository repository,
@@ -13,7 +13,7 @@ namespace WorkSpace.Application.Features.Promotions.Queries
     {
         public async Task<IEnumerable<PromotionDto>> Handle(GetActivePromotionsQuery request, CancellationToken cancellationToken)
         {
-            var promotions = await repository.GetActivePromotionsAsync(request.Count, cancellationToken);
+            var promotions = await repository.GetActivePromotionsAsync(cancellationToken);
             var dtoList = mapper.Map<IEnumerable<PromotionDto>>(promotions);
             return dtoList;
         }
