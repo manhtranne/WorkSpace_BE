@@ -23,5 +23,12 @@ namespace WorkSpace.Infrastructure.Repositories
         {
             return await _context.WorkSpaceTypes.ToListAsync();
         }
+
+        public async Task<List<Domain.Entities.WorkSpace>> GetWorkSpacesByTypeId(int typeId)
+        {
+            return await _context.Workspaces
+                                 .Where(ws => ws.WorkSpaceTypeId == typeId)
+                                 .ToListAsync();
+        }
     }
 }

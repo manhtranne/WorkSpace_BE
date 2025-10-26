@@ -19,5 +19,12 @@ public class WorkSpaceTypesController : ControllerBase
         var workspceTypes = await _workSpaceTypeRepository.GetAllWorkSpaceType();
         return Ok(workspceTypes);
     }
+
+    [HttpGet("{id}/workspaces")]
+    public async Task<IActionResult> GetWorkSpacesByTypeId([FromRoute] int id)
+    {
+        var workspaces = await _workSpaceTypeRepository.GetWorkSpacesByTypeId(id);
+        return Ok(workspaces);
+    }
 }
 

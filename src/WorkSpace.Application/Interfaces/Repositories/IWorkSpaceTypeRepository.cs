@@ -10,5 +10,6 @@ namespace WorkSpace.Application.Interfaces.Repositories
     public interface IWorkSpaceTypeRepository
     {
         Task<List<WorkSpaceType>> GetAllWorkSpaceType();
+        Task<List<WorkSpace.Domain.Entities.WorkSpace>> GetWorkSpacesByTypeId(int typeId);
     }
 }
