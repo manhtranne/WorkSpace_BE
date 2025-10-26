@@ -28,18 +28,15 @@ public static class ServiceRegistration
         services.AddScoped(typeof(IHostProfileAsyncRepository), typeof(HostProfileAsyncProfileAsyncRepository));
         services.AddScoped(typeof(IWorkSpaceFavoriteRepository), typeof(WorkSpaceFavoriteRepository));
         services.AddScoped(typeof(IPromotionRepository), typeof(PromotionRepository));
-<<<<<<< HEAD
-=======
         services.AddScoped(typeof(IBookingStatusRepository), typeof(BookingStatusRepository));
->>>>>>> origin/main
-        #endregion
-
-        #region Services
+        services.AddScoped(typeof(IBookingRepository), typeof(BookingRepository));
 
         services.AddScoped<IWorkSpaceSeeder, WorkSpaceSeeder>();
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IDateTimeService, DateTimeService>();
+        services.AddScoped<IAvailabilityService, AvailabilityService>();
+        services.AddScoped<IBookingPricingService, BookingPricingService>();
 
         services.AddScoped<ISearchService, SearchService>();
         services.AddScoped<ISearchService, SearchService>(); 
