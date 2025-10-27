@@ -53,7 +53,7 @@ app.UseCors(cors =>
         .AllowCredentials()
         .SetIsOriginAllowed(origin => true);
 });
-
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

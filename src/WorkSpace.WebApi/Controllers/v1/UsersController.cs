@@ -7,12 +7,12 @@ using WorkSpace.Application.Features.Users.Commands.DeleteUser;
 using WorkSpace.Application.Features.Users.Commands.UpdateUser;
 using WorkSpace.Application.Features.Users.Queries.GetAllUsers;
 using WorkSpace.Application.Features.Users.Queries.GetUserById;
-
+using WorkSpace.Application.Enums;
 namespace WorkSpace.WebApi.Controllers.v1
 {
     [Route("api/v1/users")]
-    [ApiController] 
-    [Authorize(Roles = "Moderator,Admin,SuperAdmin")] 
+    [ApiController]
+    [Authorize(Roles = $"{nameof(Roles.Admin)},{nameof(Roles.Staff)}")]
     public class UsersController : BaseApiController
     {
         [HttpGet]

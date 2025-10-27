@@ -1,13 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WorkSpace.Application.Features.Bookings.Queries; 
 using WorkSpace.Application.Features.Reviews.Commands;
 using WorkSpace.Application.Features.Reviews.Queries;
-using WorkSpace.Application.Features.Bookings.Queries; 
+using WorkSpace.Application.Enums;
 using WorkSpace.Application.Wrappers; 
 namespace WorkSpace.WebApi.Controllers.v1;
 
 [Route("api/v1/staff")]
-[Authorize(Roles = "Moderator,Admin,SuperAdmin")]
+[Authorize(Roles = $"{nameof(Roles.Admin)},{nameof(Roles.Staff)}")]
 [ApiController]
 public class StaffAdminController : BaseApiController
 {
