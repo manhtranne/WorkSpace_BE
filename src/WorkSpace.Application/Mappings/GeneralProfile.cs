@@ -8,6 +8,8 @@ using WorkSpace.Application.DTOs.WorkSpaces;
 using WorkSpace.Application.DTOs.WorkSpaceTypes;
 using WorkSpace.Application.Features.HostProfile.Commands.CreateHostProfile;
 using WorkSpace.Domain.Entities;
+using WorkSpace.Application.DTOs.Reviews; 
+using WorkSpace.Application.DTOs.Bookings;
 
 namespace WorkSpace.Application.Mappings
 {
@@ -73,9 +75,18 @@ namespace WorkSpace.Application.Mappings
                 .ForMember(d => d.AverageRating, o => o.MapFrom(s => s.Reviews.Any() ? s.Reviews.Average(r => r.Rating) : 0))
                 .ForMember(d => d.ReviewCount, o => o.MapFrom(s => s.Reviews.Count))
                 .ForMember(d => d.Amenities, o => o.MapFrom(s => s.WorkSpaceRoomAmenities.Select(a => a.Amenity.Name).ToList()));
+            CreateMap<Review, ReviewModerationDto>()
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.GetFullName() : null))
+                .ForMember(dest => dest.WorkSpaceRoomTitle, opt => opt.MapFrom(src => src.WorkSpaceRoom != null ? src.WorkSpaceRoom.Title : null));
 
-            // DA XOA: CreateMap<WorkSpaceRoom, WorkSpaceRoomDetailDto>()
-            // Ly do: Da map thu cong trong GetWorkSpaceRoomDetailQueryHandler
+   
+            CreateMap<Booking, BookingAdminDto>()
+                .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src => src.Customer != null ? src.Customer.GetFullName() : null))
+                .ForMember(dest => dest.CustomerEmail, opt => opt.MapFrom(src => src.Customer != null ? src.Customer.Email : null))
+                .ForMember(dest => dest.WorkSpaceRoomTitle, opt => opt.MapFrom(src => src.WorkSpaceRoom != null ? src.WorkSpaceRoom.Title : null))
+                .ForMember(dest => dest.BookingStatusName, opt => opt.MapFrom(src => src.BookingStatus != null ? src.BookingStatus.Name : null));
+
+
         }
     }
 
