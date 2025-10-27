@@ -28,7 +28,8 @@ public static class ServiceRegistration
         services.AddScoped(typeof(IHostProfileAsyncRepository), typeof(HostProfileAsyncProfileAsyncRepository));
         services.AddScoped(typeof(IWorkSpaceFavoriteRepository), typeof(WorkSpaceFavoriteRepository));
         services.AddScoped(typeof(IPromotionRepository), typeof(PromotionRepository));
-        services.AddScoped(typeof(IBookingStatusRepository), typeof(BookingStatusRepository))
+        services.AddScoped(typeof(IBookingStatusRepository), typeof(BookingStatusRepository));
+
 
         services.AddScoped<IWorkSpaceSeeder, WorkSpaceSeeder>();
         services.AddScoped<IAccountService, AccountService>();
@@ -36,6 +37,7 @@ public static class ServiceRegistration
         services.AddScoped<IDateTimeService, DateTimeService>();
         services.AddScoped<IAvailabilityService, AvailabilityService>();
         services.AddScoped<IBookingPricingService, BookingPricingService>();
+        services.AddScoped<IBookingRepository, BookingRepository>(); 
 
         services.AddScoped<ISearchService, SearchService>();
         services.AddScoped<ISearchService, SearchService>(); 
