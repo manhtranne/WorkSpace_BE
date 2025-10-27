@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using WorkSpace.Application.Interfaces;
 using WorkSpace.Domain.Entities;
-
 namespace WorkSpace.Infrastructure
+
 {
-    public class WorkSpaceContext : IdentityDbContext<AppUser, AppRole, int>
+    public class WorkSpaceContext : IdentityDbContext<AppUser, AppRole, int>, IApplicationDbContext
     {
         public WorkSpaceContext(DbContextOptions<WorkSpaceContext> options) : base(options)
         {

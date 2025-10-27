@@ -6,6 +6,7 @@ using WorkSpace.Application.DTOs.Bookings;
 using WorkSpace.Application.Interfaces.Repositories;
 using WorkSpace.Application.Wrappers;
 using WorkSpace.Domain.Entities;
+using WorkSpace.Application.Interfaces;
 
 namespace WorkSpace.Application.Features.Bookings.Queries;
 
@@ -24,10 +25,10 @@ public class GetAllBookingsQuery : IRequest<PagedResponse<IEnumerable<BookingAdm
 public class GetAllBookingsQueryHandler : IRequestHandler<GetAllBookingsQuery, PagedResponse<IEnumerable<BookingAdminDto>>>
 {
 
-    private readonly DbContext _dbContext;
+    private readonly IApplicationDbContext _dbContext;
     private readonly IMapper _mapper;
 
-    public GetAllBookingsQueryHandler(DbContext dbContext, IMapper mapper)
+    public GetAllBookingsQueryHandler(IApplicationDbContext dbContext, IMapper mapper)
     {
         _dbContext = dbContext;
         _mapper = mapper;
@@ -35,7 +36,7 @@ public class GetAllBookingsQueryHandler : IRequestHandler<GetAllBookingsQuery, P
 
     public async Task<PagedResponse<IEnumerable<BookingAdminDto>>> Handle(GetAllBookingsQuery request, CancellationToken cancellationToken)
     {
-        var query = _dbContext.Set<Booking>()
+        var query = _dbContext.Bookings
             .Include(b => b.Customer)
             .Include(b => b.WorkSpaceRoom)
             .Include(b => b.BookingStatus)

@@ -1,11 +1,12 @@
-﻿using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using System.Text;
+using WorkSpace.Application.Interfaces;
 using WorkSpace.Application.Interfaces.Repositories;
 using WorkSpace.Application.Interfaces.Services;
 using WorkSpace.Application.Wrappers;
@@ -29,6 +30,7 @@ public static class ServiceRegistration
         services.AddScoped(typeof(IWorkSpaceFavoriteRepository), typeof(WorkSpaceFavoriteRepository));
         services.AddScoped(typeof(IPromotionRepository), typeof(PromotionRepository));
         services.AddScoped(typeof(IBookingStatusRepository), typeof(BookingStatusRepository));
+        services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<WorkSpaceContext>());
 
 
         services.AddScoped<IWorkSpaceSeeder, WorkSpaceSeeder>();
@@ -37,7 +39,8 @@ public static class ServiceRegistration
         services.AddScoped<IDateTimeService, DateTimeService>();
         services.AddScoped<IAvailabilityService, AvailabilityService>();
         services.AddScoped<IBookingPricingService, BookingPricingService>();
-        services.AddScoped<IBookingRepository, BookingRepository>(); 
+        services.AddScoped<IBookingRepository, BookingRepository>();
+
 
         services.AddScoped<ISearchService, SearchService>();
         services.AddScoped<ISearchService, SearchService>(); 

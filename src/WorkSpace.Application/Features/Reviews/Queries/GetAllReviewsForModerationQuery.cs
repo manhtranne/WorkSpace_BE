@@ -5,7 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using WorkSpace.Application.DTOs.Reviews;
 using WorkSpace.Application.Interfaces.Repositories; 
 using WorkSpace.Application.Wrappers;
-using WorkSpace.Domain.Entities; 
+using WorkSpace.Domain.Entities;
+using WorkSpace.Application.Interfaces;
 
 namespace WorkSpace.Application.Features.Reviews.Queries;
 
@@ -22,20 +23,19 @@ public class GetAllReviewsForModerationQuery : IRequest<PagedResponse<IEnumerabl
 public class GetAllReviewsForModerationQueryHandler : IRequestHandler<GetAllReviewsForModerationQuery, PagedResponse<IEnumerable<ReviewModerationDto>>>
 {
     private readonly IGenericRepositoryAsync<Review> _reviewRepository;
-    private readonly DbContext _dbContext; 
-    private readonly IMapper _mapper; 
+    private readonly IApplicationDbContext _dbContext;
+    private readonly IMapper _mapper;
 
 
-    public GetAllReviewsForModerationQueryHandler(IGenericRepositoryAsync<Review> reviewRepository, DbContext dbContext, IMapper mapper)
+    public GetAllReviewsForModerationQueryHandler(IApplicationDbContext dbContext, IMapper mapper)
     {
-        _reviewRepository = reviewRepository;
         _dbContext = dbContext;
         _mapper = mapper;
     }
 
     public async Task<PagedResponse<IEnumerable<ReviewModerationDto>>> Handle(GetAllReviewsForModerationQuery request, CancellationToken cancellationToken)
     {
-        var query = _dbContext.Set<Review>()
+        var query = _dbContext.Reviews
             .Include(r => r.User) 
             .Include(r => r.WorkSpaceRoom) 
             .AsNoTracking(); 
