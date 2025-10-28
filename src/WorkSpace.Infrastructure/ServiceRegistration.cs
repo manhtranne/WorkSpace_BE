@@ -39,7 +39,9 @@ public static class ServiceRegistration
         services.AddScoped<IDateTimeService, DateTimeService>();
         services.AddScoped<IAvailabilityService, AvailabilityService>();
         services.AddScoped<IBookingPricingService, BookingPricingService>();
+
         services.AddScoped<IBookingRepository, BookingRepository>();
+
 
 
         services.AddScoped<ISearchService, SearchService>();
