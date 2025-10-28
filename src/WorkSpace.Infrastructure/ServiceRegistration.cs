@@ -30,6 +30,7 @@ public static class ServiceRegistration
         services.AddScoped(typeof(IWorkSpaceFavoriteRepository), typeof(WorkSpaceFavoriteRepository));
         services.AddScoped(typeof(IPromotionRepository), typeof(PromotionRepository));
         services.AddScoped(typeof(IBookingStatusRepository), typeof(BookingStatusRepository));
+        services.AddScoped(typeof(IWorkSpaceTypeRepository), typeof(WorkSpaceTypeRepository));
 
         services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<WorkSpaceContext>());
 
