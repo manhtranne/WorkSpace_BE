@@ -126,7 +126,7 @@ public class AccountService : IAccountService
                 var result = await _userManager.CreateAsync(user, request.Password);
                 if (result.Succeeded)
                 {
-                    await _userManager.AddToRoleAsync(user, Roles.Basic.ToString());
+                    await _userManager.AddToRoleAsync(user, Roles.Customer.ToString());
                     
                     // Auto confirm email for now (skip email verification)
                     var emailConfirmToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);

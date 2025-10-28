@@ -31,5 +31,18 @@ namespace WorkSpace.Application.Interfaces.Repositories
             int pageSize,
             CancellationToken cancellationToken = default
         );
+
+        Task<(IReadOnlyList<Domain.Entities.WorkSpace> WorkSpaces, int TotalCount)> GetPendingWorkSpacesAsync(
+            int pageNumber,
+            int pageSize,
+            CancellationToken cancellationToken = default
+        );
+
+        Task<(IReadOnlyList<Domain.Entities.WorkSpace> WorkSpaces, int TotalCount)> GetAllWorkSpacesForAdminAsync(
+            int pageNumber,
+            int pageSize,
+            bool? isVerified,
+            CancellationToken cancellationToken = default
+        );
     }
 }

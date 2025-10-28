@@ -264,5 +264,62 @@ namespace WorkSpace.Infrastructure.Repositories
 
             return (rooms, totalCount);
         }
+
+        public async Task<(IReadOnlyList<Domain.Entities.WorkSpace> WorkSpaces, int TotalCount)> GetPendingWorkSpacesAsync(
+            int pageNumber,
+            int pageSize,
+            CancellationToken cancellationToken = default)
+        {
+            var query = _context.Workspaces
+                .Include(w => w.Address)
+                .Include(w => w.Host)
+                    .ThenInclude(h => h.User)
+                .Include(w => w.WorkSpaceType)
+                .Include(w => w.WorkSpaceRooms)
+                .AsNoTracking()
+                .Where(w => !w.IsVerified)
+                .OrderByDescending(w => w.CreateUtc);
+
+            var totalCount = await query.CountAsync(cancellationToken);
+
+            var workSpaces = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+            return (workSpaces, totalCount);
+        }
+
+        public async Task<(IReadOnlyList<Domain.Entities.WorkSpace> WorkSpaces, int TotalCount)> GetAllWorkSpacesForAdminAsync(
+            int pageNumber,
+            int pageSize,
+            bool? isVerified,
+            CancellationToken cancellationToken = default)
+        {
+            var query = _context.Workspaces
+                .Include(w => w.Address)
+                .Include(w => w.Host)
+                    .ThenInclude(h => h.User)
+                .Include(w => w.WorkSpaceType)
+                .Include(w => w.WorkSpaceRooms)
+                .AsNoTracking()
+                .AsQueryable();
+
+            if (isVerified.HasValue)
+            {
+                query = query.Where(w => w.IsVerified == isVerified.Value);
+            }
+
+            query = query.OrderByDescending(w => w.CreateUtc);
+
+            var totalCount = await query.CountAsync(cancellationToken);
+
+            var workSpaces = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+            return (workSpaces, totalCount);
+        }
     }
 }
