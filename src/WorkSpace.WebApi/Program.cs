@@ -5,6 +5,7 @@ using WorkSpace.Infrastructure.Seeds;
 using WorkSpace.WebApi.Extensions;
 using WorkSpace.WebApi.Middlewares;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -52,7 +53,7 @@ app.UseCors(cors =>
         .AllowCredentials()
         .SetIsOriginAllowed(origin => true);
 });
-
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

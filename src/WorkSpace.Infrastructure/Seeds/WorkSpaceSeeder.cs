@@ -1,7 +1,7 @@
 ﻿using Azure.Core;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using WorkSpace.Application.Enums;
+using WorkSpace.Application.Enums; 
 using WorkSpace.Domain.Entities;
 
 namespace WorkSpace.Infrastructure.Seeds;
@@ -10,49 +10,50 @@ public class WorkSpaceSeeder(WorkSpaceContext context, UserManager<AppUser> user
 {
     public async Task SeedAsync(CancellationToken ct = default)
     {
-       
+
         await context.Database.MigrateAsync(ct);
 
         if (await roleManager.Roles.AnyAsync(ct)) return;
 
         var rolesToSeed = new (string Name, string DisplayName)[]
         {
-            (Roles.SuperAdmin.ToString(), "Super Administrator"),
-            (Roles.Admin.ToString(), "Admin"),
-            (Roles.Moderator.ToString(), "Moderator"),
-            (Roles.Basic.ToString(), "Basic User")
+            (Roles.Admin.ToString(), "Administrator"), 
+            (Roles.Staff.ToString(), "Staff"),         
+            (Roles.Owner.ToString(), "Owner"),         
+            (Roles.Customer.ToString(), "Customer")    
         };
-        
+
         foreach (var (name, displayName) in rolesToSeed)
         {
-            await CreateRoleIfNotExistsAsync(name, displayName,ct);
+            await CreateRoleIfNotExistsAsync(name, displayName, ct);
         }
-        
-        const string adminEmail = "superadmin@workspace.local";
-        const string adminPass  = "Password1!";
+
+   
+        const string adminEmail = "admin@workspace.local"; 
+        const string adminPass = "Password1!";
         await EnsureUserWithRolesAsync(
             email: adminEmail,
             password: adminPass,
-            firstName: "Super",
+            firstName: "System", 
             lastName: "Admin",
-            roles: new[] { Roles.SuperAdmin.ToString() },
+            roles: new[] { Roles.Admin.ToString() }, 
             ct: ct
         );
 
-        // Seed BookingStatuses
+     
         await SeedBookingStatusesAsync(ct);
 
     }
-    
-   
-private async Task CreateRoleIfNotExistsAsync(string roleName, string displayName, CancellationToken ct)
+
+
+    private async Task CreateRoleIfNotExistsAsync(string roleName, string displayName, CancellationToken ct)
     {
         if (await roleManager.RoleExistsAsync(roleName)) return;
 
         var role = new AppRole
         {
             Name = roleName,
-            DisplayName = displayName
+            DisplayName = displayName 
         };
 
         var result = await roleManager.CreateAsync(role);
@@ -77,9 +78,9 @@ private async Task CreateRoleIfNotExistsAsync(string roleName, string displayNam
         {
             user = new AppUser
             {
-                UserName = email,
+                UserName = email, 
                 Email = email,
-                EmailConfirmed = true,
+                EmailConfirmed = true, 
                 FirstName = firstName,
                 LastName = lastName,
                 IsActive = true,
@@ -113,54 +114,14 @@ private async Task CreateRoleIfNotExistsAsync(string roleName, string displayNam
 
         var bookingStatuses = new[]
         {
-            new BookingStatus
-            {
-                Name = "Pending",
-                Description = "Booking is awaiting confirmation or payment",
-                CreateUtc = DateTimeOffset.UtcNow
-            },
-            new BookingStatus
-            {
-                Name = "Confirmed",
-                Description = "Booking has been confirmed and paid",
-                CreateUtc = DateTimeOffset.UtcNow
-            },
-            new BookingStatus
-            {
-                Name = "InProgress",
-                Description = "Booking is currently in progress",
-                CreateUtc = DateTimeOffset.UtcNow
-            },
-            new BookingStatus
-            {
-                Name = "Completed",
-                Description = "Booking has been completed successfully",
-                CreateUtc = DateTimeOffset.UtcNow
-            },
-            new BookingStatus
-            {
-                Name = "Cancelled",
-                Description = "Booking has been cancelled",
-                CreateUtc = DateTimeOffset.UtcNow
-            },
-            new BookingStatus
-            {
-                Name = "Expired",
-                Description = "Booking has expired without confirmation",
-                CreateUtc = DateTimeOffset.UtcNow
-            },
-            new BookingStatus
-            {
-                Name = "NoShow",
-                Description = "Customer did not show up for confirmed booking",
-                CreateUtc = DateTimeOffset.UtcNow
-            },
-            new BookingStatus
-            {
-                Name = "Refunded",
-                Description = "Booking has been cancelled and refunded",
-                CreateUtc = DateTimeOffset.UtcNow
-            }
+            new BookingStatus { Name = "Pending", Description = "Booking is awaiting confirmation or payment", CreateUtc = DateTimeOffset.UtcNow },
+            new BookingStatus { Name = "Confirmed", Description = "Booking has been confirmed and paid", CreateUtc = DateTimeOffset.UtcNow },
+            new BookingStatus { Name = "InProgress", Description = "Booking is currently in progress", CreateUtc = DateTimeOffset.UtcNow },
+            new BookingStatus { Name = "Completed", Description = "Booking has been completed successfully", CreateUtc = DateTimeOffset.UtcNow },
+            new BookingStatus { Name = "Cancelled", Description = "Booking has been cancelled", CreateUtc = DateTimeOffset.UtcNow },
+            new BookingStatus { Name = "Expired", Description = "Booking has expired without confirmation", CreateUtc = DateTimeOffset.UtcNow },
+            new BookingStatus { Name = "NoShow", Description = "Customer did not show up for confirmed booking", CreateUtc = DateTimeOffset.UtcNow },
+            new BookingStatus { Name = "Refunded", Description = "Booking has been cancelled and refunded", CreateUtc = DateTimeOffset.UtcNow }
         };
 
         await context.BookingStatuses.AddRangeAsync(bookingStatuses, ct);
