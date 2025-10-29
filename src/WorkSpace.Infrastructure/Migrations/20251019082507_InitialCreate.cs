@@ -328,7 +328,6 @@ namespace WorkSpace.Infrastructure.Migrations
                     ContentMarkdown = table.Column<string>(type: "nvarchar(max)", maxLength: 2147483647, nullable: true),
                     ContentHtml = table.Column<string>(type: "nvarchar(max)", maxLength: 2147483647, nullable: true),
                     ImageData = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsFeatured = table.Column<bool>(type: "bit", nullable: false),
                     UserId = table.Column<int>(type: "int", nullable: false),
                     CreatedById = table.Column<int>(type: "int", nullable: true),
                     LastModifiedById = table.Column<int>(type: "int", nullable: true),
@@ -537,14 +536,19 @@ namespace WorkSpace.Infrastructure.Migrations
                 name: "WorkSpaceRoomAmenities",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    WorkspaceId = table.Column<int>(type: "int", nullable: false),
+                    AmenityId = table.Column<int>(type: "int", nullable: false),
                     WorkSpaceRoomId = table.Column<int>(type: "int", nullable: false),
-                    AmenityId = table.Column<int>(type: "int", nullable: false)
+                    IsAvailable = table.Column<bool>(type: "bit", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false),
+                    CreatedById = table.Column<int>(type: "int", nullable: true),
+                    LastModifiedById = table.Column<int>(type: "int", nullable: true),
+                    CreateUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    LastModifiedUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_WorkSpaceRoomAmenities", x => x.Id);
+                    table.PrimaryKey("PK_WorkSpaceRoomAmenities", x => new { x.WorkspaceId, x.AmenityId });
                     table.ForeignKey(
                         name: "FK_WorkSpaceRoomAmenities_Amenities_AmenityId",
                         column: x => x.AmenityId,
@@ -842,10 +846,9 @@ namespace WorkSpace.Infrastructure.Migrations
                 column: "AmenityId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_WorkSpaceRoomAmenities_WorkSpaceRoomId_AmenityId",
+                name: "IX_WorkSpaceRoomAmenities_WorkSpaceRoomId",
                 table: "WorkSpaceRoomAmenities",
-                columns: new[] { "WorkSpaceRoomId", "AmenityId" },
-                unique: true);
+                column: "WorkSpaceRoomId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_WorkSpaceRoomImages_WorkSpaceRoomId",

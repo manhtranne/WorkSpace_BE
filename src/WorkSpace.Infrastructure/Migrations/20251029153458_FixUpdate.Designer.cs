@@ -12,8 +12,8 @@ using WorkSpace.Infrastructure;
 namespace WorkSpace.Infrastructure.Migrations
 {
     [DbContext(typeof(WorkSpaceContext))]
-    [Migration("20251029133435_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20251029153458_FixUpdate")]
+    partial class FixUpdate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
