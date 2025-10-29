@@ -12,7 +12,7 @@ using WorkSpace.Infrastructure;
 namespace WorkSpace.Infrastructure.Migrations
 {
     [DbContext(typeof(WorkSpaceContext))]
-    [Migration("20251029132554_InitialCreate")]
+    [Migration("20251029133435_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -1136,25 +1136,7 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Property<int>("AmenityId")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset>("CreateUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int?>("CreatedById")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsAvailable")
-                        .HasColumnType("bit");
-
-                    b.Property<int?>("LastModifiedById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset?>("LastModifiedUtc")
-                        .HasColumnType("datetimeoffset");
-
                     b.Property<int>("WorkSpaceRoomId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("WorkspaceId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");

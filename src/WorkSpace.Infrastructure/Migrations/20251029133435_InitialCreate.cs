@@ -539,14 +539,8 @@ namespace WorkSpace.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    WorkspaceId = table.Column<int>(type: "int", nullable: false),
-                    AmenityId = table.Column<int>(type: "int", nullable: false),
                     WorkSpaceRoomId = table.Column<int>(type: "int", nullable: false),
-                    IsAvailable = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedById = table.Column<int>(type: "int", nullable: true),
-                    LastModifiedById = table.Column<int>(type: "int", nullable: true),
-                    CreateUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    LastModifiedUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                    AmenityId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {

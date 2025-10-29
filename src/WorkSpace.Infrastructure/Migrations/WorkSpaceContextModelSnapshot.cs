@@ -1133,25 +1133,7 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Property<int>("AmenityId")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset>("CreateUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int?>("CreatedById")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsAvailable")
-                        .HasColumnType("bit");
-
-                    b.Property<int?>("LastModifiedById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset?>("LastModifiedUtc")
-                        .HasColumnType("datetimeoffset");
-
                     b.Property<int>("WorkSpaceRoomId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("WorkspaceId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");

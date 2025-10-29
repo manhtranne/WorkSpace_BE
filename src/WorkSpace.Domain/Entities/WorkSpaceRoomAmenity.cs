@@ -1,6 +1,4 @@
-﻿
-using WorkSpace.Domain.Entities;
-
+﻿using WorkSpace.Domain.Entities;
 
 public class WorkSpaceRoomAmenity
 {
