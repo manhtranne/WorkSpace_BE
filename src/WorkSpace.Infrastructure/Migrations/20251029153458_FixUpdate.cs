@@ -19,37 +19,20 @@ namespace WorkSpace.Infrastructure.Migrations
                 name: "IX_WorkSpaceRoomAmenities_WorkSpaceRoomId",
                 table: "WorkSpaceRoomAmenities");
 
-            migrationBuilder.DropColumn(
-                name: "WorkspaceId",
-                table: "WorkSpaceRoomAmenities");
+            migrationBuilder.DropColumn(name: "WorkspaceId", table: "WorkSpaceRoomAmenities");
+            migrationBuilder.DropColumn(name: "CreateUtc", table: "WorkSpaceRoomAmenities");
+            migrationBuilder.DropColumn(name: "CreatedById", table: "WorkSpaceRoomAmenities");
+            migrationBuilder.DropColumn(name: "IsAvailable", table: "WorkSpaceRoomAmenities");
+            migrationBuilder.DropColumn(name: "LastModifiedById", table: "WorkSpaceRoomAmenities");
+            migrationBuilder.DropColumn(name: "LastModifiedUtc", table: "WorkSpaceRoomAmenities");
 
-            migrationBuilder.DropColumn(
-                name: "CreateUtc",
-                table: "WorkSpaceRoomAmenities");
+            migrationBuilder.DropColumn(name: "Id", table: "WorkSpaceRoomAmenities");
 
-            migrationBuilder.DropColumn(
-                name: "CreatedById",
-                table: "WorkSpaceRoomAmenities");
-
-            migrationBuilder.DropColumn(
-                name: "IsAvailable",
-                table: "WorkSpaceRoomAmenities");
-
-            migrationBuilder.DropColumn(
-                name: "LastModifiedById",
-                table: "WorkSpaceRoomAmenities");
-
-            migrationBuilder.DropColumn(
-                name: "LastModifiedUtc",
-                table: "WorkSpaceRoomAmenities");
-
-            migrationBuilder.AlterColumn<int>(
+            migrationBuilder.AddColumn<int>(
                 name: "Id",
                 table: "WorkSpaceRoomAmenities",
                 type: "int",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int")
+                nullable: false)
                 .Annotation("SqlServer:Identity", "1, 1");
 
             migrationBuilder.AddPrimaryKey(
@@ -75,14 +58,13 @@ namespace WorkSpace.Infrastructure.Migrations
                 name: "IX_WorkSpaceRoomAmenities_WorkSpaceRoomId_AmenityId",
                 table: "WorkSpaceRoomAmenities");
 
-            migrationBuilder.AlterColumn<int>(
+            migrationBuilder.DropColumn(name: "Id", table: "WorkSpaceRoomAmenities");
+
+            migrationBuilder.AddColumn<int>(
                 name: "Id",
                 table: "WorkSpaceRoomAmenities",
                 type: "int",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int")
-                .OldAnnotation("SqlServer:Identity", "1, 1");
+                nullable: false);
 
             migrationBuilder.AddColumn<int>(
                 name: "WorkspaceId",
@@ -96,7 +78,7 @@ namespace WorkSpace.Infrastructure.Migrations
                 table: "WorkSpaceRoomAmenities",
                 type: "datetimeoffset",
                 nullable: false,
-                defaultValue: new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)));
+                defaultValue: new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), TimeSpan.Zero));
 
             migrationBuilder.AddColumn<int>(
                 name: "CreatedById",
