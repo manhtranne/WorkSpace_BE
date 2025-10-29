@@ -41,14 +41,14 @@ namespace WorkSpace.Infrastructure
 
             #region Schema Configuration
 
-    
+
             modelBuilder.Entity<WorkSpaceType>()
                 .HasMany(wt => wt.Workspaces)
                 .WithOne(w => w.WorkSpaceType)
                 .HasForeignKey(w => w.WorkSpaceTypeId)
-                .OnDelete(DeleteBehavior.Restrict); 
+                .OnDelete(DeleteBehavior.Restrict);
 
-        
+
             modelBuilder.Entity<WorkSpace.Domain.Entities.WorkSpace>()
                 .HasMany(w => w.WorkSpaceRooms)
                 .WithOne(wr => wr.WorkSpace)
@@ -61,164 +61,167 @@ namespace WorkSpace.Infrastructure
                 .HasForeignKey(wr => wr.WorkSpaceRoomTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<WorkSpaceRoomAmenity>()
-                    .HasKey(wra => new { wra.WorkspaceId, wra.AmenityId });
+            modelBuilder.Entity<WorkSpaceRoomAmenity>(entity =>
+            {
 
-            modelBuilder.Entity<WorkSpaceRoomAmenity>()
-                .HasOne(wra => wra.WorkSpaceRoom)
-                .WithMany(wr => wr.WorkSpaceRoomAmenities)
-                .HasForeignKey(wra => wra.WorkSpaceRoomId) 
-                .OnDelete(DeleteBehavior.Cascade);
+                entity.HasKey(e => e.Id);
 
-            modelBuilder.Entity<WorkSpaceRoomAmenity>()
-                .HasOne(wra => wra.Amenity)
-                .WithMany(a => a.WorkspaceAmenities)
-                .HasForeignKey(wra => wra.AmenityId)
-                .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<WorkSpaceRoomImage>()
+                entity.HasOne(wra => wra.WorkSpaceRoom)
+                      .WithMany(wr => wr.WorkSpaceRoomAmenities)
+                      .HasForeignKey(wra => wra.WorkSpaceRoomId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(wra => wra.Amenity)
+                      .WithMany(a => a.WorkspaceAmenities)
+                      .HasForeignKey(wra => wra.AmenityId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => new { e.WorkSpaceRoomId, e.AmenityId }).IsUnique();
+
+                modelBuilder.Entity<WorkSpaceRoomImage>()
                 .HasOne(wri => wri.WorkSpaceRoom)
                 .WithMany(wr => wr.WorkSpaceRoomImages)
                 .HasForeignKey(wri => wri.WorkSpaceRoomId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-         
-            modelBuilder.Entity<Booking>()
-                .HasOne(b => b.WorkSpaceRoom)
-                .WithMany(wr => wr.Bookings)
-                .HasForeignKey(b => b.WorkSpaceRoomId)
-                .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Review>()
-                .HasOne(r => r.WorkSpaceRoom)
-                .WithMany(wr => wr.Reviews)
-                .HasForeignKey(r => r.WorkSpaceRoomId)
-                .OnDelete(DeleteBehavior.Restrict);
+                modelBuilder.Entity<Booking>()
+                    .HasOne(b => b.WorkSpaceRoom)
+                    .WithMany(wr => wr.Bookings)
+                    .HasForeignKey(b => b.WorkSpaceRoomId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
-           
-            modelBuilder.Entity<BlockedTimeSlot>()
-                .HasOne(b => b.WorkSpaceRoom)
-                .WithMany(wr => wr.BlockedTimeSlots)
-                .HasForeignKey(b => b.WorkSpaceRoomId)
-                .OnDelete(DeleteBehavior.Cascade);
+                modelBuilder.Entity<Review>()
+                    .HasOne(r => r.WorkSpaceRoom)
+                    .WithMany(wr => wr.Reviews)
+                    .HasForeignKey(r => r.WorkSpaceRoomId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
-         
-            modelBuilder.Entity<WorkSpaceFavorite>()
-                .HasKey(wf => new { wf.WorkspaceId, wf.UserId });
-            modelBuilder.Entity<WorkSpaceFavorite>()
-                .HasOne(wf => wf.Workspace)
-                .WithMany(w => w.WorkSpaceFavorites)
-                .HasForeignKey(wf => wf.WorkspaceId)
-                .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<WorkSpaceFavorite>()
-                .HasOne(wf => wf.User)
-                .WithMany(u => u.WorkSpaceFavorites)
-                .HasForeignKey(wf => wf.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
 
-         
-            modelBuilder.Entity<Address>()
-                .HasMany(a => a.Workspaces)
-                .WithOne(w => w.Address)
-                .HasForeignKey(w => w.AddressId)
-                .OnDelete(DeleteBehavior.Restrict);
+                modelBuilder.Entity<BlockedTimeSlot>()
+                    .HasOne(b => b.WorkSpaceRoom)
+                    .WithMany(wr => wr.BlockedTimeSlots)
+                    .HasForeignKey(b => b.WorkSpaceRoomId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<HostProfile>()
-                .HasMany(h => h.Workspaces)
-                .WithOne(w => w.Host)
-                .HasForeignKey(w => w.HostId)
-                .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<HostProfile>()
-                .HasOne(h => h.User)
-                .WithOne(u => u.HostProfile)
-                .HasForeignKey<HostProfile>(h => h.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
 
-       
-            modelBuilder.Entity<Booking>()
-                .HasOne(b => b.Customer)
-                .WithMany(u => u.Bookings)
-                .HasForeignKey(b => b.CustomerId)
-                .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<Booking>()
-                .HasOne(b => b.BookingStatus)
-                .WithMany(bs => bs.Bookings)
-                .HasForeignKey(b => b.BookingStatusId)
-                .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<Booking>()
-                .HasIndex(b => b.BookingCode)
-                .IsUnique();
-            modelBuilder.Entity<Booking>()
-                .HasMany(b => b.BookingParticipants)
-                .WithOne(bp => bp.Booking)
-                .HasForeignKey(bp => bp.BookingId)
-                .OnDelete(DeleteBehavior.Cascade);
+                modelBuilder.Entity<WorkSpaceFavorite>()
+                    .HasKey(wf => new { wf.WorkspaceId, wf.UserId });
+                modelBuilder.Entity<WorkSpaceFavorite>()
+                    .HasOne(wf => wf.Workspace)
+                    .WithMany(w => w.WorkSpaceFavorites)
+                    .HasForeignKey(wf => wf.WorkspaceId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                modelBuilder.Entity<WorkSpaceFavorite>()
+                    .HasOne(wf => wf.User)
+                    .WithMany(u => u.WorkSpaceFavorites)
+                    .HasForeignKey(wf => wf.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
-       
-            modelBuilder.Entity<Review>()
-                .HasOne(r => r.User)
-                .WithMany(u => u.Reviews)
-                .HasForeignKey(r => r.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<Review>()
-                .HasOne(r => r.Booking)
-                .WithMany(b => b.Reviews)
-                .HasForeignKey(r => r.BookingId)
-                .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<Review>()
-                .HasIndex(r => r.BookingId)
-                .IsUnique();
 
-            modelBuilder.Entity<Payment>()
-                .HasOne(p => p.Booking)
-                .WithOne(b => b.Payment)
-                .HasForeignKey<Payment>(p => p.BookingId)
-                .OnDelete(DeleteBehavior.Restrict);
+                modelBuilder.Entity<Address>()
+                    .HasMany(a => a.Workspaces)
+                    .WithOne(w => w.Address)
+                    .HasForeignKey(w => w.AddressId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
-   
-            modelBuilder.Entity<PromotionUsage>()
-                .HasOne(pu => pu.Promotion)
-                .WithMany(p => p.PromotionUsages)
-                .HasForeignKey(pu => pu.PromotionId)
-                .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<PromotionUsage>()
-                .HasOne(pu => pu.Booking)
-                .WithMany(b => b.PromotionUsages)
-                .HasForeignKey(pu => pu.BookingId)
-                .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<PromotionUsage>()
-                .HasOne(pu => pu.User)
-                .WithMany(u => u.PromotionUsages)
-                .HasForeignKey(pu => pu.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                modelBuilder.Entity<HostProfile>()
+                    .HasMany(h => h.Workspaces)
+                    .WithOne(w => w.Host)
+                    .HasForeignKey(w => w.HostId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                modelBuilder.Entity<HostProfile>()
+                    .HasOne(h => h.User)
+                    .WithOne(u => u.HostProfile)
+                    .HasForeignKey<HostProfile>(h => h.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
-      
-            modelBuilder.Entity<Post>()
-                .HasOne(p => p.User)
-                .WithMany(u => u.Posts)
-                .HasForeignKey(p => p.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
 
-            #endregion
+                modelBuilder.Entity<Booking>()
+                    .HasOne(b => b.Customer)
+                    .WithMany(u => u.Bookings)
+                    .HasForeignKey(b => b.CustomerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                modelBuilder.Entity<Booking>()
+                    .HasOne(b => b.BookingStatus)
+                    .WithMany(bs => bs.Bookings)
+                    .HasForeignKey(b => b.BookingStatusId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                modelBuilder.Entity<Booking>()
+                    .HasIndex(b => b.BookingCode)
+                    .IsUnique();
+                modelBuilder.Entity<Booking>()
+                    .HasMany(b => b.BookingParticipants)
+                    .WithOne(bp => bp.Booking)
+                    .HasForeignKey(bp => bp.BookingId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
-            #region Identity Tables Configuration
 
-            modelBuilder.Entity<IdentityUserClaim<int>>().ToTable("AppUserClaims").HasKey(x => x.Id);
-            modelBuilder.Entity<IdentityRoleClaim<int>>().ToTable("AppRoleClaims").HasKey(x => x.Id);
-            modelBuilder.Entity<IdentityUserLogin<int>>().ToTable("AppUserLogins").HasKey(x => x.UserId);
-            modelBuilder.Entity<IdentityUserRole<int>>().ToTable("AppUserRoles").HasKey(x => new { x.RoleId, x.UserId });
-            modelBuilder.Entity<IdentityUserToken<int>>().ToTable("AppUserTokens").HasKey(x => x.UserId);
+                modelBuilder.Entity<Review>()
+                    .HasOne(r => r.User)
+                    .WithMany(u => u.Reviews)
+                    .HasForeignKey(r => r.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                modelBuilder.Entity<Review>()
+                    .HasOne(r => r.Booking)
+                    .WithMany(b => b.Reviews)
+                    .HasForeignKey(r => r.BookingId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                modelBuilder.Entity<Review>()
+                    .HasIndex(r => r.BookingId)
+                    .IsUnique();
 
-            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-            {
-                var tableName = entityType.GetTableName() ?? string.Empty;
-                if (tableName.StartsWith("AspNet"))
+                modelBuilder.Entity<Payment>()
+                    .HasOne(p => p.Booking)
+                    .WithOne(b => b.Payment)
+                    .HasForeignKey<Payment>(p => p.BookingId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+
+                modelBuilder.Entity<PromotionUsage>()
+                    .HasOne(pu => pu.Promotion)
+                    .WithMany(p => p.PromotionUsages)
+                    .HasForeignKey(pu => pu.PromotionId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                modelBuilder.Entity<PromotionUsage>()
+                    .HasOne(pu => pu.Booking)
+                    .WithMany(b => b.PromotionUsages)
+                    .HasForeignKey(pu => pu.BookingId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                modelBuilder.Entity<PromotionUsage>()
+                    .HasOne(pu => pu.User)
+                    .WithMany(u => u.PromotionUsages)
+                    .HasForeignKey(pu => pu.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+
+                modelBuilder.Entity<Post>()
+                    .HasOne(p => p.User)
+                    .WithMany(u => u.Posts)
+                    .HasForeignKey(p => p.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                #endregion
+
+                #region Identity Tables Configuration
+
+                modelBuilder.Entity<IdentityUserClaim<int>>().ToTable("AppUserClaims").HasKey(x => x.Id);
+                modelBuilder.Entity<IdentityRoleClaim<int>>().ToTable("AppRoleClaims").HasKey(x => x.Id);
+                modelBuilder.Entity<IdentityUserLogin<int>>().ToTable("AppUserLogins").HasKey(x => x.UserId);
+                modelBuilder.Entity<IdentityUserRole<int>>().ToTable("AppUserRoles").HasKey(x => new { x.RoleId, x.UserId });
+                modelBuilder.Entity<IdentityUserToken<int>>().ToTable("AppUserTokens").HasKey(x => x.UserId);
+
+                foreach (var entityType in modelBuilder.Model.GetEntityTypes())
                 {
-                    entityType.SetTableName(tableName.Substring(6)); 
+                    var tableName = entityType.GetTableName() ?? string.Empty;
+                    if (tableName.StartsWith("AspNet"))
+                    {
+                        entityType.SetTableName(tableName.Substring(6));
+                    }
                 }
-            }
 
-            #endregion
-        }
+                #endregion
+            });
     }
-}
+    } }

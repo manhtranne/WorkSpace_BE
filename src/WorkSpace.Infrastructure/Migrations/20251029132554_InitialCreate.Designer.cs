@@ -12,8 +12,8 @@ using WorkSpace.Infrastructure;
 namespace WorkSpace.Infrastructure.Migrations
 {
     [DbContext(typeof(WorkSpaceContext))]
-    [Migration("20251028073657_IsFeatureAdd")]
-    partial class IsFeatureAdd
+    [Migration("20251029132554_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1127,8 +1127,11 @@ namespace WorkSpace.Infrastructure.Migrations
 
             modelBuilder.Entity("WorkSpaceRoomAmenity", b =>
                 {
-                    b.Property<int>("WorkspaceId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AmenityId")
                         .HasColumnType("int");
@@ -1137,9 +1140,6 @@ namespace WorkSpace.Infrastructure.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<int?>("CreatedById")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Id")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsAvailable")
@@ -1154,11 +1154,15 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Property<int>("WorkSpaceRoomId")
                         .HasColumnType("int");
 
-                    b.HasKey("WorkspaceId", "AmenityId");
+                    b.Property<int>("WorkspaceId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("AmenityId");
 
-                    b.HasIndex("WorkSpaceRoomId");
+                    b.HasIndex("WorkSpaceRoomId", "AmenityId")
+                        .IsUnique();
 
                     b.ToTable("WorkSpaceRoomAmenities");
                 });

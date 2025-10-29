@@ -1124,8 +1124,11 @@ namespace WorkSpace.Infrastructure.Migrations
 
             modelBuilder.Entity("WorkSpaceRoomAmenity", b =>
                 {
-                    b.Property<int>("WorkspaceId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AmenityId")
                         .HasColumnType("int");
@@ -1134,9 +1137,6 @@ namespace WorkSpace.Infrastructure.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<int?>("CreatedById")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Id")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsAvailable")
@@ -1151,11 +1151,15 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Property<int>("WorkSpaceRoomId")
                         .HasColumnType("int");
 
-                    b.HasKey("WorkspaceId", "AmenityId");
+                    b.Property<int>("WorkspaceId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("AmenityId");
 
-                    b.HasIndex("WorkSpaceRoomId");
+                    b.HasIndex("WorkSpaceRoomId", "AmenityId")
+                        .IsUnique();
 
                     b.ToTable("WorkSpaceRoomAmenities");
                 });
