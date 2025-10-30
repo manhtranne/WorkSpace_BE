@@ -1,12 +1,11 @@
-﻿
-using AutoMapper;
+﻿using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WorkSpace.Application.DTOs.Bookings;
 using WorkSpace.Application.Interfaces.Repositories;
+using WorkSpace.Application.Interfaces;
 using WorkSpace.Application.Wrappers;
 using WorkSpace.Domain.Entities;
-using WorkSpace.Application.Interfaces;
 
 namespace WorkSpace.Application.Features.Bookings.Queries;
 
@@ -24,7 +23,6 @@ public class GetAllBookingsQuery : IRequest<PagedResponse<IEnumerable<BookingAdm
 
 public class GetAllBookingsQueryHandler : IRequestHandler<GetAllBookingsQuery, PagedResponse<IEnumerable<BookingAdminDto>>>
 {
-
     private readonly IApplicationDbContext _dbContext;
     private readonly IMapper _mapper;
 
@@ -41,7 +39,6 @@ public class GetAllBookingsQueryHandler : IRequestHandler<GetAllBookingsQuery, P
             .Include(b => b.WorkSpaceRoom)
             .Include(b => b.BookingStatus)
             .AsNoTracking();
-
 
         if (!string.IsNullOrWhiteSpace(request.BookingCodeFilter))
         {
@@ -65,7 +62,6 @@ public class GetAllBookingsQueryHandler : IRequestHandler<GetAllBookingsQuery, P
         }
         if (request.EndDateFilter.HasValue)
         {
-
             query = query.Where(b => b.EndTimeUtc <= request.EndDateFilter.Value);
         }
 

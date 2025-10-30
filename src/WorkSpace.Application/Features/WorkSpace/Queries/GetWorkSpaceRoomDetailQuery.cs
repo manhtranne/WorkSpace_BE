@@ -58,7 +58,6 @@ public class GetWorkSpaceRoomDetailQueryHandler : IRequestHandler<GetWorkSpaceRo
                 Name = wra.Amenity.Name,
                 Description = wra.Amenity.Description,
                 IconClass = wra.Amenity.IconClass,
-                IsAvailable = wra.IsAvailable 
             }).ToList(),
 
    

@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using WorkSpace.Application.DTOs.Bookings;
+using WorkSpace.Application.Extensions;
 using WorkSpace.Application.Features.Bookings.Commands;
 
 namespace WorkSpace.WebApi.Controllers.v1;
@@ -6,11 +9,26 @@ namespace WorkSpace.WebApi.Controllers.v1;
 public class BookingController : BaseApiController
 {
     /// <summary>
-    /// Create a new booking status
+    /// Create a new booking
     /// </summary>
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateBookingCommand command, CancellationToken cancellationToken)
+    [Authorize]
+    public async Task<IActionResult> Create([FromBody] CreateBookingRequest request, CancellationToken cancellationToken)
     {
+        var userId = User.GetUserId();
+        if (userId == 0)
+        {
+            return Unauthorized("Invalid user token");
+        }
+
+        // Override customerId from token for security
+        request.CustomerId = userId;
+
+        var command = new CreateBookingCommand 
+        { 
+            Model = request 
+        };
+
         var result = await Mediator.Send(command, cancellationToken);
         return Ok(result);
     }

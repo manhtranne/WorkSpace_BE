@@ -1,4 +1,5 @@
-﻿namespace WorkSpace.Application.DTOs.WorkSpaces
+﻿
+namespace WorkSpace.Application.DTOs.WorkSpaces
 {
     public class WorkSpaceSearchResultDto
     {
@@ -7,5 +8,6 @@
         public string? Description { get; set; }
         public string? Ward { get; set; }
         public string? Street { get; set; }
+        public string? HostName { get; set; } 
     }
 }

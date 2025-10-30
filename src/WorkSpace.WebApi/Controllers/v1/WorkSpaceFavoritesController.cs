@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using WorkSpace.Application.DTOs.WorkSpaces;
 using System.Threading.Tasks;
+using WorkSpace.Application.Extensions;
 using WorkSpace.Application.Interfaces.Repositories;
-using TravelBooking.Extensions;
 
 namespace WorkSpace.WebApi.Controllers.v1
 {
