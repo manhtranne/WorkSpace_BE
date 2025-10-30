@@ -217,9 +217,11 @@ public class AccountService : IAccountService
 
         private string RandomTokenString()
         {
-            using var rngCryptoServiceProvider = new RNGCryptoServiceProvider();
             var randomBytes = new byte[40];
-            rngCryptoServiceProvider.GetBytes(randomBytes);
+            using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomBytes);
+            }
             // convert random bytes to hex string
             return BitConverter.ToString(randomBytes).Replace("-", "");
         }

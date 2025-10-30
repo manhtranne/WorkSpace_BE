@@ -31,40 +31,39 @@ public static class ServiceRegistration
         services.AddScoped(typeof(IPromotionRepository), typeof(PromotionRepository));
         services.AddScoped(typeof(IBookingStatusRepository), typeof(BookingStatusRepository));
         services.AddScoped(typeof(IWorkSpaceTypeRepository), typeof(WorkSpaceTypeRepository));
+        services.AddScoped(typeof(IBookingRepository), typeof(BookingRepository));
+        services.AddScoped(typeof(IPaymentRepository), typeof(PaymentRepository));
+        services.AddScoped(typeof(IBlockedTimeSlotRepository), typeof(BlockedTimeSlotRepository));
 
         services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<WorkSpaceContext>());
+        #endregion
 
-
-
+        #region Services
         services.AddScoped<IWorkSpaceSeeder, WorkSpaceSeeder>();
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IDateTimeService, DateTimeService>();
         services.AddScoped<IAvailabilityService, AvailabilityService>();
         services.AddScoped<IBookingPricingService, BookingPricingService>();
-
-        services.AddScoped<IBookingRepository, BookingRepository>(); 
-
-
-        services.AddScoped<IBookingRepository, BookingRepository>();
-
-
-
-
         services.AddScoped<ISearchService, SearchService>();
-        services.AddScoped<ISearchService, SearchService>(); 
-        services.AddScoped<IWorkSpaceSeeder, WorkSpaceSeeder>();
+        services.AddScoped<IVNPayService, VNPayService>();
+        services.AddScoped<IPromotionService, PromotionService>();
+        #endregion
 
-
+        #region Identity
         services.AddIdentityCore<AppUser>()
             .AddRoles<AppRole>()
             .AddEntityFrameworkStores<WorkSpaceContext>()
             .AddDefaultTokenProviders();
-        
         #endregion
         
+        #region Configuration
         services.Configure<JWTSettings>(configuration.GetSection("JWTSettings"));
         services.Configure<MailSettings>(configuration.GetSection("MailSettings"));
+        services.Configure<VNPaySettings>(configuration.GetSection("VNPaySettings"));
+        #endregion
+        
+        #region Authentication
         services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -111,6 +110,6 @@ public static class ServiceRegistration
                         },
                     };
                 });
-        
+        #endregion
     }
 }

@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WorkSpace.Application.DTOs.Reviews;
+using WorkSpace.Application.Extensions;
 using WorkSpace.Application.Features.Reviews.Commands.CreateReview;
 using WorkSpace.Application.Wrappers;
-using TravelBooking.Extensions;
 
 namespace WorkSpace.WebApi.Controllers.v1
 {
