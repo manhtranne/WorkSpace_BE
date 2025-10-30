@@ -6,7 +6,9 @@ using WorkSpace.Application.Features.Users.Commands.DeleteUser;
 using WorkSpace.Application.Features.Users.Commands.UpdateUser;
 using WorkSpace.Application.Features.Users.Queries.GetAllUsers;
 using WorkSpace.Application.Features.Users.Queries.GetUserById;
+using WorkSpace.Application.Features.Users.Queries.GetCurrentUser;
 using WorkSpace.Application.Enums;
+using WorkSpace.Application.Extensions;
 
 namespace WorkSpace.WebApi.Controllers.v1
 {
