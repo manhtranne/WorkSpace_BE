@@ -3,7 +3,7 @@ using System.Linq;
 using System.Security.Claims;
 using Microsoft.IdentityModel.JsonWebTokens;
 
-namespace TravelBooking.Extensions
+namespace WorkSpace.Application.Extensions
 {
     public static class ClaimExtensions
     {
