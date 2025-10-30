@@ -12,14 +12,24 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
     private readonly IBookingRepository _bookingRepo;
     private readonly IAvailabilityService _availability;
     private readonly IBookingPricingService _pricing;
+    private readonly IPromotionService _promotionService;
+    private readonly IBlockedTimeSlotRepository _blockedTimeSlotRepo;
     private readonly IMapper _mapper;
     
     
-    public CreateBookingCommandHandler(IBookingRepository bookingRepo, IAvailabilityService availability, IBookingPricingService pricing, IMapper mapper)
+    public CreateBookingCommandHandler(
+        IBookingRepository bookingRepo, 
+        IAvailabilityService availability, 
+        IBookingPricingService pricing, 
+        IPromotionService promotionService,
+        IBlockedTimeSlotRepository blockedTimeSlotRepo,
+        IMapper mapper)
     {
         _bookingRepo = bookingRepo;
         _availability = availability;
         _pricing = pricing;
+        _promotionService = promotionService;
+        _blockedTimeSlotRepo = blockedTimeSlotRepo;
         _mapper = mapper;
     }
     
@@ -31,6 +41,29 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
         if (!available) return new Response<int>("Time range is not available.");
 
         var quote = await _pricing.QuoteAsync(m.WorkspaceId, m.StartTimeUtc, m.EndTimeUtc, m.NumberOfParticipants, cancellationToken);
+
+        // Apply promotion if provided
+        decimal discountAmount = 0;
+        Promotion? appliedPromotion = null;
+        var finalAmount = quote.FinalAmount;
+
+        if (!string.IsNullOrWhiteSpace(m.PromotionCode))
+        {
+            var (isValid, discount, promotion, errorMessage) = await _promotionService
+                .ValidateAndCalculateDiscountAsync(m.PromotionCode, m.CustomerId, quote.FinalAmount, cancellationToken);
+
+            if (!isValid)
+            {
+                return new Response<int>(errorMessage ?? "Invalid promotion code.");
+            }
+
+            discountAmount = discount;
+            appliedPromotion = promotion;
+            finalAmount = quote.FinalAmount - discountAmount;
+
+            // Ensure final amount is not negative
+            if (finalAmount < 0) finalAmount = 0;
+        }
 
         var booking = new Booking
         {
@@ -45,11 +78,35 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             TotalPrice = quote.TotalPrice,
             TaxAmount = quote.TaxAmount,
             ServiceFee = quote.ServiceFee,
-            FinalAmount = quote.FinalAmount,
+            FinalAmount = finalAmount,
             BookingStatusId = 1 // PendingPayment
         };
 
         var model = await _bookingRepo.AddAsync(booking);
-        return new Response<int>(model.Id, "Booking created with PendingPayment. Complete payment to confirm.");
+
+        // IMPORTANT: Block time slot immediately to prevent double booking
+        await _blockedTimeSlotRepo.CreateBlockedTimeSlotForBookingAsync(
+            m.WorkspaceId,
+            model.Id,
+            m.StartTimeUtc,
+            m.EndTimeUtc,
+            cancellationToken);
+
+        // Record promotion usage if applied
+        if (appliedPromotion != null)
+        {
+            await _promotionService.RecordPromotionUsageAsync(
+                appliedPromotion.Id, 
+                model.Id, 
+                m.CustomerId, 
+                discountAmount, 
+                cancellationToken);
+        }
+
+        var message = discountAmount > 0 
+            ? $"Booking created with {discountAmount:N0} VND discount applied. Complete payment to confirm."
+            : "Booking created with PendingPayment. Complete payment to confirm.";
+
+        return new Response<int>(model.Id, message);
     }
 }

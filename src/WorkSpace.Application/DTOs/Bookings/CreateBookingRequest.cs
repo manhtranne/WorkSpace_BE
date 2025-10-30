@@ -9,4 +9,5 @@ public class CreateBookingRequest
     public int NumberOfParticipants { get; set; } = 1;
     public string? SpecialRequests { get; set; }
     public string Currency { get; set; } = "VND";
+    public string? PromotionCode { get; set; }
 }
