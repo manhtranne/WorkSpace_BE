@@ -46,13 +46,6 @@ else
     // Production: Only allow specific origins from appsettings
     app.UseCors("Production");
 }
-app.UseCors(cors =>
-{
-    cors.AllowAnyMethod()
-        .AllowAnyHeader()
-        .AllowCredentials()
-        .SetIsOriginAllowed(origin => true);
-});
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();

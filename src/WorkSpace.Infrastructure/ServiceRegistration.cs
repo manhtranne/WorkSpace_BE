@@ -64,15 +64,20 @@ public static class ServiceRegistration
         #endregion
         
         #region Authentication
+        // PHẢI config lại DefaultScheme vì AddIdentity sẽ override về Cookie
+        // Đặt JWT Bearer làm default để API endpoints yêu cầu JWT token
         services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             })
                 .AddJwtBearer(o =>
                 {
                     o.RequireHttpsMetadata = false;
                     o.SaveToken = false;
+                    // Map claims từ JWT sang ClaimsIdentity
+                    o.MapInboundClaims = false; // Giữ nguyên claim names từ JWT
                     o.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuerSigningKey = true,
