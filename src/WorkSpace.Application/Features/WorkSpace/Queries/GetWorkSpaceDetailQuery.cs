@@ -36,7 +36,9 @@ public class GetWorkSpaceDetailQueryHandler(
             Ward = workspace.Address?.Ward,
             State = workspace.Address?.State,
             Country = workspace.Address?.Country,
-            
+            Latitude = workspace.Address?.Latitude ?? 0,
+            Longitude = workspace.Address?.Longitude ?? 0,
+
             WorkSpaceType = workspace.WorkSpaceType?.Name,
             IsActive = workspace.IsActive,
             IsVerified = workspace.IsVerified,
