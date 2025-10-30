@@ -13,6 +13,7 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
     private readonly IAvailabilityService _availability;
     private readonly IBookingPricingService _pricing;
     private readonly IPromotionService _promotionService;
+    private readonly IBlockedTimeSlotRepository _blockedTimeSlotRepo;
     private readonly IMapper _mapper;
     
     
@@ -21,12 +22,14 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
         IAvailabilityService availability, 
         IBookingPricingService pricing, 
         IPromotionService promotionService,
+        IBlockedTimeSlotRepository blockedTimeSlotRepo,
         IMapper mapper)
     {
         _bookingRepo = bookingRepo;
         _availability = availability;
         _pricing = pricing;
         _promotionService = promotionService;
+        _blockedTimeSlotRepo = blockedTimeSlotRepo;
         _mapper = mapper;
     }
     
@@ -80,6 +83,14 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
         };
 
         var model = await _bookingRepo.AddAsync(booking);
+
+        // IMPORTANT: Block time slot immediately to prevent double booking
+        await _blockedTimeSlotRepo.CreateBlockedTimeSlotForBookingAsync(
+            m.WorkspaceId,
+            model.Id,
+            m.StartTimeUtc,
+            m.EndTimeUtc,
+            cancellationToken);
 
         // Record promotion usage if applied
         if (appliedPromotion != null)

@@ -16,17 +16,20 @@ public class ProcessPaymentCallbackCommandHandler : IRequestHandler<ProcessPayme
     private readonly IPaymentRepository _paymentRepository;
     private readonly IBookingRepository _bookingRepository;
     private readonly IBookingStatusRepository _bookingStatusRepository;
+    private readonly IBlockedTimeSlotRepository _blockedTimeSlotRepository;
     private readonly IVNPayService _vnpayService;
 
     public ProcessPaymentCallbackCommandHandler(
         IPaymentRepository paymentRepository,
         IBookingRepository bookingRepository,
         IBookingStatusRepository bookingStatusRepository,
+        IBlockedTimeSlotRepository blockedTimeSlotRepository,
         IVNPayService vnpayService)
     {
         _paymentRepository = paymentRepository;
         _bookingRepository = bookingRepository;
         _bookingStatusRepository = bookingStatusRepository;
+        _blockedTimeSlotRepository = blockedTimeSlotRepository;
         _vnpayService = vnpayService;
     }
 
@@ -37,6 +40,11 @@ public class ProcessPaymentCallbackCommandHandler : IRequestHandler<ProcessPayme
 
         if (result.Status == "Failed")
         {
+            // Payment failed - release blocked time slot
+            await _blockedTimeSlotRepository.RemoveBlockedTimeSlotForBookingAsync(
+                result.BookingId, 
+                cancellationToken);
+
             return new Response<PaymentResultDto>
             {
                 Succeeded = false,

@@ -10,10 +10,19 @@ public class AvailabilityService : IAvailabilityService
 
     public async Task<bool> IsAvailableAsync(int workspaceId, DateTimeOffset startUtc, DateTimeOffset endUtc, CancellationToken ct)
     {
-        var overlap = await _context.Bookings
+        // Check existing bookings overlap
+        var bookingOverlap = await _context.Bookings
             .Where(b => b.WorkSpaceRoomId == workspaceId) 
             .AnyAsync(b => !(b.EndTimeUtc <= startUtc || b.StartTimeUtc >= endUtc), ct);
 
-        return !overlap;
+        if (bookingOverlap)
+            return false;
+
+        // Check blocked time slots
+        var blockedOverlap = await _context.BlockedTimeSlots
+            .Where(b => b.WorkSpaceRoomId == workspaceId)
+            .AnyAsync(b => b.StartTime < endUtc.DateTime && b.EndTime > startUtc.DateTime, ct);
+
+        return !blockedOverlap;
     }
 }
