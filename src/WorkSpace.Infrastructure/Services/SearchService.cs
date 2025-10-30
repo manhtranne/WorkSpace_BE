@@ -126,7 +126,9 @@ namespace WorkSpace.Infrastructure.Services
                                 .SelectMany(r => r.WorkSpaceRoomImages) 
                                 .Select(img => img.ImageUrl) 
                                 .Distinct() 
-                                .ToList() 
+                                .ToList() ,
+                Latitude = w.Address?.Latitude ?? 0,
+                Longitude = w.Address?.Longitude ?? 0
             }).ToList();
 
             int count = dtoList.Count();
