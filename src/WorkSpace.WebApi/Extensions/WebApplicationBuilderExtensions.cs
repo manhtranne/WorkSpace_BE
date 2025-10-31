@@ -20,10 +20,10 @@ public static class WebApplicationBuilderExtensions
                 b => b.MigrationsAssembly("WorkSpace.Infrastructure") 
             )
         );
+        // Dùng AddIdentity để có đầy đủ services cho SignInManager
         builder.Services
             .AddIdentity<AppUser, AppRole>(options =>
             {
-              
                 options.Password.RequireDigit = false;
                 options.Password.RequireLowercase = false;
                 options.Password.RequireNonAlphanumeric = false;
@@ -36,7 +36,28 @@ public static class WebApplicationBuilderExtensions
             })
             .AddEntityFrameworkStores<WorkSpaceContext>()  
             .AddDefaultTokenProviders();
-        builder.Services.AddAuthentication();
+        
+        // ✅ QUAN TRỌNG: Config lại Authentication Options SAU AddIdentity
+        // AddIdentity tự động thêm Cookie auth và có thể override default scheme
+        // Phải force lại JWT Bearer làm default cho API endpoints
+        builder.Services.PostConfigure<Microsoft.AspNetCore.Authentication.AuthenticationOptions>(options =>
+        {
+            // Force JWT Bearer làm default scheme cho tất cả API endpoints
+            options.DefaultAuthenticateScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
+        });
+        
+        builder.Services.ConfigureApplicationCookie(options =>
+        {
+            // Disable redirect to login page for API
+            options.Events.OnRedirectToLogin = context =>
+            {
+                context.Response.StatusCode = 401;
+                return Task.CompletedTask;
+            };
+        });
+        
         builder.Services.AddScoped<IAuthenticatedUserService, AuthenticatedUserService>();
 
         var allowedOrigins = builder.Configuration.GetSection("CorsSettings:AllowedOrigins").Get<string[]>() 

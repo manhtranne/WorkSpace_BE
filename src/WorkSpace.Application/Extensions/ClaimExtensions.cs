@@ -13,12 +13,19 @@ namespace WorkSpace.Application.Extensions
             if (user == null)
                 return 0;
 
-            var idClaim = user.Claims.FirstOrDefault(c =>
-                string.Equals(c.Type, "uid", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(c.Type, "sub", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(c.Type, ClaimTypes.NameIdentifier, StringComparison.OrdinalIgnoreCase));
-
+            // Try to find "uid" claim (case-insensitive)
+            var idClaim = user.Claims.FirstOrDefault(c => 
+                c.Type.Equals("uid", StringComparison.OrdinalIgnoreCase));
+            
             if (idClaim != null && int.TryParse(idClaim.Value, out int userId))
+                return userId;
+
+            // Fallback: try other common claim types
+            idClaim = user.Claims.FirstOrDefault(c =>
+                c.Type.Equals("sub", StringComparison.OrdinalIgnoreCase) ||
+                c.Type == ClaimTypes.NameIdentifier);
+
+            if (idClaim != null && int.TryParse(idClaim.Value, out userId))
                 return userId;
 
             return 0;

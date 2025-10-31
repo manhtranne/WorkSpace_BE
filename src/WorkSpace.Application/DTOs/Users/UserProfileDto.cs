@@ -1,10 +1,11 @@
-﻿
+
 using System;
 using System.Collections.Generic;
+using WorkSpace.Application.DTOs.Bookings;
 
 namespace WorkSpace.Application.DTOs.Users
 {
-    public class UserDto
+    public class UserProfileDto
     {
         public int Id { get; set; }
         public string FirstName { get; set; }
@@ -15,5 +16,7 @@ namespace WorkSpace.Application.DTOs.Users
         public bool IsActive { get; set; }
         public DateTime DateCreated { get; set; }
         public List<string> Roles { get; set; }
+        public List<BookingAdminDto> BookingHistory { get; set; } = new();
     }
 }
+
