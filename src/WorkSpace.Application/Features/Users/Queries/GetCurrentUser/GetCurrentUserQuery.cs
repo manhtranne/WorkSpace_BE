@@ -78,6 +78,7 @@ namespace WorkSpace.Application.Features.Users.Queries.GetCurrentUser
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
                 UserName = user.UserName,
                 IsActive = user.IsActive,
                 DateCreated = user.DateCreated,

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 using WorkSpace.Application.Interfaces.Repositories;
 using WorkSpace.Application.Interfaces.Services;
 using WorkSpace.Application.Wrappers;
@@ -14,6 +15,7 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
     private readonly IBookingPricingService _pricing;
     private readonly IPromotionService _promotionService;
     private readonly IBlockedTimeSlotRepository _blockedTimeSlotRepo;
+    private readonly UserManager<AppUser> _userManager;
     private readonly IMapper _mapper;
     
     
@@ -23,6 +25,7 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
         IBookingPricingService pricing, 
         IPromotionService promotionService,
         IBlockedTimeSlotRepository blockedTimeSlotRepo,
+        UserManager<AppUser> userManager,
         IMapper mapper)
     {
         _bookingRepo = bookingRepo;
@@ -30,6 +33,7 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
         _pricing = pricing;
         _promotionService = promotionService;
         _blockedTimeSlotRepo = blockedTimeSlotRepo;
+        _userManager = userManager;
         _mapper = mapper;
     }
     
@@ -37,6 +41,40 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
     public async Task<Response<int>> Handle(CreateBookingCommand request, CancellationToken cancellationToken)
     {
         var m = request.Model;
+        
+        // Update user profile if new info provided
+        if (!string.IsNullOrWhiteSpace(m.FirstName) || !string.IsNullOrWhiteSpace(m.LastName) || !string.IsNullOrWhiteSpace(m.PhoneNumber))
+        {
+            var user = await _userManager.FindByIdAsync(m.CustomerId.ToString());
+            if (user != null)
+            {
+                bool needsUpdate = false;
+                
+                if (!string.IsNullOrWhiteSpace(m.FirstName) && string.IsNullOrWhiteSpace(user.FirstName))
+                {
+                    user.FirstName = m.FirstName;
+                    needsUpdate = true;
+                }
+                
+                if (!string.IsNullOrWhiteSpace(m.LastName) && string.IsNullOrWhiteSpace(user.LastName))
+                {
+                    user.LastName = m.LastName;
+                    needsUpdate = true;
+                }
+                
+                if (!string.IsNullOrWhiteSpace(m.PhoneNumber) && string.IsNullOrWhiteSpace(user.PhoneNumber))
+                {
+                    user.PhoneNumber = m.PhoneNumber;
+                    needsUpdate = true;
+                }
+                
+                if (needsUpdate)
+                {
+                    await _userManager.UpdateAsync(user);
+                }
+            }
+        }
+        
         var available = await _availability.IsAvailableAsync(m.WorkspaceId, m.StartTimeUtc, m.EndTimeUtc, cancellationToken);
         if (!available) return new Response<int>("Time range is not available.");
 
