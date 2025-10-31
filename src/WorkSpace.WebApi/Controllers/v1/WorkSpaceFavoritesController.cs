@@ -69,8 +69,20 @@ namespace WorkSpace.WebApi.Controllers.v1
             }
             var favoriteWorkSpaces = await _workSpaceFavoriteRepository.GetFavoriteWorkSpacesAsync(userId);
             return Ok(favoriteWorkSpaces);
+        }
 
 
+        //GetFavoriteWorkSpaceIdsAsync
+        [HttpGet("userfavoriteids")]
+        public async Task<IActionResult> GetFavoriteWorkSpaceIds()
+        {
+            var userId = User.GetUserId();
+            if (userId == null)
+            {
+                return Unauthorized("User not authenticated");
+            }
+            var favoriteWorkSpaceIds = await _workSpaceFavoriteRepository.GetFavoriteWorkSpaceIdsAsync(userId);
+            return Ok(favoriteWorkSpaceIds);
         }
 
     }
