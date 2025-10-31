@@ -35,6 +35,7 @@ namespace WorkSpace.Application.Features.Users.Commands.UpdateUser
 
             user.FirstName = request.UpdateUserRequest.FirstName;
             user.LastName = request.UpdateUserRequest.LastName;
+            user.PhoneNumber = request.UpdateUserRequest.PhoneNumber;
             user.IsActive = request.UpdateUserRequest.IsActive;
 
             var result = await _userManager.UpdateAsync(user);

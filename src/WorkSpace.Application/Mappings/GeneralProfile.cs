@@ -17,7 +17,8 @@ namespace WorkSpace.Application.Mappings
     {
         public GeneralProfile()
         {
-            CreateMap<AppUser, UserDto>();
+            CreateMap<AppUser, UserDto>()
+                .ForMember(d => d.PhoneNumber, o => o.MapFrom(s => s.PhoneNumber));
 
             // Amenity mappings
             CreateMap<Amenity, AmenityDto>();
