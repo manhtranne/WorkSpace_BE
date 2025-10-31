@@ -26,12 +26,17 @@ namespace WorkSpace.Infrastructure.Repositories
                 .Include(w => w.WorkSpaceRooms)
                     .ThenInclude(wr => wr.WorkSpaceRoomType)
                 .Include(w => w.WorkSpaceRooms)
-                    .ThenInclude(wr => wr.WorkSpaceRoomImages)
+                    .ThenInclude(wr => wr.WorkSpaceRoomImages) 
                 .Include(w => w.WorkSpaceRooms)
                     .ThenInclude(wr => wr.WorkSpaceRoomAmenities)
                         .ThenInclude(wra => wra.Amenity)
                 .Include(w => w.WorkSpaceRooms)
                     .ThenInclude(wr => wr.Reviews)
+
+       
+                .Include(w => w.WorkSpaceRooms)
+                    .ThenInclude(wr => wr.BlockedTimeSlots)
+
                 .AsNoTracking()
                 .FirstOrDefaultAsync(w => w.Id == id, cancellationToken);
         }
