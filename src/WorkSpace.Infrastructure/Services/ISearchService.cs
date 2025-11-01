@@ -10,5 +10,6 @@ namespace WorkSpace.Application.Interfaces.Services
         Task<Response<IEnumerable<WorkSpaceSearchResultDto>>> SearchWorkSpacesAsync(SearchRequestDto request);
         Task<IEnumerable<string>> GetLocationSuggestionsAsync(string query);
         Task<IEnumerable<string>> GetAllWardsAsync();
+        Task<Response<IEnumerable<RoomWithAmenitiesDto>>> SearchRoomsInWorkSpaceAsync(int workSpaceId, SearchRoomsInWorkSpaceRequestDto request);
     }
 }

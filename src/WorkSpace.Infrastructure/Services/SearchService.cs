@@ -135,7 +135,106 @@ namespace WorkSpace.Infrastructure.Services
             return new Response<IEnumerable<WorkSpaceSearchResultDto>>(dtoList, $"Found {count} records matching criteria.");
         }
 
+        public async Task<Response<IEnumerable<RoomWithAmenitiesDto>>> SearchRoomsInWorkSpaceAsync(int workSpaceId, SearchRoomsInWorkSpaceRequestDto request)
+        {
+            if (request.EndTime <= request.StartTime)
+            {
+                return new Response<IEnumerable<RoomWithAmenitiesDto>>("End time must be after start time.") { Succeeded = false };
+            }
 
+            if (request.StartTime < DateTimeOffset.UtcNow)
+            {
+                return new Response<IEnumerable<RoomWithAmenitiesDto>>("Start time cannot be in the past.") { Succeeded = false };
+            }
+
+            var effectiveStartTime = request.StartTime.ToUniversalTime();
+            var effectiveEndTime = request.EndTime.ToUniversalTime();
+
+            var query = _context.WorkSpaceRooms
+                .Include(r => r.WorkSpaceRoomType)
+                .Include(r => r.WorkSpaceRoomImages)
+                .Include(r => r.WorkSpaceRoomAmenities)
+                    .ThenInclude(wra => wra.Amenity)
+                .Include(r => r.Reviews)
+                .Include(r => r.Bookings) 
+                    .ThenInclude(b => b.BookingStatus)
+                .Include(r => r.BlockedTimeSlots)
+                .Where(r => r.WorkSpaceId == workSpaceId && 
+                            r.IsActive && r.IsVerified) 
+                .AsQueryable();
+
+ 
+            query = query.Where(r => r.Capacity >= request.Capacity);
+
+   
+            query = query.Where(room =>
+
+               !room.Bookings.Any(b =>
+                   b.StartTimeUtc < effectiveEndTime && b.EndTimeUtc > effectiveStartTime &&
+                   b.BookingStatus != null &&
+                   (b.BookingStatus.Name == "Confirmed" || b.BookingStatus.Name == "InProgress" || b.BookingStatus.Name == "Pending")) &&
+      
+               !room.BlockedTimeSlots.Any(slot =>
+                   slot.StartTime < effectiveEndTime.DateTime && slot.EndTime > effectiveStartTime.DateTime
+               )
+           );
+
+            var availableRooms = await query
+                .Distinct()
+                .ToListAsync();
+
+
+            var dtoList = availableRooms.Select(room => new RoomWithAmenitiesDto
+            {
+                Id = room.Id,
+                Title = room.Title,
+                Description = room.Description,
+                RoomType = room.WorkSpaceRoomType?.Name,
+
+                PricePerHour = room.PricePerHour,
+                PricePerDay = room.PricePerDay,
+                PricePerMonth = room.PricePerMonth,
+
+                Capacity = room.Capacity,
+                Area = room.Area,
+                IsActive = room.IsActive,
+                IsVerified = room.IsVerified,
+
+                Images = room.WorkSpaceRoomImages
+                    .Select(img => img.ImageUrl)
+                    .ToList(),
+
+                Amenities = room.WorkSpaceRoomAmenities
+                    .Where(a => a.Amenity != null)
+                    .Select(a => new SimpleRoomAmenityDto
+                    {
+                        Id = a.Amenity!.Id,
+                        Name = a.Amenity.Name,
+                        IconClass = a.Amenity.IconClass
+                    })
+                    .ToList(),
+
+                AverageRating = room.Reviews.Any()
+                    ? room.Reviews.Average(r => r.Rating)
+                    : 0,
+                ReviewCount = room.Reviews.Count,
+
+                IsAvailable = true, 
+
+
+                BlockedTimes = room.BlockedTimeSlots
+                .Select(bt => new SimpleBlockedTimeSlotDto
+                {
+                    Id = bt.Id,
+                    StartTime = bt.StartTime,
+                    EndTime = bt.EndTime,
+                    Reason = bt.Reason
+                })
+                .ToList()
+            }).ToList();
+
+            return new Response<IEnumerable<RoomWithAmenitiesDto>>(dtoList, $"Found {dtoList.Count} available rooms matching criteria.");
+        }
         public async Task<IEnumerable<string>> GetLocationSuggestionsAsync(string query)
         {
             if (string.IsNullOrWhiteSpace(query))
