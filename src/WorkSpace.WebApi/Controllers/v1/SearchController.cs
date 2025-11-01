@@ -4,6 +4,7 @@ using WorkSpace.Application.Interfaces.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using WorkSpace.Application.Wrappers;
 
 namespace WorkSpace.WebApi.Controllers.v1
 {
@@ -24,6 +25,26 @@ namespace WorkSpace.WebApi.Controllers.v1
             var suggestions = await _searchService.GetLocationSuggestionsAsync(query);
             return Ok(suggestions);
         }
+
+        [HttpGet("workspaces/{workSpaceId}/search-rooms")]
+        public async Task<IActionResult> SearchRoomsInWorkSpace(
+            [FromRoute] int workSpaceId,
+            [FromQuery] SearchRoomsInWorkSpaceRequestDto request)
+        {
+            var result = await _searchService.SearchRoomsInWorkSpaceAsync(workSpaceId, request);
+
+            if (result.Succeeded)
+            {
+                return Ok(result.Data);
+            }
+            else
+            {
+     
+                return BadRequest(new { Message = result.Message ?? "Search failed." });
+            }
+        }
+    
+
 
         [HttpGet("wards")]
         public async Task<IActionResult> GetAllWards()
