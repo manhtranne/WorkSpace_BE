@@ -33,7 +33,7 @@ public static class WebApplicationBuilderExtensions
 
                 options.User.RequireUniqueEmail = true;
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-                options.ClaimsIdentity.RoleClaimType = "roles";
+                //options.ClaimsIdentity.RoleClaimType = "roles";
             })
             .AddEntityFrameworkStores<WorkSpaceContext>()  
             .AddDefaultTokenProviders();
