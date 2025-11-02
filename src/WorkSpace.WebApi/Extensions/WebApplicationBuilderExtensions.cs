@@ -20,7 +20,7 @@ public static class WebApplicationBuilderExtensions
                 b => b.MigrationsAssembly("WorkSpace.Infrastructure") 
             )
         );
-        // Dùng AddIdentity để có đầy đủ services cho SignInManager
+
         builder.Services
             .AddIdentity<AppUser, AppRole>(options =>
             {
@@ -33,16 +33,14 @@ public static class WebApplicationBuilderExtensions
 
                 options.User.RequireUniqueEmail = true;
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+                options.ClaimsIdentity.RoleClaimType = "roles";
             })
             .AddEntityFrameworkStores<WorkSpaceContext>()  
             .AddDefaultTokenProviders();
-        
-        // ✅ QUAN TRỌNG: Config lại Authentication Options SAU AddIdentity
-        // AddIdentity tự động thêm Cookie auth và có thể override default scheme
-        // Phải force lại JWT Bearer làm default cho API endpoints
+
         builder.Services.PostConfigure<Microsoft.AspNetCore.Authentication.AuthenticationOptions>(options =>
         {
-            // Force JWT Bearer làm default scheme cho tất cả API endpoints
+ 
             options.DefaultAuthenticateScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
             options.DefaultChallengeScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
             options.DefaultScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
@@ -50,7 +48,7 @@ public static class WebApplicationBuilderExtensions
         
         builder.Services.ConfigureApplicationCookie(options =>
         {
-            // Disable redirect to login page for API
+     
             options.Events.OnRedirectToLogin = context =>
             {
                 context.Response.StatusCode = 401;
@@ -65,7 +63,7 @@ public static class WebApplicationBuilderExtensions
         
         builder.Services.AddCors(options =>
         {
-            // Policy cho Development - Allow all
+      
             options.AddPolicy("AllowAll", policy =>
             {
                 policy.AllowAnyOrigin()
@@ -73,7 +71,7 @@ public static class WebApplicationBuilderExtensions
                       .AllowAnyHeader();
             });
             
-            // Policy cho Production - Chỉ cho phép origins cụ thể
+      
             options.AddPolicy("Production", policy =>
             {
                 if (allowedOrigins.Length > 0)
@@ -85,7 +83,7 @@ public static class WebApplicationBuilderExtensions
                 }
                 else
                 {
-                    // Fallback nếu không có config
+               
                     policy.AllowAnyOrigin()
                           .AllowAnyMethod()
                           .AllowAnyHeader();
@@ -96,7 +94,7 @@ public static class WebApplicationBuilderExtensions
         builder.Services.AddControllers()
         .AddJsonOptions(opt =>
         {
-            // Không sinh $id, $values, vẫn tránh vòng lặp
+         
             opt.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
             opt.JsonSerializerOptions.WriteIndented = true; // Format đẹp hơn
             opt.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull; // Bỏ qua null

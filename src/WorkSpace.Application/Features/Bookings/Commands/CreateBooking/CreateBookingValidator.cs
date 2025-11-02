@@ -12,10 +12,7 @@ public class CreateBookingValidator : AbstractValidator<CreateBookingCommand>
         RuleFor(x => x.Model.EndTimeUtc)
             .GreaterThan(x => x.Model.StartTimeUtc)
             .WithMessage("EndTime must be after StartTime.");
-        RuleFor(x => x.Model.StartTimeUtc.Offset).Equal(TimeSpan.Zero)
-            .WithMessage("Use UTC (Offset must be 0).");
-        RuleFor(x => x.Model.EndTimeUtc.Offset).Equal(TimeSpan.Zero)
-            .WithMessage("Use UTC (Offset must be 0).");
+ 
         
         // Validate customer info if provided
         When(x => !string.IsNullOrWhiteSpace(x.Model.FirstName), () =>

@@ -2,5 +2,5 @@
 
 public interface IAvailabilityService
 {
-    Task<bool> IsAvailableAsync(int workspaceId, DateTimeOffset startUtc, DateTimeOffset endUtc, CancellationToken ct);
+    Task<bool> IsAvailableAsync(int workspaceId, DateTime startUtc, DateTime endUtc, CancellationToken ct);
 }

@@ -9,5 +9,5 @@ public record WorkSpaceFilter(
     int? MinCapacity,
     bool? OnlyVerified,
     bool? OnlyActived,
-    DateTimeOffset? DesiredStartUtc,
-    DateTimeOffset? DesiredEndUtc);
+    DateTime? DesiredStartUtc,
+    DateTime? DesiredEndUtc);
