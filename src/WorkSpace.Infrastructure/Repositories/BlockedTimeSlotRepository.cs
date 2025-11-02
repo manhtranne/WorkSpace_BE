@@ -15,42 +15,42 @@ public class BlockedTimeSlotRepository : GenericRepositoryAsync<BlockedTimeSlot>
 
     public async Task<IReadOnlyList<BlockedTimeSlot>> GetBlockedTimeSlotsForRoomAsync(
         int workSpaceRoomId, 
-        DateTimeOffset startTime, 
-        DateTimeOffset endTime, 
+        DateTime startTime, 
+        DateTime endTime, 
         CancellationToken cancellationToken = default)
     {
         return await _context.BlockedTimeSlots
             .Where(b => b.WorkSpaceRoomId == workSpaceRoomId
-                        && b.StartTime < endTime.DateTime
-                        && b.EndTime > startTime.DateTime)
+                        && b.StartTime < endTime
+                        && b.EndTime > startTime)
             .ToListAsync(cancellationToken);
     }
 
     public async Task<bool> IsTimeSlotBlockedAsync(
         int workSpaceRoomId, 
-        DateTimeOffset startTime, 
-        DateTimeOffset endTime, 
+        DateTime startTime, 
+        DateTime endTime, 
         CancellationToken cancellationToken = default)
     {
         return await _context.BlockedTimeSlots
             .AnyAsync(b => b.WorkSpaceRoomId == workSpaceRoomId
-                           && b.StartTime < endTime.DateTime
-                           && b.EndTime > startTime.DateTime, 
+                           && b.StartTime < endTime
+                           && b.EndTime > startTime, 
                 cancellationToken);
     }
 
     public async Task CreateBlockedTimeSlotForBookingAsync(
         int workSpaceRoomId, 
         int bookingId, 
-        DateTimeOffset startTime, 
-        DateTimeOffset endTime, 
+        DateTime startTime, 
+        DateTime endTime, 
         CancellationToken cancellationToken = default)
     {
         var blockedSlot = new BlockedTimeSlot
         {
             WorkSpaceRoomId = workSpaceRoomId,
-            StartTime = startTime.DateTime,
-            EndTime = endTime.DateTime,
+            StartTime = startTime,
+            EndTime = endTime,
             Reason = $"Blocked for booking ID: {bookingId}",
             CreatedAt = DateTime.UtcNow
         };

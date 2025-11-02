@@ -12,8 +12,8 @@ public class Booking : AuditableBaseEntity
     public int CustomerId { get; set; }
     public int WorkSpaceRoomId { get; set; }
 
-    public DateTimeOffset StartTimeUtc { get; set; }
-    public DateTimeOffset EndTimeUtc { get; set; }
+    public DateTime StartTimeUtc { get; set; }
+    public DateTime EndTimeUtc { get; set; }
 
     public int NumberOfParticipants { get; set; } = 1;
 
@@ -30,8 +30,8 @@ public class Booking : AuditableBaseEntity
 
     public int BookingStatusId { get; set; }
 
-    public DateTimeOffset? CheckedInAt { get; set; }
-    public DateTimeOffset? CheckedOutAt { get; set; }
+    public DateTime? CheckedInAt { get; set; }
+    public DateTime? CheckedOutAt { get; set; }
 
     [MaxLength(500)]
     public string? CancellationReason { get; set; }

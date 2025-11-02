@@ -15,8 +15,6 @@ namespace WorkSpace.WebApi.Controllers.v1;
 
 [Route("api/v1/staff")]
 
-[Authorize(Roles = "Moderator,Admin,SuperAdmin")]
-
 [Authorize(Roles = $"{nameof(Roles.Admin)},{nameof(Roles.Staff)}")]
 
 [ApiController]

@@ -9,7 +9,7 @@ public class BookingPricingService : IBookingPricingService
     private readonly WorkSpaceContext _ctx;
     public BookingPricingService(WorkSpaceContext ctx) => _ctx = ctx;
 
-    public async Task<BookingQuoteResponse> QuoteAsync(int workspaceId, DateTimeOffset startUtc, DateTimeOffset endUtc, int participants, CancellationToken ct)
+    public async Task<BookingQuoteResponse> QuoteAsync(int workspaceId, DateTime startUtc, DateTime endUtc, int participants, CancellationToken ct)
     {
         var ws = await _ctx.WorkSpaceRooms.FirstOrDefaultAsync(x => x.Id == workspaceId, ct)
                  ?? throw new InvalidOperationException("Workspace not found");

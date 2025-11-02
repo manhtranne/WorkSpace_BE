@@ -12,7 +12,7 @@ public class BookingRepository : GenericRepositoryAsync<Booking>, IBookingReposi
         _context = dbContext;
     }
 
-    public  Task<bool> HasOverlapAsync(int workspaceId, DateTimeOffset startUtc, DateTimeOffset endUtc, CancellationToken ct)
+    public  Task<bool> HasOverlapAsync(int workspaceId, DateTime startUtc, DateTime endUtc, CancellationToken ct)
     {
         return _context.Bookings
             .Where(b => b.WorkSpaceRoomId == workspaceId && b.BookingStatusId != 3 && b.BookingStatusId != 6)
