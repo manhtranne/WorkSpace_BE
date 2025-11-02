@@ -7,10 +7,10 @@ namespace WorkSpace.Application.DTOs.WorkSpaces
     public class SearchRoomsInWorkSpaceRequestDto
     {
         [Required(ErrorMessage = "Start time is required")]
-        public DateTimeOffset StartTime { get; set; }
+        public DateTime StartTime { get; set; }
 
         [Required(ErrorMessage = "End time is required")]
-        public DateTimeOffset EndTime { get; set; }
+        public DateTime EndTime { get; set; }
 
         [Required(ErrorMessage = "Capacity is required")]
         [Range(1, int.MaxValue, ErrorMessage = "Capacity must be at least 1")]

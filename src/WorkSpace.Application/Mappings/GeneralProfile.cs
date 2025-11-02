@@ -62,7 +62,7 @@ namespace WorkSpace.Application.Mappings
                 .ForMember(d => d.AddressLine, o => o.MapFrom(s => s.Address != null ? $"{s.Address.Street}, {s.Address.Ward}" : null))
                 .ForMember(d => d.City, o => o.MapFrom(s => s.Address != null ? s.Address.Ward : null))
                 .ForMember(d => d.Country, o => o.MapFrom(s => s.Address != null ? s.Address.Country : null))
-                .ForMember(d => d.CreatedDate, o => o.MapFrom(s => s.CreateUtc))
+                .ForMember(d => d.CreatedDate, o => o.MapFrom(s => s.CreateUtc.DateTime))
                 .ForMember(d => d.TotalRooms, o => o.MapFrom(s => s.WorkSpaceRooms.Count));
 
             // WorkSpaceRoom Mappings (Chi con map cho ListItem)

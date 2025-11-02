@@ -5,10 +5,10 @@ namespace WorkSpace.Application.DTOs.WorkSpaces;
 public class CheckAvailableRoomsRequest
 {
     [Required(ErrorMessage = "Start time is required")]
-    public DateTimeOffset StartTime { get; set; }
+    public DateTime StartTime { get; set; }
     
     [Required(ErrorMessage = "End time is required")]
-    public DateTimeOffset EndTime { get; set; }
+    public DateTime EndTime { get; set; }
 }
 
 // Internal request with all filters (used by Query Handler)

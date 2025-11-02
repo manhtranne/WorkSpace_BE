@@ -73,8 +73,8 @@ namespace WorkSpace.WebApi.Controllers.v1
             [FromQuery] int? minCapacity = null,
             [FromQuery] bool? onlyVerified = null,
             [FromQuery] bool? onlyActive = true,
-            [FromQuery] DateTimeOffset? desiredStartUtc = null,
-            [FromQuery] DateTimeOffset? desiredEndUtc = null,
+            [FromQuery] DateTime? desiredStartUtc = null,
+            [FromQuery] DateTime? desiredEndUtc = null,
             CancellationToken cancellationToken = default)
         {
             var filter = new WorkSpaceFilter

@@ -1,5 +1,4 @@
-﻿
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using WorkSpace.Application.DTOs.WorkSpaces;
 using WorkSpace.Application.Interfaces.Services;
@@ -10,7 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Threading; 
+using System.Threading;
 
 namespace WorkSpace.Infrastructure.Services
 {
@@ -27,7 +26,7 @@ namespace WorkSpace.Infrastructure.Services
 
         public async Task<Response<IEnumerable<WorkSpaceSearchResultDto>>> SearchWorkSpacesAsync(SearchRequestDto request)
         {
-        
+
             CancellationToken cancellationToken = default;
 
             var query = _context.Workspaces
@@ -39,8 +38,8 @@ namespace WorkSpace.Infrastructure.Services
                         .ThenInclude(wra => wra.Amenity)
                 .Include(w => w.WorkSpaceRooms)
                     .ThenInclude(r => r.BlockedTimeSlots)
-                 .Include(w => w.WorkSpaceRooms) 
-                    .ThenInclude(r => r.WorkSpaceRoomImages) 
+                 .Include(w => w.WorkSpaceRooms)
+                    .ThenInclude(r => r.WorkSpaceRoomImages)
                 .Where(w => w.IsActive && w.IsVerified)
                 .AsQueryable();
 
@@ -81,16 +80,19 @@ namespace WorkSpace.Infrastructure.Services
 
             if (request.HasDateTimeFilter())
             {
-                DateTimeOffset effectiveStartTime = request.StartTime ?? DateTimeOffset.MinValue;
-                DateTimeOffset effectiveEndTime = request.EndTime ?? DateTimeOffset.MaxValue;
+               
+                DateTime effectiveStartTime = request.StartTime ?? DateTime.MinValue;
+                DateTime effectiveEndTime = request.EndTime ?? DateTime.MaxValue;
 
                 if (request.StartTime.HasValue && request.EndTime.HasValue && effectiveEndTime <= effectiveStartTime)
                 {
                     return new Response<IEnumerable<WorkSpaceSearchResultDto>>("End time must be after start time.") { Succeeded = false };
                 }
 
-                effectiveStartTime = effectiveStartTime.ToUniversalTime();
-                effectiveEndTime = effectiveEndTime.ToUniversalTime();
+              
+                effectiveStartTime = (effectiveStartTime.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(effectiveStartTime, DateTimeKind.Utc) : effectiveStartTime.ToUniversalTime());
+                effectiveEndTime = (effectiveEndTime.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(effectiveEndTime, DateTimeKind.Utc) : effectiveEndTime.ToUniversalTime());
+
 
                 query = query.Where(w => w.WorkSpaceRooms.Any(room =>
                    room.IsActive && room.IsVerified &&
@@ -98,12 +100,13 @@ namespace WorkSpace.Infrastructure.Services
                        b.StartTimeUtc < effectiveEndTime && b.EndTimeUtc > effectiveStartTime &&
                        b.BookingStatus != null &&
                        (b.BookingStatus.Name == "Confirmed" || b.BookingStatus.Name == "InProgress" || b.BookingStatus.Name == "Pending")) &&
+               
                    !room.BlockedTimeSlots.Any(slot =>
-                       slot.StartTime < effectiveEndTime.DateTime && slot.EndTime > effectiveStartTime.DateTime
+                       slot.StartTime < effectiveEndTime && slot.EndTime > effectiveStartTime
                    )
                ));
             }
-    
+
 
             var workspaces = await query
                 .Distinct()
@@ -120,13 +123,13 @@ namespace WorkSpace.Infrastructure.Services
                 HostName = w.Host?.User?.GetFullName()
                            ?? w.Host?.User?.UserName
                            ?? "N/A",
-           
+
                 ImageUrls = w.WorkSpaceRooms
-                                .Where(r => r.IsActive && r.IsVerified) 
-                                .SelectMany(r => r.WorkSpaceRoomImages) 
-                                .Select(img => img.ImageUrl) 
-                                .Distinct() 
-                                .ToList() ,
+                                .Where(r => r.IsActive && r.IsVerified)
+                                .SelectMany(r => r.WorkSpaceRoomImages)
+                                .Select(img => img.ImageUrl)
+                                .Distinct()
+                                .ToList(),
                 Latitude = w.Address?.Latitude ?? 0,
                 Longitude = w.Address?.Longitude ?? 0
             }).ToList();
@@ -142,13 +145,14 @@ namespace WorkSpace.Infrastructure.Services
                 return new Response<IEnumerable<RoomWithAmenitiesDto>>("End time must be after start time.") { Succeeded = false };
             }
 
-            if (request.StartTime < DateTimeOffset.UtcNow)
+            if (request.StartTime < DateTime.UtcNow)
             {
                 return new Response<IEnumerable<RoomWithAmenitiesDto>>("Start time cannot be in the past.") { Succeeded = false };
             }
 
-            var effectiveStartTime = request.StartTime.ToUniversalTime();
-            var effectiveEndTime = request.EndTime.ToUniversalTime();
+  
+            var effectiveStartTime = (request.StartTime.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(request.StartTime, DateTimeKind.Utc) : request.StartTime.ToUniversalTime());
+            var effectiveEndTime = (request.EndTime.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(request.EndTime, DateTimeKind.Utc) : request.EndTime.ToUniversalTime());
 
             var query = _context.WorkSpaceRooms
                 .Include(r => r.WorkSpaceRoomType)
@@ -156,26 +160,27 @@ namespace WorkSpace.Infrastructure.Services
                 .Include(r => r.WorkSpaceRoomAmenities)
                     .ThenInclude(wra => wra.Amenity)
                 .Include(r => r.Reviews)
-                .Include(r => r.Bookings) 
+                .Include(r => r.Bookings)
                     .ThenInclude(b => b.BookingStatus)
                 .Include(r => r.BlockedTimeSlots)
-                .Where(r => r.WorkSpaceId == workSpaceId && 
-                            r.IsActive && r.IsVerified) 
+                .Where(r => r.WorkSpaceId == workSpaceId &&
+                            r.IsActive && r.IsVerified)
                 .AsQueryable();
 
- 
+
             query = query.Where(r => r.Capacity >= request.Capacity);
 
-   
+
             query = query.Where(room =>
 
                !room.Bookings.Any(b =>
                    b.StartTimeUtc < effectiveEndTime && b.EndTimeUtc > effectiveStartTime &&
                    b.BookingStatus != null &&
                    (b.BookingStatus.Name == "Confirmed" || b.BookingStatus.Name == "InProgress" || b.BookingStatus.Name == "Pending")) &&
-      
+
+           
                !room.BlockedTimeSlots.Any(slot =>
-                   slot.StartTime < effectiveEndTime.DateTime && slot.EndTime > effectiveStartTime.DateTime
+                   slot.StartTime < effectiveEndTime && slot.EndTime > effectiveStartTime
                )
            );
 
@@ -219,7 +224,7 @@ namespace WorkSpace.Infrastructure.Services
                     : 0,
                 ReviewCount = room.Reviews.Count,
 
-                IsAvailable = true, 
+                IsAvailable = true,
 
 
                 BlockedTimes = room.BlockedTimeSlots
@@ -268,6 +273,6 @@ namespace WorkSpace.Infrastructure.Services
                 .ToListAsync();
             return wards;
         }
-    
+
     }
 }
