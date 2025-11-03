@@ -12,7 +12,6 @@ public class CreateBookingValidator : AbstractValidator<CreateBookingCommand>
         RuleFor(x => x.Model.EndTimeUtc)
             .GreaterThan(x => x.Model.StartTimeUtc)
             .WithMessage("EndTime must be after StartTime.");
- 
         
         // Validate customer info if provided
         When(x => !string.IsNullOrWhiteSpace(x.Model.FirstName), () =>
