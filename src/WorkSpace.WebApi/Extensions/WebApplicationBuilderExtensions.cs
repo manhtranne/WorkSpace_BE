@@ -33,6 +33,7 @@ public static class WebApplicationBuilderExtensions
 
                 options.User.RequireUniqueEmail = true;
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+                //options.ClaimsIdentity.RoleClaimType = "roles";
             })
             .AddEntityFrameworkStores<WorkSpaceContext>()  
             .AddDefaultTokenProviders();
@@ -65,7 +66,7 @@ public static class WebApplicationBuilderExtensions
         
         builder.Services.AddCors(options =>
         {
-            // Policy cho Development - Allow all
+      
             options.AddPolicy("AllowAll", policy =>
             {
                 policy.AllowAnyOrigin()
@@ -73,7 +74,7 @@ public static class WebApplicationBuilderExtensions
                       .AllowAnyHeader();
             });
             
-            // Policy cho Production - Chỉ cho phép origins cụ thể
+      
             options.AddPolicy("Production", policy =>
             {
                 if (allowedOrigins.Length > 0)
@@ -85,7 +86,7 @@ public static class WebApplicationBuilderExtensions
                 }
                 else
                 {
-                    // Fallback nếu không có config
+               
                     policy.AllowAnyOrigin()
                           .AllowAnyMethod()
                           .AllowAnyHeader();
@@ -96,7 +97,7 @@ public static class WebApplicationBuilderExtensions
         builder.Services.AddControllers()
         .AddJsonOptions(opt =>
         {
-            // Không sinh $id, $values, vẫn tránh vòng lặp
+         
             opt.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
             opt.JsonSerializerOptions.WriteIndented = true; // Format đẹp hơn
             opt.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull; // Bỏ qua null

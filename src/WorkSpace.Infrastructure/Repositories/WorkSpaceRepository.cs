@@ -1,6 +1,4 @@
-﻿
-
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using WorkSpace.Application.DTOs.WorkSpaces;
 using WorkSpace.Application.Interfaces.Repositories;
 using WorkSpace.Domain.Entities;
@@ -32,6 +30,11 @@ namespace WorkSpace.Infrastructure.Repositories
                         .ThenInclude(wra => wra.Amenity)
                 .Include(w => w.WorkSpaceRooms)
                     .ThenInclude(wr => wr.Reviews)
+
+
+                .Include(w => w.WorkSpaceRooms)
+                    .ThenInclude(wr => wr.BlockedTimeSlots)
+
                 .AsNoTracking()
                 .FirstOrDefaultAsync(w => w.Id == id, cancellationToken);
         }
@@ -58,7 +61,7 @@ namespace WorkSpace.Infrastructure.Repositories
                 .Include(wr => wr.WorkSpace)
                 .ThenInclude(w => w.Address)
                 .Include(wr => wr.WorkSpaceRoomImages)
-  
+
                 .Include(wr => wr.BlockedTimeSlots)
                 .AsNoTracking()
                 .AsQueryable();
@@ -68,8 +71,8 @@ namespace WorkSpace.Infrastructure.Repositories
                 query = query.Where(x => x.WorkSpaceRoomTypeId == typeId);
             }
 
-         
-            if (!string.IsNullOrWhiteSpace(filter.City)) 
+
+            if (!string.IsNullOrWhiteSpace(filter.City))
             {
                 query = query.Where(x => x.WorkSpace.Address!.Ward == filter.City);
             }
@@ -92,21 +95,20 @@ namespace WorkSpace.Infrastructure.Repositories
                 query = query.Where(x => x.IsVerified && x.WorkSpace.IsVerified);
             }
 
-   
+
             if (filter.DesiredStartUtc.HasValue && filter.DesiredEndUtc.HasValue)
             {
-             
+
                 var start = filter.DesiredStartUtc.Value;
                 var end = filter.DesiredEndUtc.Value;
 
-
                 query = query.Where(x => !x.BlockedTimeSlots.Any(b =>
-                    b.StartTime < end.UtcDateTime && b.EndTime > start.UtcDateTime
+                    b.StartTime < end && b.EndTime > start
 
                    )
                 );
             }
-     
+
 
             var total = await query.CountAsync(cancellationToken);
             var items = await query
@@ -132,9 +134,9 @@ namespace WorkSpace.Infrastructure.Repositories
                 .Include(wr => wr.WorkSpaceRoomImages)
                 .Include(wr => wr.Reviews)
                 .AsNoTracking()
-                .Where(wr => wr.IsActive && wr.IsVerified 
+                .Where(wr => wr.IsActive && wr.IsVerified
                             && wr.WorkSpace.IsActive && wr.WorkSpace.IsVerified)
-                .Select(wr => new 
+                .Select(wr => new
                 {
                     Room = wr,
                     AverageRating = wr.Reviews.Any() ? wr.Reviews.Average(r => r.Rating) : 0,
@@ -185,8 +187,9 @@ namespace WorkSpace.Infrastructure.Repositories
             int pageSize,
             CancellationToken cancellationToken = default)
         {
-            var startUtc = request.StartTime.UtcDateTime;
-            var endUtc = request.EndTime.UtcDateTime;
+         
+            var startUtc = request.StartTime;
+            var endUtc = request.EndTime;
 
             var query = _context.WorkSpaceRooms
                 .Include(wr => wr.WorkSpace)
@@ -202,7 +205,7 @@ namespace WorkSpace.Infrastructure.Repositories
                 .AsNoTracking()
                 .AsQueryable();
 
-            // Apply base filters
+      
             if (request.OnlyActive)
             {
                 query = query.Where(wr => wr.IsActive && wr.WorkSpace.IsActive);
@@ -238,18 +241,16 @@ namespace WorkSpace.Infrastructure.Repositories
                 query = query.Where(wr => wr.Capacity >= request.MinCapacity.Value);
             }
 
-            // Filter out rooms that have overlapping blocked time slots
+       
             query = query.Where(wr => !wr.BlockedTimeSlots.Any(bts =>
                 bts.StartTime < endUtc && bts.EndTime > startUtc
             ));
 
-            // Filter out rooms that have overlapping bookings with confirmed/pending status
-            // Assuming booking status names: "Confirmed", "Pending", "CheckedIn" mean the room is occupied
             query = query.Where(wr => !wr.Bookings.Any(b =>
                 b.StartTimeUtc < endUtc && b.EndTimeUtc > startUtc &&
                 b.BookingStatus != null &&
-                (b.BookingStatus.Name == "Confirmed" || 
-                 b.BookingStatus.Name == "Pending" || 
+                (b.BookingStatus.Name == "Confirmed" ||
+                 b.BookingStatus.Name == "Pending" ||
                  b.BookingStatus.Name == "CheckedIn")
             ));
 

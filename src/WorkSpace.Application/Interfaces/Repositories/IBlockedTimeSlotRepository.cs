@@ -6,21 +6,21 @@ public interface IBlockedTimeSlotRepository : IGenericRepositoryAsync<BlockedTim
 {
     Task<IReadOnlyList<BlockedTimeSlot>> GetBlockedTimeSlotsForRoomAsync(
         int workSpaceRoomId, 
-        DateTimeOffset startTime, 
-        DateTimeOffset endTime, 
+        DateTime startTime, 
+        DateTime endTime, 
         CancellationToken cancellationToken = default);
 
     Task<bool> IsTimeSlotBlockedAsync(
-        int workSpaceRoomId, 
-        DateTimeOffset startTime, 
-        DateTimeOffset endTime, 
+        int workSpaceRoomId,
+        DateTime startTime,
+        DateTime endTime, 
         CancellationToken cancellationToken = default);
 
     Task CreateBlockedTimeSlotForBookingAsync(
         int workSpaceRoomId, 
-        int bookingId, 
-        DateTimeOffset startTime, 
-        DateTimeOffset endTime, 
+        int bookingId,
+        DateTime startTime,
+        DateTime endTime, 
         CancellationToken cancellationToken = default);
 
     Task RemoveBlockedTimeSlotForBookingAsync(

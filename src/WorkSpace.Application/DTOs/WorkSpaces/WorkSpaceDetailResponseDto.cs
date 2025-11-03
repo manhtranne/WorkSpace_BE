@@ -46,7 +46,6 @@ public class RoomWithAmenitiesDto
     public decimal PricePerDay { get; set; }
     public decimal PricePerMonth { get; set; }
 
-
     public int Capacity { get; set; }
     public double Area { get; set; }
     public bool IsActive { get; set; }
@@ -55,15 +54,15 @@ public class RoomWithAmenitiesDto
 
     public List<string> Images { get; set; } = new();
 
-
-    public List<SimpleRoomAmenityDto> Amenities { get; set; } = new(); 
-
+    public List<SimpleRoomAmenityDto> Amenities { get; set; } = new();
 
     public double AverageRating { get; set; }
     public int ReviewCount { get; set; }
 
-
     public bool IsAvailable { get; set; } = true;
+
+
+    public List<SimpleBlockedTimeSlotDto> BlockedTimes { get; set; } = new();
 }
 
 

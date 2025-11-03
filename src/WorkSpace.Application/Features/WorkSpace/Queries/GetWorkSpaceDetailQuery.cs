@@ -80,7 +80,16 @@ public class GetWorkSpaceDetailQueryHandler(
                         : 0,
                     ReviewCount = room.Reviews.Count,
                     
-                    IsAvailable = room.IsActive && room.IsVerified
+                    IsAvailable = room.IsActive && room.IsVerified,
+                    BlockedTimes = room.BlockedTimeSlots
+                    .Select(bt => new SimpleBlockedTimeSlotDto
+                    {
+                        Id = bt.Id,
+                        StartTime = bt.StartTime,
+                        EndTime = bt.EndTime,
+                        Reason = bt.Reason
+                    })
+                    .ToList()
                 })
                 .ToList(),
             
