@@ -10,5 +10,6 @@
         public bool IsFeatured { get; set; }
         public DateTimeOffset CreateUtc { get; set; }  // ✅ sửa chỗ này
         public string? UserName { get; set; }
+        public string? Avatar { get; set; }
     }
 }
