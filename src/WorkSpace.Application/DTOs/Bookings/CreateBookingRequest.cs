@@ -11,7 +11,7 @@ public class CreateBookingRequest
     public string Currency { get; set; } = "VND";
     public string? PromotionCode { get; set; }
     
- 
+    // Customer info - will be saved to user profile if not already set
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
     public string? PhoneNumber { get; set; }
