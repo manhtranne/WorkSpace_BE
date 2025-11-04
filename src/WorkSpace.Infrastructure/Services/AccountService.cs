@@ -398,4 +398,262 @@ public class AccountService : IAccountService
                 throw new ApiException("An error occurred during token revocation. Please try again.");
             }
         }
+
+        // Admin functions
+        public async Task<PagedResponse<List<UserDto>>> GetAllUsersAsync(GetAllUsersRequestDto request)
+        {
+            try
+            {
+                _logger.LogInformation("Getting all users - Page: {PageNumber}, PageSize: {PageSize}", request.PageNumber, request.PageSize);
+                
+                var query = _userManager.Users.AsQueryable();
+
+                // Apply filters
+                if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+                {
+                    var searchTerm = request.SearchTerm.ToLower();
+                    query = query.Where(u => 
+                        u.UserName.ToLower().Contains(searchTerm) || 
+                        u.Email.ToLower().Contains(searchTerm) ||
+                        (u.FirstName != null && u.FirstName.ToLower().Contains(searchTerm)) ||
+                        (u.LastName != null && u.LastName.ToLower().Contains(searchTerm))
+                    );
+                }
+
+                if (request.IsActive.HasValue)
+                {
+                    query = query.Where(u => u.IsActive == request.IsActive.Value);
+                }
+
+                // Get total count before pagination
+                var totalRecords = await query.CountAsync();
+
+                // Apply pagination
+                var users = await query
+                    .OrderByDescending(u => u.DateCreated)
+                    .Skip((request.PageNumber - 1) * request.PageSize)
+                    .Take(request.PageSize)
+                    .ToListAsync();
+
+                var userDtos = new List<UserDto>();
+
+                foreach (var user in users)
+                {
+                    var roles = await _userManager.GetRolesAsync(user);
+                    
+                    // Filter by role if specified
+                    if (!string.IsNullOrWhiteSpace(request.Role) && !roles.Contains(request.Role))
+                    {
+                        continue;
+                    }
+
+                    userDtos.Add(new UserDto
+                    {
+                        Id = user.Id,
+                        UserName = user.UserName,
+                        Email = user.Email,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        Avatar = user.Avatar,
+                        IsActive = user.IsActive,
+                        EmailConfirmed = user.EmailConfirmed,
+                        DateCreated = user.DateCreated,
+                        Dob = user.Dob,
+                        LastLoginDate = user.LastLoginDate,
+                        Roles = roles.ToList(),
+                        FullName = user.GetFullName()
+                    });
+                }
+
+                _logger.LogInformation("Retrieved {Count} users out of {Total} total", userDtos.Count, totalRecords);
+
+                return new PagedResponse<List<UserDto>>(userDtos, request.PageNumber, request.PageSize, totalRecords);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all users");
+                throw new ApiException("An error occurred while retrieving users");
+            }
+        }
+
+        public async Task<Response<UserDto>> GetUserByIdAsync(int userId)
+        {
+            try
+            {
+                _logger.LogInformation("Getting user by ID: {UserId}", userId);
+                
+                var user = await _userManager.FindByIdAsync(userId.ToString());
+                if (user == null)
+                {
+                    throw new ApiException($"User with ID {userId} not found");
+                }
+
+                var roles = await _userManager.GetRolesAsync(user);
+                var userDto = new UserDto
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Avatar = user.Avatar,
+                    IsActive = user.IsActive,
+                    EmailConfirmed = user.EmailConfirmed,
+                    DateCreated = user.DateCreated,
+                    Dob = user.Dob,
+                    LastLoginDate = user.LastLoginDate,
+                    Roles = roles.ToList(),
+                    FullName = user.GetFullName()
+                };
+
+                return new Response<UserDto>(userDto, "User retrieved successfully");
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting user by ID: {UserId}", userId);
+                throw new ApiException("An error occurred while retrieving user");
+            }
+        }
+
+        public async Task<Response<UserDto>> CreateUserByAdminAsync(CreateUserByAdminDto request)
+        {
+            try
+            {
+                _logger.LogInformation("Admin creating user with email: {Email}", request.Email);
+                
+                // Validate role exists
+                var roleExists = await _roleManager.RoleExistsAsync(request.Role);
+                if (!roleExists)
+                {
+                    throw new ApiException($"Role '{request.Role}' does not exist");
+                }
+
+                // Check if username already exists
+                var userWithSameUserName = await _userManager.FindByNameAsync(request.UserName);
+                if (userWithSameUserName != null)
+                {
+                    throw new ApiException($"Username '{request.UserName}' is already taken");
+                }
+
+                // Check if email already exists
+                var userWithSameEmail = await _userManager.FindByEmailAsync(request.Email);
+                if (userWithSameEmail != null)
+                {
+                    throw new ApiException($"Email '{request.Email}' is already registered");
+                }
+
+                var user = new AppUser
+                {
+                    Email = request.Email,
+                    UserName = request.UserName,
+                    FirstName = request.FirstName,
+                    LastName = request.LastName,
+                    Dob = request.Dob,
+                    DateCreated = DateTime.UtcNow,
+                    IsActive = request.IsActive,
+                    EmailConfirmed = request.EmailConfirmed
+                };
+
+                var result = await _userManager.CreateAsync(user, request.Password);
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    _logger.LogError("User creation failed for email {Email}: {Errors}", request.Email, errors);
+                    throw new ApiException($"User creation failed: {errors}");
+                }
+
+                // Add role
+                await _userManager.AddToRoleAsync(user, request.Role);
+
+                var roles = await _userManager.GetRolesAsync(user);
+                var userDto = new UserDto
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Avatar = user.Avatar,
+                    IsActive = user.IsActive,
+                    EmailConfirmed = user.EmailConfirmed,
+                    DateCreated = user.DateCreated,
+                    Dob = user.Dob,
+                    LastLoginDate = user.LastLoginDate,
+                    Roles = roles.ToList(),
+                    FullName = user.GetFullName()
+                };
+
+                _logger.LogInformation("User created successfully by admin: {UserId} ({Email})", user.Id, user.Email);
+
+                return new Response<UserDto>(userDto, "User created successfully");
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating user by admin");
+                throw new ApiException("An error occurred while creating user");
+            }
+        }
+
+        public async Task<Response<UserDto>> UpdateUserStatusAsync(int userId, UpdateUserStatusDto request)
+        {
+            try
+            {
+                _logger.LogInformation("Updating user status for user ID: {UserId} to {IsActive}", userId, request.IsActive);
+                
+                var user = await _userManager.FindByIdAsync(userId.ToString());
+                if (user == null)
+                {
+                    throw new ApiException($"User with ID {userId} not found");
+                }
+
+                user.IsActive = request.IsActive;
+                var result = await _userManager.UpdateAsync(user);
+
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    _logger.LogError("User status update failed for user {UserId}: {Errors}", userId, errors);
+                    throw new ApiException($"User status update failed: {errors}");
+                }
+
+                var roles = await _userManager.GetRolesAsync(user);
+                var userDto = new UserDto
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Avatar = user.Avatar,
+                    IsActive = user.IsActive,
+                    EmailConfirmed = user.EmailConfirmed,
+                    DateCreated = user.DateCreated,
+                    Dob = user.Dob,
+                    LastLoginDate = user.LastLoginDate,
+                    Roles = roles.ToList(),
+                    FullName = user.GetFullName()
+                };
+
+                _logger.LogInformation("User status updated successfully for user {UserId}", userId);
+
+                return new Response<UserDto>(userDto, $"User status updated to {(request.IsActive ? "Active" : "Inactive")}");
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating user status for user ID: {UserId}", userId);
+                throw new ApiException("An error occurred while updating user status");
+            }
+        }
     }

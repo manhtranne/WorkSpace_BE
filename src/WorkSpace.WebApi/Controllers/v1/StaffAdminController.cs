@@ -10,7 +10,8 @@ using WorkSpace.Application.Features.WorkSpace.Commands;
 using WorkSpace.Application.Features.WorkSpace.Queries;
 using WorkSpace.Application.Enums;
 
-using WorkSpace.Application.Wrappers; 
+using WorkSpace.Application.Wrappers;
+
 namespace WorkSpace.WebApi.Controllers.v1;
 
 [Route("api/v1/staff")]
@@ -20,8 +21,6 @@ namespace WorkSpace.WebApi.Controllers.v1;
 [ApiController]
 public class StaffAdminController : BaseApiController
 {
-
-
     [HttpGet("reviews")]
     public async Task<IActionResult> GetAllReviewsForModeration(
         [FromQuery] GetAllReviewsForModerationQuery query,
