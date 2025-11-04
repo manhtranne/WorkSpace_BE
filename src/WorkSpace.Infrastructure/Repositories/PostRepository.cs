@@ -41,7 +41,8 @@ namespace WorkSpace.Infrastructure.Repositories
                     ImageData = p.ImageData,
                     IsFeatured = p.IsFeatured,
                     CreateUtc = p.CreateUtc,
-                    UserName = p.User != null ? p.User.UserName : "Ẩn danh"
+                    UserName = p.User != null ? p.User.UserName : "Ẩn danh",
+                    Avatar = p.User != null ? p.User.Avatar : null
                 })
                 .OrderByDescending(p => p.CreateUtc)
                 .ToListAsync();
