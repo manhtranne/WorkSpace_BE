@@ -1,15 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
+using WorkSpace.Application.DTOs.Bookings;
+using WorkSpace.Application.Enums;
+using WorkSpace.Application.Extensions;
+using WorkSpace.Application.Features.Bookings.Commands;
+using WorkSpace.Application.Features.Bookings.Queries; 
 using WorkSpace.Application.Features.Reviews.Commands;
 using WorkSpace.Application.Features.Reviews.Queries;
-
-using WorkSpace.Application.Features.Bookings.Queries; 
-
 using WorkSpace.Application.Features.WorkSpace.Commands;
 using WorkSpace.Application.Features.WorkSpace.Queries;
-using WorkSpace.Application.Enums;
-
 using WorkSpace.Application.Wrappers;
 
 namespace WorkSpace.WebApi.Controllers.v1;
@@ -59,9 +58,6 @@ public class StaffAdminController : BaseApiController
     }
 
 
-    /// <summary>
-    /// Lấy danh sách workspace chờ duyệt (IsVerified = false)
-    /// </summary>
     [HttpGet("workspaces/pending")]
     public async Task<IActionResult> GetPendingWorkSpaces(
         [FromQuery] int pageNumber = 1,
@@ -73,9 +69,7 @@ public class StaffAdminController : BaseApiController
         return Ok(result);
     }
 
-    /// <summary>
-    /// Lấy tất cả workspace với filter theo trạng thái verified
-    /// </summary>
+
     [HttpGet("workspaces")]
     public async Task<IActionResult> GetAllWorkSpaces(
         [FromQuery] int pageNumber = 1,
@@ -88,9 +82,7 @@ public class StaffAdminController : BaseApiController
         return Ok(result);
     }
 
-    /// <summary>
-    /// Duyệt hoặc từ chối workspace
-    /// </summary>
+
     [HttpPut("workspaces/{workSpaceId}/approve")]
     public async Task<IActionResult> ApproveWorkSpace(
         [FromRoute] int workSpaceId,
@@ -106,6 +98,69 @@ public class StaffAdminController : BaseApiController
             return BadRequest(result);
         }
         
+        return Ok(result);
+    }
+    [HttpPost("bookings/{bookingId}/cancel")]
+    public async Task<IActionResult> StaffCancelBooking(
+        [FromRoute] int bookingId,
+        [FromBody] StaffCancelBookingRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        var staffUserId = User.GetUserId();
+        if (staffUserId == 0) return Unauthorized();
+
+        var command = new StaffCancelBookingCommand
+        {
+            BookingId = bookingId,
+            Reason = request.Reason,
+            StaffUserId = staffUserId
+        };
+
+        var result = await Mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+
+
+    [HttpPut("bookings/{bookingId}/reschedule")]
+    public async Task<IActionResult> StaffRescheduleBooking(
+        [FromRoute] int bookingId,
+        [FromBody] StaffRescheduleBookingRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        var staffUserId = User.GetUserId();
+        if (staffUserId == 0) return Unauthorized();
+
+        var command = new StaffRescheduleBookingCommand
+        {
+            BookingId = bookingId,
+            NewStartTimeUtc = request.NewStartTimeUtc,
+            NewEndTimeUtc = request.NewEndTimeUtc,
+            StaffUserId = staffUserId
+        };
+
+        var result = await Mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("bookings/{bookingId}/confirm-payment")]
+    public async Task<IActionResult> StaffConfirmPayment(
+        [FromRoute] int bookingId,
+        [FromBody] StaffConfirmPaymentRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        var staffUserId = User.GetUserId();
+        if (staffUserId == 0) return Unauthorized();
+
+        var command = new StaffConfirmPaymentCommand
+        {
+            BookingId = bookingId,
+            PaymentMethod = request.PaymentMethod,
+            TransactionId = request.TransactionId,
+            Amount = request.Amount,
+            StaffUserId = staffUserId
+        };
+
+        var result = await Mediator.Send(command, cancellationToken);
         return Ok(result);
     }
 }
