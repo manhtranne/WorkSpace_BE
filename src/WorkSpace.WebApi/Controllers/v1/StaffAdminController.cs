@@ -1,12 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WorkSpace.Application.DTOs.Bookings;
+using WorkSpace.Application.DTOs.Support;
 using WorkSpace.Application.Enums;
 using WorkSpace.Application.Extensions;
 using WorkSpace.Application.Features.Bookings.Commands;
 using WorkSpace.Application.Features.Bookings.Queries; 
 using WorkSpace.Application.Features.Reviews.Commands;
 using WorkSpace.Application.Features.Reviews.Queries;
+using WorkSpace.Application.Features.SupportTickets.Commands;
+using WorkSpace.Application.Features.SupportTickets.Queries;
 using WorkSpace.Application.Features.WorkSpace.Commands;
 using WorkSpace.Application.Features.WorkSpace.Queries;
 using WorkSpace.Application.Wrappers;
@@ -157,6 +160,56 @@ public class StaffAdminController : BaseApiController
             PaymentMethod = request.PaymentMethod,
             TransactionId = request.TransactionId,
             Amount = request.Amount,
+            StaffUserId = staffUserId
+        };
+
+        var result = await Mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("support-tickets")]
+    public async Task<IActionResult> GetSupportTickets(
+        [FromQuery] GetSupportTicketsQuery query,
+        CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(query, cancellationToken);
+        return Ok(result);
+    }
+
+
+    [HttpPost("support-tickets/{ticketId}/reply")]
+    public async Task<IActionResult> ReplyToTicket(
+        [FromRoute] int ticketId,
+        [FromBody] StaffReplyRequest request,
+        CancellationToken cancellationToken)
+    {
+        var staffUserId = User.GetUserId();
+        if (staffUserId == 0) return Unauthorized(new Response<string>("Invalid user token"));
+
+        var command = new StaffReplyToTicketCommand
+        {
+            TicketId = ticketId,
+            Message = request.Message,
+            StaffUserId = staffUserId
+        };
+
+        var result = await Mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPut("support-tickets/{ticketId}/status")]
+    public async Task<IActionResult> UpdateTicketStatus(
+        [FromRoute] int ticketId,
+        [FromBody] UpdateTicketStatusRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        var staffUserId = User.GetUserId();
+        if (staffUserId == 0) return Unauthorized(new Response<string>("Invalid user token"));
+
+        var command = new UpdateTicketStatusCommand
+        {
+            TicketId = ticketId,
+            NewStatus = request.Status,
             StaffUserId = staffUserId
         };
 
