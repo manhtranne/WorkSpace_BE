@@ -12,6 +12,8 @@ namespace WorkSpace.Application.Interfaces
         DbSet<WorkSpaceRoom> WorkSpaceRooms { get; } 
         DbSet<BookingStatus> BookingStatuses { get; }
         DbSet<Payment> Payments { get; }
+        DbSet<SupportTicket> SupportTickets { get; }
+        DbSet<SupportTicketReply> SupportTicketReplies { get; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
         DbSet<TEntity> Set<TEntity>() where TEntity : class;
