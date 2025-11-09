@@ -34,6 +34,8 @@ namespace WorkSpace.Infrastructure
 
         public DbSet<WorkSpaceType> WorkSpaceTypes { get; set; }
 
+        public DbSet<SupportTicket> SupportTickets { get; set; }
+        public DbSet<SupportTicketReply> SupportTicketReplies { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -201,6 +203,32 @@ namespace WorkSpace.Infrastructure
                     .WithMany(u => u.Posts)
                     .HasForeignKey(p => p.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
+
+                modelBuilder.Entity<SupportTicket>(entity =>
+                {
+                    entity.HasOne(t => t.SubmittedByUser)
+                        .WithMany()
+                        .HasForeignKey(t => t.SubmittedByUserId)
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    entity.HasOne(t => t.AssignedToStaff)
+                        .WithMany() 
+                        .HasForeignKey(t => t.AssignedToStaffId)
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+                modelBuilder.Entity<SupportTicketReply>(entity =>
+                {
+                    entity.HasOne(r => r.Ticket)
+                        .WithMany(t => t.Replies)
+                        .HasForeignKey(r => r.TicketId)
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    entity.HasOne(r => r.RepliedByUser)
+                        .WithMany() 
+                        .HasForeignKey(r => r.RepliedByUserId)
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
 
                 #endregion
 
