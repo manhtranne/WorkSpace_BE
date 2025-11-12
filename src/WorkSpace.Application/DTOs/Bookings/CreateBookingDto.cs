@@ -9,9 +9,7 @@ namespace WorkSpace.Application.DTOs.Bookings
 {
     public class CreateBookingDto
     {
-        [Required]
-        [MaxLength(50)]
-        public required string BookingCode { get; set; }
+        public string? BookingCode { get; set; }
 
         public int? CustomerId { get; set; }
         public int? GuestId { get; set; }

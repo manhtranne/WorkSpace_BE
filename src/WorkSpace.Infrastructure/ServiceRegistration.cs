@@ -36,6 +36,7 @@ public static class ServiceRegistration
         services.AddScoped(typeof(IPaymentRepository), typeof(PaymentRepository));
         services.AddScoped(typeof(IBlockedTimeSlotRepository), typeof(BlockedTimeSlotRepository));
         services.AddScoped(typeof(IPostRepository), typeof(PostRepository));
+        services.AddScoped(typeof(IUserRepository), typeof(UserRepository));
 
         services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<WorkSpaceContext>());
         #endregion
@@ -50,6 +51,8 @@ public static class ServiceRegistration
         services.AddScoped<IVNPayService, VNPayService>();
         services.AddScoped<IPromotionService, PromotionService>();
         services.AddScoped<IBookingService, BookingService>();
+        services.AddScoped<IUserService, UserService>();
+        services.AddHttpContextAccessor();
         #endregion
 
         #region Identity

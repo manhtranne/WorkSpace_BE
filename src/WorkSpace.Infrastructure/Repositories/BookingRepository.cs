@@ -21,7 +21,7 @@ public class BookingRepository : IBookingRepository
     }
 
 
-    public async Task<int> CreateBookingAsync(int userId, CreateBookingDto bookingDto)
+    public async Task<int> CreateBookingCustomerAsync(int userId, CreateBookingDto bookingDto)
     {
         var booking = new Booking
         {
@@ -38,7 +38,7 @@ public class BookingRepository : IBookingRepository
             ServiceFee = bookingDto.ServiceFee,
             FinalAmount = bookingDto.FinalAmount,
             Currency = "VND",
-            BookingStatusId = 1 // Default to 'Pending'
+            BookingStatusId = 3 // 'Pending'
         };
         _context.Bookings.Add(booking);
         await _context.SaveChangesAsync();
@@ -110,4 +110,5 @@ public class BookingRepository : IBookingRepository
             await _context.SaveChangesAsync();
         }
     }
+
 }
