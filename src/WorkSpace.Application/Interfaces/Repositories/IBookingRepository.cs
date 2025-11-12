@@ -2,8 +2,15 @@
 
 namespace WorkSpace.Application.Interfaces.Repositories;
 
-public interface IBookingRepository : IGenericRepositoryAsync<Booking>
+public interface IBookingRepository 
 {
-    Task<bool> HasOverlapAsync(int workspaceId, DateTime startUtc, DateTime endUtc, CancellationToken ct);
-    Task<Booking?> GetByCodeAsync(string bookingCode, CancellationToken ct);
+    Task<IEnumerable<Booking>> GetAllBookingsAsync();
+    Task<Booking> GetBookingByIdAsync(int id);
+    Task<int> CreateBookingAsync(string userId);
+    Task<int> CreateBookingGuestAsync(string guestId);
+    Task UpdateBookingAsync(int id, Booking booking);
+    Task UpdateBookingStatusAsync(int bookingId, int bookingStatusId);
+    Task DeleteBookingAsync(int id);
+    Task<IEnumerable<Booking>> GetBookingsByUserIdAsync(string userId);
+
 }

@@ -4,21 +4,45 @@ using WorkSpace.Domain.Entities;
 
 namespace WorkSpace.Infrastructure.Repositories;
 
-public class BookingRepository : GenericRepositoryAsync<Booking>, IBookingRepository
+public class BookingRepository : IBookingRepository
 {
-    private readonly WorkSpaceContext _context;
-    public BookingRepository(WorkSpaceContext dbContext) : base(dbContext)
+    public Task<int> CreateBookingAsync(string userId)
     {
-        _context = dbContext;
+        throw new NotImplementedException();
     }
 
-    public  Task<bool> HasOverlapAsync(int workspaceId, DateTime startUtc, DateTime endUtc, CancellationToken ct)
+    public Task<int> CreateBookingGuestAsync(string guestId)
     {
-        return _context.Bookings
-            .Where(b => b.WorkSpaceRoomId == workspaceId && b.BookingStatusId != 3 && b.BookingStatusId != 6)
-            .AnyAsync(b => !(b.EndTimeUtc <= startUtc || b.StartTimeUtc >= endUtc), ct);
+        throw new NotImplementedException();
     }
 
-    public Task<Booking?> GetByCodeAsync(string bookingCode, CancellationToken ct)
-        => _context.Bookings.Include(x => x.Payment).FirstOrDefaultAsync(x => x.BookingCode == bookingCode, ct);
+    public Task DeleteBookingAsync(int id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<IEnumerable<Booking>> GetAllBookingsAsync()
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Booking> GetBookingByIdAsync(int id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<IEnumerable<Booking>> GetBookingsByUserIdAsync(string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task UpdateBookingAsync(int id, Booking booking)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task UpdateBookingStatusAsync(int bookingId, int bookingStatusId)
+    {
+        throw new NotImplementedException();
+    }
 }

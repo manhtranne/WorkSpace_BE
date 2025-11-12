@@ -45,7 +45,6 @@ public static class ServiceRegistration
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IDateTimeService, DateTimeService>();
         services.AddScoped<IAvailabilityService, AvailabilityService>();
-        services.AddScoped<IBookingPricingService, BookingPricingService>();
         services.AddScoped<ISearchService, SearchService>();
         services.AddScoped<IVNPayService, VNPayService>();
         services.AddScoped<IPromotionService, PromotionService>();
