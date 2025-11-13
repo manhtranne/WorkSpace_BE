@@ -111,4 +111,23 @@ public class BookingRepository : IBookingRepository
         }
     }
 
+
+    public Task<Booking?> GetByCodeAsync(string bookingCode, CancellationToken ct)
+        => _context.Bookings.Include(x => x.Payment).FirstOrDefaultAsync(x => x.BookingCode == bookingCode, ct);
+
+    public async Task<Booking?> GetBookingWithDetailsAsync(int bookingId, CancellationToken ct)
+    {
+        return await _context.Bookings
+            .Include(b => b.Customer)
+            .Include(b => b.WorkSpaceRoom)
+            .ThenInclude(r => r.WorkSpace)
+            .ThenInclude(ws => ws.Host)
+            .ThenInclude(h => h.User)
+            .FirstOrDefaultAsync(b => b.Id == bookingId, ct);
+    }
+
+    public Task<bool> HasOverlapAsync(int workspaceId, DateTime startUtc, DateTime endUtc, CancellationToken ct)
+    {
+        throw new NotImplementedException();
+    }
 }

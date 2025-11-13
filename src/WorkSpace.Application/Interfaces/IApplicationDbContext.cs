@@ -30,6 +30,10 @@ namespace WorkSpace.Application.Interfaces
         DbSet<WorkSpaceRoomAmenity> WorkSpaceRoomAmenities { get; }
         DbSet<WorkSpaceType> WorkSpaceTypes { get; }
         DbSet<Guest> Guests { get; }
+        
+        DbSet<ChatThread> ChatThreads { get; }
+        
+        DbSet<ChatMessage> ChatMessages { get; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
         DbSet<TEntity> Set<TEntity>() where TEntity : class;
