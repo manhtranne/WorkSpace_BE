@@ -10,7 +10,6 @@ public class PaymentMethod
     public string PaymentMethodName { get; set; }
     public decimal PaymentCost { get; set; }
 
-    // Quan hệ 1 - nhiều với FoodOrder
     [JsonIgnore]
     public ICollection<Booking> Bookings { get; set; }
 

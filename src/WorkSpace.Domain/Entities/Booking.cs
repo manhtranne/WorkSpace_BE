@@ -38,7 +38,7 @@ public class Booking : AuditableBaseEntity
     [MaxLength(500)]
     public string? CancellationReason { get; set; }
     public bool IsReviewed { get; set; } = false;
-    public int PaymentMethodID { get; set; }
+    public int? PaymentMethodID { get; set; }
 
     // Navigation properties
     public virtual AppUser? Customer { get; set; }
