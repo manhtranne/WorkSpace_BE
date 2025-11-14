@@ -33,7 +33,7 @@ public static class ServiceRegistration
         services.AddScoped(typeof(IWorkSpaceTypeRepository), typeof(WorkSpaceTypeRepository));
         services.AddScoped(typeof(IBookingRepository), typeof(BookingRepository));
         services.AddScoped(typeof(IGuestRepository), typeof(GuestRepository));
-        services.AddScoped(typeof(IPaymentRepository), typeof(PaymentRepository));
+        //services.AddScoped(typeof(IPaymentRepository), typeof(PaymentRepository));
         services.AddScoped(typeof(IBlockedTimeSlotRepository), typeof(BlockedTimeSlotRepository));
         services.AddScoped(typeof(IPostRepository), typeof(PostRepository));
         services.AddScoped(typeof(IUserRepository), typeof(UserRepository));
