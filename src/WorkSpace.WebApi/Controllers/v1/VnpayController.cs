@@ -18,17 +18,20 @@ namespace WorkSpace.WebApi.Controllers.v1
         private readonly IConfiguration _configuration;
         private readonly IVnpay _vnpay;
         private readonly IBookingRepository _bookingRepository;
+        private readonly IBlockedTimeSlotRepository _blockedTimeSlotRepository;
         private readonly IHubContext<OrderHub> _hubContext;
 
         public VnpayController(
             IConfiguration configuration,
             IVnpay vnpay,
             IBookingRepository bookingRepository,
+            IBlockedTimeSlotRepository blockedTimeSlotRepository,
             IHubContext<OrderHub> hubContext)
         {
             _configuration = configuration;
             _vnpay = vnpay;
             _bookingRepository = bookingRepository;
+            _blockedTimeSlotRepository = blockedTimeSlotRepository;
             _hubContext = hubContext;
 
             _vnpay.Initialize(
@@ -91,10 +94,15 @@ namespace WorkSpace.WebApi.Controllers.v1
                 int bookingId = ExtractBookingIdFromOrderInfo(orderInfo);
                 if (bookingId == 0)
                     return RedirectWithError("Booking ID trong thông tin đơn hàng không hợp lệ");
+                var booking = await _bookingRepository.GetBookingByIdAsync(bookingId);
+                if (booking == null)
+                    return RedirectWithError("Booking không tồn tại");
 
                 if (result.IsSuccess)
                 {
                     await _bookingRepository.UpdateBookingStatusAsync(bookingId, 9);
+                    await _bookingRepository.UpdatePaymentMethod(bookingId, 2);
+                    await _blockedTimeSlotRepository.CreateBlockedTimeForBookingAsync(booking.WorkSpaceRoomId, bookingId, booking.StartTimeUtc, booking.EndTimeUtc);
                     await _hubContext.Clients.Group("Staff")
                         .SendAsync("New Booking", $"Booking #{bookingId} has been paid successfully");
                 }

@@ -91,7 +91,7 @@ public class BookingRepository : IBookingRepository
 
     public async Task<IEnumerable<Booking>> GetBookingsByUserIdAsync(int userId)
     {
-        return await _context.Bookings
+        return await _context.Bookings.Include(b => b.WorkSpaceRoom)
             .Where(b => b.CustomerId == userId)
             .ToListAsync();
     }
@@ -129,5 +129,17 @@ public class BookingRepository : IBookingRepository
     public Task<bool> HasOverlapAsync(int workspaceId, DateTime startUtc, DateTime endUtc, CancellationToken ct)
     {
         throw new NotImplementedException();
+    }
+
+    public async Task<int> UpdatePaymentMethod(int bookingId, int paymentMethodId)
+    {
+        var booking = await _context.Bookings.FindAsync(bookingId);
+        if (booking != null)
+        {
+            booking.PaymentMethodID = paymentMethodId;
+            await _context.SaveChangesAsync();
+            return booking.Id;
+        }
+        return 0;
     }
 }
