@@ -42,7 +42,12 @@ namespace WorkSpace.WebApi.Controllers
         {
             var origin = GetOrigin();
             await _accountService.ForgotPassword(model, origin);
-            return Ok();
+            
+            return Ok(new 
+            { 
+                succeeded = true,
+                message = "Link reset password đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư." 
+            });
         }
         [HttpPost("reset-password")]
         // API Request URL: POST /api/accounts/reset-password
