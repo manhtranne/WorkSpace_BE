@@ -1,69 +1,79 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using WorkSpace.Application.Interfaces.Services;
+using WorkSpace.Application.DTOs.Guest;
 using WorkSpace.Application.DTOs.Bookings;
+using WorkSpace.Application.DTOs.Customer;
+using WorkSpace.Application.Interfaces.Repositories;
 using WorkSpace.Application.Extensions;
-using WorkSpace.Application.Features.Bookings.Commands;
-using WorkSpace.Application.Features.Bookings.Queries;
 
-namespace WorkSpace.WebApi.Controllers.v1;
-[Route("api/v1/bookings")]
-public class BookingController : BaseApiController
+
+namespace WorkSpace.WebApi.Controllers.v1
 {
-    /// <summary>
-    /// Create a new booking
-    /// </summary>
-    [HttpPost]
-    [Authorize]
-    public async Task<IActionResult> Create([FromBody] CreateBookingRequest request, CancellationToken cancellationToken)
+    [Route("api/v1/booking")]
+    [ApiController]
+    public class BookingController : ControllerBase
     {
-        var userId = User.GetUserId();
-        if (userId == 0)
+        private readonly IBookingService _bookingService;
+        private readonly IBookingRepository _bookingRepository;
+        public BookingController(IBookingService bookingService, IBookingRepository bookingRepository)
         {
-            return Unauthorized("Invalid user token");
+            _bookingService = bookingService;
+            _bookingRepository = bookingRepository;
         }
 
-        // Override customerId from token for security
-        request.CustomerId = userId;
-
-        var command = new CreateBookingCommand 
-        { 
-            Model = request 
-        };
-
-        var result = await Mediator.Send(command, cancellationToken);
-        return Ok(result);
-    }
-
-    /// <summary>
-    /// Get all bookings for the current user
-    /// </summary>
-    [HttpGet("my-bookings")]
-    [Authorize]
-    public async Task<IActionResult> GetMyBookings(
-        [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 20,
-        [FromQuery] int? statusIdFilter = null,
-        [FromQuery] DateTimeOffset? startDateFilter = null,
-        [FromQuery] DateTimeOffset? endDateFilter = null,
-        CancellationToken cancellationToken = default)
-    {
-        var userId = User.GetUserId();
-        if (userId == 0)
+        [HttpGet("customer")]
+        public async Task<IActionResult> GetBookingById()
         {
-            return Unauthorized("Invalid user token");
+            var userId= User.GetUserId();
+            var bookings = await _bookingRepository.GetBookingsByUserIdAsync(userId);
+            if (bookings == null)
+            {
+                return NotFound(new { Message = "Booking not found." });
+            }
+            return Ok(bookings);
         }
 
-        var query = new GetUserBookingsQuery
-        {
-            UserId = userId,
-            PageNumber = pageNumber,
-            PageSize = pageSize,
-            StatusIdFilter = statusIdFilter,
-            StartDateFilter = startDateFilter,
-            EndDateFilter = endDateFilter
-        };
 
-        var result = await Mediator.Send(query, cancellationToken);
-        return Ok(result);
+
+        [HttpPost("guest")]
+        public async Task<IActionResult> CreateGuestBooking([FromBody] GuestBookingRequestDto request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                var bookingDto = request.BookingDetails;
+                var guestInfo = request.GuestDetails;
+                int bookingId = await _bookingService.HandleGuestBookingAsync(bookingDto, guestInfo);
+                return Ok(new { BookingId = bookingId, Message = "Booking created successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "An error occurred while processing the booking.", Details = ex.Message });
+            }
+        }
+
+
+        [HttpPost("customer")]
+        public async Task<IActionResult> CreateCustomerBooking([FromBody] CustomerBookingRequestDto request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                var bookingDto = request.BookingDetails;
+                var customerInfo = request.CustomerDetails;
+                int bookingId = await _bookingService.HandleCustomerBookingAsync(bookingDto, customerInfo);
+                return Ok(new { BookingId = bookingId, Message = "Booking created successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "An error occurred while processing the booking.", Details = ex.Message });
+            }
+        }
     }
 }

@@ -11,7 +11,7 @@ namespace WorkSpace.Application.Interfaces
         DbSet<AppUser> Users { get; }
         DbSet<WorkSpaceRoom> WorkSpaceRooms { get; }
         DbSet<BookingStatus> BookingStatuses { get; }
-        DbSet<Payment> Payments { get; }
+        DbSet<PaymentMethod> PaymentMethods { get; }
         DbSet<SupportTicket> SupportTickets { get; }
         DbSet<SupportTicketReply> SupportTicketReplies { get; }
 
@@ -29,6 +29,11 @@ namespace WorkSpace.Application.Interfaces
         DbSet<WorkSpaceRoomImage> WorkSpaceRoomImages { get; }
         DbSet<WorkSpaceRoomAmenity> WorkSpaceRoomAmenities { get; }
         DbSet<WorkSpaceType> WorkSpaceTypes { get; }
+        DbSet<Guest> Guests { get; }
+        
+        DbSet<ChatThread> ChatThreads { get; }
+        
+        DbSet<ChatMessage> ChatMessages { get; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
         DbSet<TEntity> Set<TEntity>() where TEntity : class;

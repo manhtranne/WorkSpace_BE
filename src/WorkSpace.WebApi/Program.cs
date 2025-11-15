@@ -1,8 +1,10 @@
 using Serilog;
 using WorkSpace.Application.Extensions;
+using WorkSpace.Application.Hubs;
 using WorkSpace.Infrastructure;
 using WorkSpace.Infrastructure.Seeds;
 using WorkSpace.WebApi.Extensions;
+using WorkSpace.WebApi.Hubs;
 using WorkSpace.WebApi.Middlewares;
 
 
@@ -15,8 +17,16 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.AddPresentation();
 
-var app = builder.Build();
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .CreateLogger();
 
+
+builder.Logging.ClearProviders();
+builder.Host.UseSerilog();
+var app = builder.Build();
 
 
 var scope = app.Services.CreateScope();
@@ -50,4 +60,8 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<OrderHub>("/orderHub");
+
+
+app.MapHub<ChatHub>("/hubs/chat");
 app.Run();
