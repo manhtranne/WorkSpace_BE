@@ -75,53 +75,69 @@ namespace WorkSpace.WebApi.Controllers.v1
             }
         }
 
-        [HttpGet("callback")]
-        public async Task<IActionResult> VNPayCallback()
+     [HttpGet("callback")]
+public async Task<IActionResult> VNPayCallback()
+{
+    var query = Request.Query;
+
+    try
+    {
+        var result = _vnpay.GetPaymentResult(query);
+
+        if (!result.IsSuccess)
+            return RedirectWithError("Giao dịch VNPAY thất bại: " + (result.TransactionStatus?.Description ?? result.Description));
+
+        var orderInfo = query["vnp_OrderInfo"];
+        if (string.IsNullOrEmpty(orderInfo))
+            return RedirectWithError("Không có thông tin đơn hàng từ VNPAY");
+
+        int bookingId = ExtractBookingIdFromOrderInfo(orderInfo);
+        if (bookingId == 0)
+            return RedirectWithError("Booking ID trong thông tin đơn hàng không hợp lệ");
+        
+        var booking = await _bookingRepository.GetBookingByIdAsync(bookingId);
+        if (booking == null)
+            return RedirectWithError("Booking không tồn tại");
+
+    
+        if (booking.BookingStatusId != 9) 
         {
-            var query = Request.Query;
-
-            try
+            if (result.IsSuccess)
             {
-                var result = _vnpay.GetPaymentResult(query);
+              
+                var confirmedStatusId = 9; 
+    
+                var vnpayMethodId = 2; 
 
-                if (!result.IsSuccess)
-                    return RedirectWithError("Giao dịch VNPAY thất bại: " + (result.TransactionStatus?.Description ?? result.Description));
+                booking.BookingStatusId = confirmedStatusId;
+                booking.PaymentMethodID = vnpayMethodId;
+                booking.PaymentTransactionId = query["vnp_TransactionNo"]; 
+                
+                await _bookingRepository.UpdateBookingAsync(booking.Id, booking); 
 
-                var orderInfo = query["vnp_OrderInfo"];
-                if (string.IsNullOrEmpty(orderInfo))
-                    return RedirectWithError("Không có thông tin đơn hàng từ VNPAY");
-
-                int bookingId = ExtractBookingIdFromOrderInfo(orderInfo);
-                if (bookingId == 0)
-                    return RedirectWithError("Booking ID trong thông tin đơn hàng không hợp lệ");
-                var booking = await _bookingRepository.GetBookingByIdAsync(bookingId);
-                if (booking == null)
-                    return RedirectWithError("Booking không tồn tại");
-
-                if (result.IsSuccess)
-                {
-                    await _bookingRepository.UpdateBookingStatusAsync(bookingId, 9);
-                    await _bookingRepository.UpdatePaymentMethod(bookingId, 2);
-                    await _blockedTimeSlotRepository.CreateBlockedTimeForBookingAsync(booking.WorkSpaceRoomId, bookingId, booking.StartTimeUtc, booking.EndTimeUtc);
-                    await _hubContext.Clients.Group("Staff")
-                        .SendAsync("New Booking", $"Booking #{bookingId} has been paid successfully");
-                }
-                else
-                {
-                    await _bookingRepository.UpdateBookingStatusAsync(bookingId, 10);
-                }
-
-                //string redirectUrl = $"{_configuration["Vnpay:ClientReturnUrl"]}/payment-result?status={(result.IsSuccess ? "success" : "failed")}&bookingId={bookingId}";
-                string redirectUrl = $"{_configuration["Vnpay:ClientReturnUrl"]}/payment-result?status={(result.IsSuccess ? "success" : "failed")}";
-
-
-                return Redirect(redirectUrl);
+                await _blockedTimeSlotRepository.CreateBlockedTimeForBookingAsync(booking.WorkSpaceRoomId, bookingId, booking.StartTimeUtc, booking.EndTimeUtc);
+                await _hubContext.Clients.Group("Staff")
+                    .SendAsync("New Booking", $"Booking #{bookingId} has been paid successfully");
             }
-            catch (Exception ex)
+            else
             {
-                return Redirect($"{_configuration["Vnpay:ClientReturnUrl"]}?status=error&message={ex.Message}");
+              
+                booking.BookingStatusId = 10; 
+                await _bookingRepository.UpdateBookingAsync(booking.Id, booking);
             }
         }
+
+      
+        string redirectUrl = $"{_configuration["Vnpay:ClientReturnUrl"]}/payment-result?status={(result.IsSuccess ? "success" : "failed")}";
+
+
+        return Redirect(redirectUrl);
+    }
+    catch (Exception ex)
+    {
+        return Redirect($"{_configuration["Vnpay:ClientReturnUrl"]}?status=error&message={ex.Message}");
+    }
+}
 
         [HttpGet("ipn-action")]
         public IActionResult IpnAction()
