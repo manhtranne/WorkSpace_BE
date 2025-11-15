@@ -6,6 +6,7 @@ using WorkSpace.Application.DTOs.Customer;
 using WorkSpace.Application.Interfaces.Repositories;
 using WorkSpace.Application.Extensions;
 
+
 namespace WorkSpace.WebApi.Controllers.v1
 {
     [Route("api/v1/booking")]
@@ -32,6 +33,8 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(bookings);
         }
 
+
+
         [HttpPost("guest")]
         public async Task<IActionResult> CreateGuestBooking([FromBody] GuestBookingRequestDto request)
         {
@@ -51,6 +54,7 @@ namespace WorkSpace.WebApi.Controllers.v1
                 return StatusCode(500, new { Message = "An error occurred while processing the booking.", Details = ex.Message });
             }
         }
+
 
         [HttpPost("customer")]
         public async Task<IActionResult> CreateCustomerBooking([FromBody] CustomerBookingRequestDto request)

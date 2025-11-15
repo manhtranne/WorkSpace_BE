@@ -47,8 +47,9 @@ namespace WorkSpace.Infrastructure.Services
             await _userRepository.UpdateUserBasicInfoAsync(customerId, customerInfo);
             int bookingId = await _bookingRepository.CreateBookingCustomerAsync(customerId, bookingDto);
             return bookingId;
-
         }
+
+
 
 
     }

@@ -43,6 +43,7 @@
 //            };
 //        }
 
+
 //        // SECURITY: Verify booking ownership
 //        if (booking.CustomerId != request.UserId)
 //        {

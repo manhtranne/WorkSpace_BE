@@ -13,5 +13,6 @@ namespace WorkSpace.Application.Interfaces.Services
     {
         Task<int> HandleGuestBookingAsync(CreateBookingDto bookingDto, GuestInfo guestInfo);
         Task<int> HandleCustomerBookingAsync(CreateBookingDto bookingDto, CustomerInfo customerInfo);
+
     }
 }
