@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WorkSpace.Application.DTOs.Owner;
 using WorkSpace.Application.Enums;
 using WorkSpace.Application.Extensions;
 using WorkSpace.Application.Features.Owner.Commands;
 using WorkSpace.Application.Features.Owner.Queries;
-using WorkSpace.Application.DTOs.Owner;
+using WorkSpace.Application.Features.Refunds.Commands;
 
 namespace WorkSpace.WebApi.Controllers.v1
 {
@@ -128,6 +129,19 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(await Mediator.Send(command, ct));
         }
 
+        [HttpPost("refund-requests/{refundRequestId}/approve")]
+        public async Task<IActionResult> ApproveOrRejectRefund(
+            [FromRoute] int refundRequestId,
+            [FromBody] ApproveRefundCommand command, 
+            CancellationToken ct)
+        {
+            var userId = User.GetUserId();
+
+            command.RefundRequestId = refundRequestId;
+            command.OwnerUserId = userId;
+
+            return Ok(await Mediator.Send(command, ct));
+        }
         #endregion
 
         #region Performance & Reviews
