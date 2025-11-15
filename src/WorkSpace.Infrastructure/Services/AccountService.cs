@@ -298,8 +298,7 @@ public class AccountService : IAccountService
         {
             var account = await _userManager.FindByEmailAsync(model.Email);
 
-            // always return ok response to prevent email enumeration
-            if (account == null) return;
+            if (account == null) throw new ApiException($"No Accounts Registered with {model.Email}.");
 
             var code = await _userManager.GeneratePasswordResetTokenAsync(account);
             var route = "api/account/reset-password/";
