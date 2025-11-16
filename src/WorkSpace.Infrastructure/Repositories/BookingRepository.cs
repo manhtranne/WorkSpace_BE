@@ -96,11 +96,16 @@ public class BookingRepository : IBookingRepository
             .ToListAsync();
     }
 
-    public Task UpdateBookingAsync(int id, Booking booking)
+    public async Task UpdateBookingAsync(int id, Booking booking)
     {
-        throw new NotImplementedException();
+        if (id != booking.Id)
+        {
+        
+            return;
+        }
+        _context.Entry(booking).State = EntityState.Modified;
+        await _context.SaveChangesAsync();
     }
-
     public async Task UpdateBookingStatusAsync(int bookingId, int bookingStatusId)
     {
         var booking = await _context.Bookings.FindAsync(bookingId);
