@@ -43,7 +43,7 @@ namespace WorkSpace.WebApi.Controllers.v1
         }
 
         [HttpGet("create-payment-url")]
-        public async Task<ActionResult<string>> CreatePaymentUrl(int bookingId)
+        public async Task<ActionResult<object>> CreatePaymentUrl(int bookingId)
         {
             try
             {
@@ -57,7 +57,7 @@ namespace WorkSpace.WebApi.Controllers.v1
                 {
                     PaymentId = DateTime.Now.Ticks,
                     Money = (double)booking.FinalAmount,
-                    Description = $"Booking-{bookingId}",   
+                    Description = $"Booking-{bookingId}",
                     IpAddress = ipAddress,
                     BankCode = BankCode.ANY,
                     CreatedDate = DateTime.Now,
@@ -67,7 +67,11 @@ namespace WorkSpace.WebApi.Controllers.v1
 
                 var paymentUrl = _vnpay.GetPaymentUrl(request);
 
-                return Created(paymentUrl, paymentUrl);
+                var response = new
+                {
+                    url = paymentUrl
+                };
+                return Created(paymentUrl, response);
             }
             catch (Exception ex)
             {
@@ -111,8 +115,7 @@ namespace WorkSpace.WebApi.Controllers.v1
                     await _bookingRepository.UpdateBookingStatusAsync(bookingId, 10);
                 }
 
-                //string redirectUrl = $"{_configuration["Vnpay:ClientReturnUrl"]}/payment-result?status={(result.IsSuccess ? "success" : "failed")}&bookingId={bookingId}";
-                string redirectUrl = $"{_configuration["Vnpay:ClientReturnUrl"]}/payment-result?status={(result.IsSuccess ? "success" : "failed")}";
+                string redirectUrl = $"{_configuration["Vnpay:ClientReturnUrl"]}/payment-result/{(result.IsSuccess ? "success" : "failed")}?bookingCode={booking.BookingCode}";
 
 
                 return Redirect(redirectUrl);
