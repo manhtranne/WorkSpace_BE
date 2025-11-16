@@ -43,7 +43,7 @@ namespace WorkSpace.WebApi.Controllers.v1
         }
 
         [HttpGet("create-payment-url")]
-        public async Task<ActionResult<string>> CreatePaymentUrl(int bookingId)
+        public async Task<ActionResult<object>> CreatePaymentUrl(int bookingId)
         {
             try
             {
@@ -57,7 +57,7 @@ namespace WorkSpace.WebApi.Controllers.v1
                 {
                     PaymentId = DateTime.Now.Ticks,
                     Money = (double)booking.FinalAmount,
-                    Description = $"Booking-{bookingId}",   
+                    Description = $"Booking-{bookingId}",
                     IpAddress = ipAddress,
                     BankCode = BankCode.ANY,
                     CreatedDate = DateTime.Now,
@@ -67,7 +67,11 @@ namespace WorkSpace.WebApi.Controllers.v1
 
                 var paymentUrl = _vnpay.GetPaymentUrl(request);
 
-                return Created(paymentUrl, paymentUrl);
+                var response = new
+                {
+                    url = paymentUrl
+                };
+                return Created(paymentUrl, response);
             }
             catch (Exception ex)
             {
@@ -87,9 +91,7 @@ public async Task<IActionResult> VNPayCallback()
         if (!result.IsSuccess)
             return RedirectWithError("Giao dịch VNPAY thất bại: " + (result.TransactionStatus?.Description ?? result.Description));
 
-        var orderInfo = query["vnp_OrderInfo"];
-        if (string.IsNullOrEmpty(orderInfo))
-            return RedirectWithError("Không có thông tin đơn hàng từ VNPAY");
+                string redirectUrl = $"{_configuration["Vnpay:ClientReturnUrl"]}/payment-result/{(result.IsSuccess ? "success" : "failed")}?bookingCode={booking.BookingCode}";
 
         int bookingId = ExtractBookingIdFromOrderInfo(orderInfo);
         if (bookingId == 0)

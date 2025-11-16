@@ -17,7 +17,7 @@ public class BookingRepository : IBookingRepository
 
     private string GenerateBookingCode()
     {
-        return "BK-" + Guid.NewGuid().ToString("N")[..8].ToUpper();
+        return "CSB-" + Guid.NewGuid().ToString("N")[..8].ToUpper();
     }
 
 
@@ -146,6 +146,21 @@ public class BookingRepository : IBookingRepository
             return booking.Id;
         }
         return 0;
+    }
+
+    public async Task<PaymentResponseCode> GetBookingByBookingCodeAsync(string bookingCode)
+    {
+        return await _context.Bookings
+            .Where(b => b.BookingCode == bookingCode)
+            .Select(b => new PaymentResponseCode
+            {
+                BookingCode = b.BookingCode,
+                FinalAmount = b.FinalAmount,
+                StartTimeUtc = b.StartTimeUtc,
+                EndTimeUtc = b.EndTimeUtc,
+                Title = b.WorkSpaceRoom.Title    
+            })
+            .FirstOrDefaultAsync();
     }
 
 }
