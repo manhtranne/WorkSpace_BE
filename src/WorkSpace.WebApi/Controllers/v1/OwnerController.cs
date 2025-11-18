@@ -24,6 +24,19 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(await Mediator.Send(query, ct));
         }
 
+        [HttpPut("workspaces/{id}")]
+        public async Task<IActionResult> UpdateWorkSpace(int id, [FromBody] UpdateWorkSpaceDto dto, CancellationToken ct)
+        {
+            var userId = User.GetUserId();
+            var command = new UpdateWorkSpaceCommand
+            {
+                WorkSpaceId = id,
+                Dto = dto,
+                OwnerUserId = userId
+            };
+            return Ok(await Mediator.Send(command, ct));
+        }
+
         [HttpPost("workspaces")]
         public async Task<IActionResult> CreateWorkSpace([FromBody] CreateWorkSpaceDto dto, CancellationToken ct)
         {
@@ -97,10 +110,11 @@ namespace WorkSpace.WebApi.Controllers.v1
         [HttpGet("bookings")]
         public async Task<IActionResult> GetMyBookings([FromQuery] GetOwnerBookingsQuery query, CancellationToken ct)
         {
-            query.OwnerUserId = User.GetUserId();
-            return Ok(await Mediator.Send(query, ct));
-        }
 
+            query.OwnerUserId = User.GetUserId();
+            var result = await Mediator.Send(query, ct);
+            return Ok(result);
+        }
         [HttpPut("bookings/{bookingId}/confirm")]
         public async Task<IActionResult> ConfirmBooking(int bookingId, CancellationToken ct)
         {
@@ -147,13 +161,22 @@ namespace WorkSpace.WebApi.Controllers.v1
         #region Performance & Reviews
 
 
-        [HttpGet("reviews")]
-        public async Task<IActionResult> GetMyReviews([FromQuery] GetOwnerReviewsQuery query, CancellationToken ct)
+        [HttpGet("workspaces/{workspaceId}/reviews")]
+        public async Task<IActionResult> GetReviewsByWorkspace(
+            int workspaceId,
+            CancellationToken ct = default)
         {
-            query.OwnerUserId = User.GetUserId();
-            return Ok(await Mediator.Send(query, ct));
-        }
+            var userId = User.GetUserId();
 
+            var query = new GetOwnerReviewsQuery
+            {
+                OwnerUserId = userId,
+                WorkSpaceIdFilter = workspaceId 
+            };
+
+            var result = await Mediator.Send(query, ct);
+            return Ok(result);
+        }
 
         [HttpGet("stats")]
         public async Task<IActionResult> GetMyStats([FromQuery] GetOwnerDashboardQuery query, CancellationToken ct)
@@ -163,5 +186,26 @@ namespace WorkSpace.WebApi.Controllers.v1
         }
 
         #endregion
+
+        [HttpGet("workspaces/{workspaceId}/rooms")]
+        public async Task<IActionResult> GetRoomsInWorkspace(
+            int workspaceId,
+            CancellationToken ct = default)
+        {
+            var userId = User.GetUserId();
+
+            var query = new WorkSpace.Application.Features.Owner.Queries.GetOwnerWorkspaceRoomsQuery
+            {
+                OwnerUserId = userId,
+                WorkspaceId = workspaceId
+            };
+
+
+            var result = await Mediator.Send(query, ct);
+
+            return Ok(result);
+        }
+
+   
     }
 }
