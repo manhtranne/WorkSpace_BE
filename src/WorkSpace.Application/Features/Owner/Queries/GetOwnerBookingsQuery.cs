@@ -4,12 +4,14 @@ using WorkSpace.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using WorkSpace.Application.DTOs.Bookings;
 using WorkSpace.Application.Interfaces.Repositories;
+using System.Text.Json.Serialization;
 
 namespace WorkSpace.Application.Features.Owner.Queries
 {
  
     public class GetOwnerBookingsQuery : IRequest<Response<IEnumerable<BookingAdminDto>>>
     {
+        [JsonIgnore]
         public int OwnerUserId { get; set; }
 
         public int? StatusIdFilter { get; set; }
