@@ -21,7 +21,9 @@ namespace WorkSpace.WebApi.Controllers.v1
         {
             var userId = User.GetUserId();
             var query = new GetOwnerWorkspacesQuery { OwnerUserId = userId };
-            return Ok(await Mediator.Send(query, ct));
+
+            var result = await Mediator.Send(query, ct);
+            return Ok(result.Data);
         }
 
         [HttpPut("workspaces/{id}")]
@@ -34,6 +36,7 @@ namespace WorkSpace.WebApi.Controllers.v1
                 Dto = dto,
                 OwnerUserId = userId
             };
+
             return Ok(await Mediator.Send(command, ct));
         }
 
@@ -53,7 +56,7 @@ namespace WorkSpace.WebApi.Controllers.v1
         public async Task<IActionResult> CreateWorkSpaceRoom(int workspaceId, [FromBody] CreateWorkSpaceRoomDto dto, CancellationToken ct)
         {
             var userId = User.GetUserId();
-            var command = new CreateWorkSpaceRoomCommand 
+            var command = new CreateWorkSpaceRoomCommand
             {
                 WorkspaceId = workspaceId,
                 Dto = dto,
@@ -62,7 +65,7 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(await Mediator.Send(command, ct));
         }
 
-  
+
         [HttpPut("rooms/{roomId}")]
         public async Task<IActionResult> UpdateWorkSpaceRoom(int roomId, [FromBody] UpdateWorkSpaceRoomDto dto, CancellationToken ct)
         {
@@ -106,15 +109,24 @@ namespace WorkSpace.WebApi.Controllers.v1
 
         #region Booking Management
 
-
         [HttpGet("bookings")]
-        public async Task<IActionResult> GetMyBookings([FromQuery] GetOwnerBookingsQuery query, CancellationToken ct)
+        public async Task<IActionResult> GetMyBookings(
+            [FromQuery] int? statusIdFilter,
+            [FromQuery] int? workSpaceIdFilter,
+            CancellationToken ct)
         {
+            var query = new GetOwnerBookingsQuery
+            {
+                OwnerUserId = User.GetUserId(),
+                StatusIdFilter = statusIdFilter,
+                WorkSpaceIdFilter = workSpaceIdFilter
+            };
 
-            query.OwnerUserId = User.GetUserId();
             var result = await Mediator.Send(query, ct);
-            return Ok(result);
+
+            return Ok(result.Data);
         }
+
         [HttpPut("bookings/{bookingId}/confirm")]
         public async Task<IActionResult> ConfirmBooking(int bookingId, CancellationToken ct)
         {
@@ -128,7 +140,7 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(await Mediator.Send(command, ct));
         }
 
- 
+
         [HttpPut("bookings/{bookingId}/cancel")]
         public async Task<IActionResult> CancelBooking(int bookingId, [FromBody] CancelBookingDto dto, CancellationToken ct)
         {
@@ -146,7 +158,7 @@ namespace WorkSpace.WebApi.Controllers.v1
         [HttpPost("refund-requests/{refundRequestId}/approve")]
         public async Task<IActionResult> ApproveOrRejectRefund(
             [FromRoute] int refundRequestId,
-            [FromBody] ApproveRefundCommand command, 
+            [FromBody] ApproveRefundCommand command,
             CancellationToken ct)
         {
             var userId = User.GetUserId();
@@ -171,18 +183,30 @@ namespace WorkSpace.WebApi.Controllers.v1
             var query = new GetOwnerReviewsQuery
             {
                 OwnerUserId = userId,
-                WorkSpaceIdFilter = workspaceId 
+                WorkSpaceIdFilter = workspaceId
             };
 
             var result = await Mediator.Send(query, ct);
-            return Ok(result);
+
+            return Ok(result.Data);
         }
 
         [HttpGet("stats")]
-        public async Task<IActionResult> GetMyStats([FromQuery] GetOwnerDashboardQuery query, CancellationToken ct)
+        public async Task<IActionResult> GetMyStats(
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate,
+            CancellationToken ct)
         {
-            query.OwnerUserId = User.GetUserId();
-            return Ok(await Mediator.Send(query, ct));
+            var query = new GetOwnerDashboardQuery
+            {
+                OwnerUserId = User.GetUserId(),
+                StartDate = startDate,
+                EndDate = endDate
+            };
+
+            var result = await Mediator.Send(query, ct);
+
+            return Ok(result.Data);
         }
 
         #endregion
@@ -200,12 +224,9 @@ namespace WorkSpace.WebApi.Controllers.v1
                 WorkspaceId = workspaceId
             };
 
-
             var result = await Mediator.Send(query, ct);
 
             return Ok(result);
         }
-
-   
     }
 }
