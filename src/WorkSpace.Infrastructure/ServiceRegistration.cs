@@ -56,6 +56,8 @@ public static class ServiceRegistration
         services.AddScoped<IBookingService, BookingService>();
         services.AddScoped<IUserService, UserService>();
         services.AddHttpContextAccessor();
+        services.AddScoped(typeof(IRecommendationService), typeof(RecommendationService));
+        services.AddScoped(typeof(IAIChatbotService), typeof(AIChatbotService));
         #endregion
 
         #region Identity
