@@ -95,7 +95,8 @@ public static class ServiceRegistration
                         ClockSkew = TimeSpan.Zero,
                         ValidIssuer = configuration["JWTSettings:Issuer"],
                         ValidAudience = configuration["JWTSettings:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWTSettings:Key"]))
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWTSettings:Key"])),
+                        RoleClaimType = "role"
                     };
                     o.Events = new JwtBearerEvents()
                     {
