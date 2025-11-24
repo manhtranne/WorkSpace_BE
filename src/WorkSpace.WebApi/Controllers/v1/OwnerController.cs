@@ -155,6 +155,32 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(await Mediator.Send(command, ct));
         }
 
+        [HttpPut("bookings/{bookingId}/check-in")]
+        public async Task<IActionResult> CheckInBooking(int bookingId, CancellationToken ct)
+        {
+            var userId = User.GetUserId();
+            var command = new ManageBookingCommand
+            {
+                BookingId = bookingId,
+                Action = BookingAction.CheckIn,
+                OwnerUserId = userId
+            };
+            return Ok(await Mediator.Send(command, ct));
+        }
+
+        [HttpPut("bookings/{bookingId}/check-out")]
+        public async Task<IActionResult> CheckOutBooking(int bookingId, CancellationToken ct)
+        {
+            var userId = User.GetUserId();
+            var command = new ManageBookingCommand
+            {
+                BookingId = bookingId,
+                Action = BookingAction.CheckOut,
+                OwnerUserId = userId
+            };
+            return Ok(await Mediator.Send(command, ct));
+        }
+
         [HttpPost("refund-requests/{refundRequestId}/approve")]
         public async Task<IActionResult> ApproveOrRejectRefund(
             [FromRoute] int refundRequestId,
