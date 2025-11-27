@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WorkSpace.Application.Extensions;
+using Microsoft.AspNetCore.Authorization;
 using WorkSpace.Application.Features.HostProfile.Commands.CreateHostProfile;
 using WorkSpace.Application.Features.HostProfile.Commands.UpdateHostProfile;
 using WorkSpace.Application.Features.HostProfile.Commands.DeleteHostProfile;
@@ -11,10 +13,14 @@ namespace WorkSpace.WebApi.Controllers.v1;
 [ApiController]
 public class HostProfileController : BaseApiController
 {
- 
+
     [HttpPost]
+    [Authorize] 
     public async Task<IActionResult> Create([FromBody] CreateHostProfileCommand command)
     {
+       
+        command.UserId = User.GetUserId();
+
         var result = await Mediator.Send(command);
         return Ok(result.Data);
     }
