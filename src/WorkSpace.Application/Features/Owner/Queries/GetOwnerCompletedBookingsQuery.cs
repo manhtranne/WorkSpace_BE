@@ -12,14 +12,14 @@ using WorkSpace.Application.Interfaces.Repositories;
 
 namespace WorkSpace.Application.Features.Owner.Queries
 {
-    // 1. Sửa kiểu trả về của IRequest thành IEnumerable<BookingAdminDto> (bỏ Response<...>)
+  
     public class GetOwnerCompletedBookingsQuery : IRequest<IEnumerable<BookingAdminDto>>
     {
         [JsonIgnore]
         public int OwnerUserId { get; set; }
     }
 
-    // 2. Cập nhật IRequestHandler tương ứng
+
     public class GetOwnerCompletedBookingsQueryHandler : IRequestHandler<GetOwnerCompletedBookingsQuery, IEnumerable<BookingAdminDto>>
     {
         private readonly IApplicationDbContext _context;

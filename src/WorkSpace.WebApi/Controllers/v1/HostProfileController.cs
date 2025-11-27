@@ -18,13 +18,15 @@ public class HostProfileController : BaseApiController
     [Authorize] 
     public async Task<IActionResult> Create([FromBody] CreateHostProfileCommand command)
     {
-       
-        command.UserId = User.GetUserId();
+    
+        var userId = User.GetUserId();
+
+   
+        command.UserId = userId;
 
         var result = await Mediator.Send(command);
         return Ok(result.Data);
     }
-
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
