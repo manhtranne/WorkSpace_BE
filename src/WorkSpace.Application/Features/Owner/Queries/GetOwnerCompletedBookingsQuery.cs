@@ -1,21 +1,26 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 using WorkSpace.Application.DTOs.Bookings;
 using WorkSpace.Application.Exceptions;
 using WorkSpace.Application.Interfaces;
 using WorkSpace.Application.Interfaces.Repositories;
-using WorkSpace.Application.Wrappers;
 
 namespace WorkSpace.Application.Features.Owner.Queries
 {
-    public class GetOwnerCompletedBookingsQuery : IRequest<Response<IEnumerable<BookingAdminDto>>>
+    // 1. Sửa kiểu trả về của IRequest thành IEnumerable<BookingAdminDto> (bỏ Response<...>)
+    public class GetOwnerCompletedBookingsQuery : IRequest<IEnumerable<BookingAdminDto>>
     {
         [JsonIgnore]
         public int OwnerUserId { get; set; }
     }
 
-    public class GetOwnerCompletedBookingsQueryHandler : IRequestHandler<GetOwnerCompletedBookingsQuery, Response<IEnumerable<BookingAdminDto>>>
+    // 2. Cập nhật IRequestHandler tương ứng
+    public class GetOwnerCompletedBookingsQueryHandler : IRequestHandler<GetOwnerCompletedBookingsQuery, IEnumerable<BookingAdminDto>>
     {
         private readonly IApplicationDbContext _context;
         private readonly IHostProfileAsyncRepository _hostRepo;
@@ -26,7 +31,7 @@ namespace WorkSpace.Application.Features.Owner.Queries
             _hostRepo = hostRepo;
         }
 
-        public async Task<Response<IEnumerable<BookingAdminDto>>> Handle(GetOwnerCompletedBookingsQuery request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<BookingAdminDto>> Handle(GetOwnerCompletedBookingsQuery request, CancellationToken cancellationToken)
         {
             var hostProfile = await _hostRepo.GetHostProfileByUserId(request.OwnerUserId, cancellationToken);
             if (hostProfile == null) throw new ApiException("Owner profile not found.");
@@ -36,12 +41,11 @@ namespace WorkSpace.Application.Features.Owner.Queries
                 .Include(b => b.WorkSpaceRoom.WorkSpace)
                 .Include(b => b.BookingStatus)
                 .Where(b => b.WorkSpaceRoom.WorkSpace.HostId == hostProfile.Id)
-                .Where(b => b.BookingStatus.Name == "Completed") 
-                .OrderByDescending(b => b.CreateUtc) 
+                .Where(b => b.BookingStatus.Name == "Completed")
+                .OrderByDescending(b => b.CreateUtc)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
-         
             var dtos = bookings.Select(b => new BookingAdminDto
             {
                 Id = b.Id,
@@ -63,7 +67,8 @@ namespace WorkSpace.Application.Features.Owner.Queries
                 IsReviewed = b.IsReviewed
             }).ToList();
 
-            return new Response<IEnumerable<BookingAdminDto>>(dtos);
+     
+            return dtos;
         }
     }
 }
