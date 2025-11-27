@@ -21,6 +21,9 @@ public partial class CreateHostProfileCommand : IRequest<Response<int>>
     public string? LogoUrl { get; set; }
     public string? WebsiteUrl { get; set; }
 
+    public string? Avatar { get; set; }
+    public string? CoverPhoto { get; set; }
+
 }
 
 public class CreateHostProfileCommandHandler : IRequestHandler<CreateHostProfileCommand, Response<int>>
