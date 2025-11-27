@@ -18,6 +18,8 @@ public class UpdateHostProfileCommand : IRequest<Response<int>>
     public string? LogoUrl { get; set; }
     public string? WebsiteUrl { get; set; }
     public bool? IsVerified { get; set; }
+    public string? Avatar { get; set; }
+    public string? CoverPhoto { get; set; }
 }
 
 public class UpdateHostProfileCommandHandler : IRequestHandler<UpdateHostProfileCommand, Response<int>>
@@ -60,7 +62,12 @@ public class UpdateHostProfileCommandHandler : IRequestHandler<UpdateHostProfile
             
         if (!string.IsNullOrEmpty(request.WebsiteUrl))
             hostProfile.WebsiteUrl = request.WebsiteUrl;
-            
+        if (!string.IsNullOrEmpty(request.Avatar))
+            hostProfile.Avatar = request.Avatar;
+
+        if (!string.IsNullOrEmpty(request.CoverPhoto))
+            hostProfile.CoverPhoto = request.CoverPhoto;
+
         if (request.IsVerified.HasValue)
             hostProfile.IsVerified = request.IsVerified.Value;
 
@@ -105,5 +112,13 @@ public class UpdateHostProfileCommandValidator : AbstractValidator<UpdateHostPro
         RuleFor(p => p.WebsiteUrl)
             .MaximumLength(200).WithMessage("{PropertyName} must not exceed 200 characters.")
             .When(p => !string.IsNullOrEmpty(p.WebsiteUrl));
+
+        RuleFor(p => p.Avatar)
+    .MaximumLength(1000).WithMessage("{PropertyName} must not exceed 1000 characters.")
+    .When(p => !string.IsNullOrEmpty(p.Avatar));
+
+        RuleFor(p => p.CoverPhoto)
+            .MaximumLength(1000).WithMessage("{PropertyName} must not exceed 1000 characters.")
+            .When(p => !string.IsNullOrEmpty(p.CoverPhoto));
     }
 }
