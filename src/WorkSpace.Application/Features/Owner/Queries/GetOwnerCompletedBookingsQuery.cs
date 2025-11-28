@@ -64,3 +64,9 @@ namespace WorkSpace.Application.Features.Owner.Queries
                 CheckedInAt = b.CheckedInAt,
                 CheckedOutAt = b.CheckedOutAt,
                 IsReviewed = b.IsReviewed
+            });
+
+            return new Response<IEnumerable<BookingAdminDto>>(dtos.ToList());
+        }
+    }
+}
