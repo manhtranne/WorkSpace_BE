@@ -1,4 +1,6 @@
-﻿namespace WorkSpace.Application.DTOs.WorkSpaces
+﻿
+
+namespace WorkSpace.Application.DTOs.WorkSpaces
 {
     public class WorkSpaceRoomListItemDto
     {
@@ -9,6 +11,7 @@
 
         public string? City { get; set; }
 
+        [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
         public string? ThumbnailUrl { get; set; }
         public List<string>? ImageUrls { get; set; }
         public decimal PricePerDay { get; set; }
