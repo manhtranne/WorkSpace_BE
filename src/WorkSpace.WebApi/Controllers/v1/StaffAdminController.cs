@@ -17,6 +17,7 @@ using WorkSpace.Application.Features.SupportTickets.Queries;
 using WorkSpace.Application.Features.WorkSpace.Commands;
 using WorkSpace.Application.Features.WorkSpace.Queries;
 using WorkSpace.Application.Wrappers;
+using WorkSpace.Application.Features.HostProfile.Commands.ApproveHostProfile;
 
 namespace WorkSpace.WebApi.Controllers.v1;
 
@@ -29,29 +30,34 @@ public class StaffAdminController : BaseApiController
 {
     [HttpGet("reviews")]
     public async Task<IActionResult> GetAllReviewsForModeration(
-        [FromQuery] GetAllReviewsForModerationQuery query,
-        CancellationToken cancellationToken)
+            [FromQuery] bool? isVerified,
+            [FromQuery] bool? isPublic,
+            CancellationToken cancellationToken)
     {
+        var query = new GetAllReviewsForModerationQuery
+        {
+            IsVerifiedFilter = isVerified,
+            IsPublicFilter = isPublic
+        };
+        
         var result = await Mediator.Send(query, cancellationToken);
         return Ok(result);
     }
-
     [HttpPut("reviews/{reviewId}/moderate")]
     public async Task<IActionResult> ModerateReview(
         [FromRoute] int reviewId,
         [FromBody] ModerateReviewCommand command,
         CancellationToken cancellationToken)
     {
-        
         command.ReviewId = reviewId;
-
         var result = await Mediator.Send(command, cancellationToken);
-   
+
         if (!result.Succeeded)
         {
-            return BadRequest(result);
+            return BadRequest(new { error = result.Message });
         }
-        return Ok(result);
+    
+        return Ok(result.Data);
     }
 
 
@@ -64,49 +70,44 @@ public class StaffAdminController : BaseApiController
     //    return Ok(result); 
     //}
 
-
     [HttpGet("workspaces/pending")]
     public async Task<IActionResult> GetPendingWorkSpaces(
-        [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 10,
-        CancellationToken cancellationToken = default)
+           CancellationToken cancellationToken = default)
     {
-        var query = new GetPendingWorkSpacesQuery(pageNumber, pageSize);
+        var query = new GetPendingWorkSpacesQuery();
         var result = await Mediator.Send(query, cancellationToken);
         return Ok(result);
     }
-
 
     [HttpGet("workspaces")]
     public async Task<IActionResult> GetAllWorkSpaces(
-        [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 10,
-        [FromQuery] bool? isVerified = null,
-        CancellationToken cancellationToken = default)
+           [FromQuery] bool? isVerified = null,
+           CancellationToken cancellationToken = default)
     {
-        var query = new GetAllWorkSpacesQuery(pageNumber, pageSize, isVerified);
+        var query = new GetAllWorkSpacesQuery(IsVerified: isVerified);
         var result = await Mediator.Send(query, cancellationToken);
         return Ok(result);
     }
 
-
     [HttpPut("workspaces/{workSpaceId}/approve")]
     public async Task<IActionResult> ApproveWorkSpace(
-        [FromRoute] int workSpaceId,
-        [FromBody] Application.DTOs.WorkSpaces.ApproveWorkSpaceDto dto,
-        CancellationToken cancellationToken = default)
+         [FromRoute] int workSpaceId,
+         [FromBody] Application.DTOs.WorkSpaces.ApproveWorkSpaceDto dto,
+         CancellationToken cancellationToken = default)
     {
         dto.WorkSpaceId = workSpaceId;
         var command = new ApproveWorkSpaceCommand(dto);
         var result = await Mediator.Send(command, cancellationToken);
-        
+
         if (!result.Succeeded)
         {
-            return BadRequest(result);
+            return BadRequest(new { error = result.Message });
         }
-        
-        return Ok(result);
+
+        return Ok(result.Data);
     }
+
+
     //[HttpPost("bookings/{bookingId}/cancel")]
     //public async Task<IActionResult> StaffCancelBooking(
     //    [FromRoute] int bookingId,
@@ -172,12 +173,12 @@ public class StaffAdminController : BaseApiController
     //}
     [HttpPost("bookings/{bookingId}/refund/request")]
     public async Task<IActionResult> RequestRefund(
-        [FromRoute] int bookingId,
-        [FromBody] CreateRefundRequestDto dto,
-        CancellationToken cancellationToken)
+         [FromRoute] int bookingId,
+         [FromBody] CreateRefundRequestDto dto,
+         CancellationToken cancellationToken)
     {
         var staffUserId = User.GetUserId();
-        if (staffUserId == 0) return Unauthorized(new Response<string>("Invalid user token"));
+        if (staffUserId == 0) return Unauthorized(new { error = "Invalid user token" });
 
         var command = new RequestRefundCommand
         {
@@ -187,16 +188,20 @@ public class StaffAdminController : BaseApiController
         };
 
         var result = await Mediator.Send(command, cancellationToken);
-        return Ok(result);
+
+        if (!result.Succeeded) return BadRequest(new { error = result.Message });
+
+      
+        return Ok(result.Data);
     }
 
     [HttpPost("refund-requests/{refundRequestId}/process")]
     public async Task<IActionResult> ProcessRefund(
-        [FromRoute] int refundRequestId,
-        CancellationToken cancellationToken)
+         [FromRoute] int refundRequestId,
+         CancellationToken cancellationToken)
     {
         var staffUserId = User.GetUserId();
-        if (staffUserId == 0) return Unauthorized(new Response<string>("Invalid user token"));
+        if (staffUserId == 0) return Unauthorized(new { error = "Invalid user token" });
 
         var ipAddress = HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "127.0.0.1";
 
@@ -208,14 +213,18 @@ public class StaffAdminController : BaseApiController
         };
 
         var result = await Mediator.Send(command, cancellationToken);
-        return Ok(result);
-    }
 
+        if (!result.Succeeded) return BadRequest(new { error = result.Message });
+
+      
+        return Ok(new { transactionId = result.Data });
+    }
     [HttpGet("support-tickets")]
     public async Task<IActionResult> GetSupportTickets(
-        [FromQuery] GetSupportTicketsQuery query,
-        CancellationToken cancellationToken)
+            [FromQuery] GetSupportTicketsQuery query,
+            CancellationToken cancellationToken)
     {
+    
         var result = await Mediator.Send(query, cancellationToken);
         return Ok(result);
     }
@@ -223,12 +232,12 @@ public class StaffAdminController : BaseApiController
 
     [HttpPost("support-tickets/{ticketId}/reply")]
     public async Task<IActionResult> ReplyToTicket(
-        [FromRoute] int ticketId,
-        [FromBody] StaffReplyRequest request,
-        CancellationToken cancellationToken)
+         [FromRoute] int ticketId,
+         [FromBody] StaffReplyRequest request,
+         CancellationToken cancellationToken)
     {
         var staffUserId = User.GetUserId();
-        if (staffUserId == 0) return Unauthorized(new Response<string>("Invalid user token"));
+        if (staffUserId == 0) return Unauthorized(new { error = "Invalid user token" });
 
         var command = new StaffReplyToTicketCommand
         {
@@ -238,17 +247,21 @@ public class StaffAdminController : BaseApiController
         };
 
         var result = await Mediator.Send(command, cancellationToken);
-        return Ok(result);
+
+        if (!result.Succeeded) return BadRequest(new { error = result.Message });
+
+        return Ok(result.Data);
     }
+
 
     [HttpPut("support-tickets/{ticketId}/status")]
     public async Task<IActionResult> UpdateTicketStatus(
-        [FromRoute] int ticketId,
-        [FromBody] UpdateTicketStatusRequestDto request,
-        CancellationToken cancellationToken)
+         [FromRoute] int ticketId,
+         [FromBody] UpdateTicketStatusRequestDto request,
+         CancellationToken cancellationToken)
     {
         var staffUserId = User.GetUserId();
-        if (staffUserId == 0) return Unauthorized(new Response<string>("Invalid user token"));
+        if (staffUserId == 0) return Unauthorized(new { error = "Invalid user token" });
 
         var command = new UpdateTicketStatusCommand
         {
@@ -258,7 +271,11 @@ public class StaffAdminController : BaseApiController
         };
 
         var result = await Mediator.Send(command, cancellationToken);
-        return Ok(result);
+
+        if (!result.Succeeded) return BadRequest(new { error = result.Message });
+
+    
+        return Ok(result.Data);
     }
     
     [HttpGet("guest-chats")]

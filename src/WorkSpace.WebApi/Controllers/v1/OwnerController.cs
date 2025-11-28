@@ -20,7 +20,25 @@ namespace WorkSpace.WebApi.Controllers.v1
         public async Task<IActionResult> GetMyWorkspaces(CancellationToken ct)
         {
             var userId = User.GetUserId();
-            var query = new GetOwnerWorkspacesQuery { OwnerUserId = userId };
+            var query = new GetOwnerWorkspacesQuery
+            {
+                OwnerUserId = userId,
+                IsVerified = true 
+            };
+
+            var result = await Mediator.Send(query, ct);
+            return Ok(result.Data);
+        }
+
+        [HttpGet("workspaces/pending")]
+        public async Task<IActionResult> GetMyPendingWorkspaces(CancellationToken ct)
+        {
+            var userId = User.GetUserId();
+            var query = new GetOwnerWorkspacesQuery
+            {
+                OwnerUserId = userId,
+                IsVerified = false 
+            };
 
             var result = await Mediator.Send(query, ct);
             return Ok(result.Data);
