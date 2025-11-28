@@ -15,6 +15,6 @@ namespace WorkSpace.Application.DTOs.WorkSpaces
         public int TotalRooms { get; set; }
         public int ActiveRooms { get; set; }
         public string? ThumbnailUrl { get; set; }
+        public List<string>? ImageUrls { get; set; }
     }
 }
-

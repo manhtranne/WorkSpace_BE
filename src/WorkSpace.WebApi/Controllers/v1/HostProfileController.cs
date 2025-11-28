@@ -6,6 +6,7 @@ using WorkSpace.Application.Features.HostProfile.Commands.UpdateHostProfile;
 using WorkSpace.Application.Features.HostProfile.Commands.DeleteHostProfile;
 using WorkSpace.Application.Features.HostProfile.Queries.GetHostProfileById;
 using WorkSpace.Application.Features.HostProfile.Queries.GetAllHostProfiles;
+using WorkSpace.Application.Features.HostProfile.Queries.GetHostProfileByUserId; 
 
 namespace WorkSpace.WebApi.Controllers.v1;
 
@@ -15,38 +16,36 @@ public class HostProfileController : BaseApiController
 {
 
     [HttpPost]
-    [Authorize] 
+    [Authorize]
     public async Task<IActionResult> Create([FromBody] CreateHostProfileCommand command)
     {
-    
         var userId = User.GetUserId();
-
-   
         command.UserId = userId;
 
         var result = await Mediator.Send(command);
         return Ok(result.Data);
     }
+
+   
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
         var result = await Mediator.Send(new GetHostProfileByIdQuery(id));
+      
+        if (!result.Succeeded) return NotFound(result.Message);
         return Ok(result.Data);
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll(
-      
             [FromQuery] bool? isVerified = null,
             [FromQuery] string? companyName = null,
             [FromQuery] string? city = null)
     {
         var query = new GetAllHostProfilesQuery
         {
-        
             PageNumber = 1,
-            PageSize = int.MaxValue, 
-
+            PageSize = int.MaxValue,
             IsVerified = isVerified,
             CompanyName = companyName,
             City = city
@@ -56,15 +55,19 @@ public class HostProfileController : BaseApiController
         return Ok(result.Data);
     }
 
-
     [HttpPut("{id}")]
+    [Authorize]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateHostProfileCommand command)
     {
         command.Id = id;
+      
+        command.RequestingUserId = User.GetUserId();
+
         var result = await Mediator.Send(command);
+        if (!result.Succeeded) return BadRequest(result.Message);
+
         return Ok(result.Data);
     }
-
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
@@ -73,18 +76,18 @@ public class HostProfileController : BaseApiController
         return Ok(result.Data);
     }
 
-
-    [HttpGet("user/{userId}")]
-    public async Task<IActionResult> GetByUserId(int userId)
+  
+    [HttpGet("me")] 
+    [Authorize]
+    public async Task<IActionResult> GetMyProfile()
     {
-      
-        var query = new GetAllHostProfilesQuery
-        {
-            PageNumber = 1,
-            PageSize = 1
-        };
-        
+        var userId = User.GetUserId();
+
+        var query = new GetHostProfileByUserIdQuery(userId);
+
         var result = await Mediator.Send(query);
+        if (!result.Succeeded) return NotFound(result.Message);
+
         return Ok(result.Data);
     }
 }
