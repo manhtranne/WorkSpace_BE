@@ -1,4 +1,4 @@
-﻿
+﻿using System.Text.Json.Serialization;
 
 namespace WorkSpace.Application.DTOs.WorkSpaces
 {
@@ -11,6 +11,7 @@ namespace WorkSpace.Application.DTOs.WorkSpaces
 
         public string? City { get; set; }
 
+        [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
         public string? ThumbnailUrl { get; set; }
         public decimal PricePerDay { get; set; }
         public int Capacity { get; set; }

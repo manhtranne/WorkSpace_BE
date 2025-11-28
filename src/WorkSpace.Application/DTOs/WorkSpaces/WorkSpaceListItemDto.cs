@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace WorkSpace.Application.DTOs.WorkSpaces
 {
     public class WorkSpaceListItemDto
@@ -14,6 +16,9 @@ namespace WorkSpace.Application.DTOs.WorkSpaces
         public bool IsVerified { get; set; }
         public int TotalRooms { get; set; }
         public int ActiveRooms { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+        public string? ThumbnailUrl { get; set; }
+        public List<string>? ImageUrls { get; set; }
     }
 }
 
