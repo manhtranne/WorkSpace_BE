@@ -127,6 +127,22 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(result.Data);
         }
 
+
+        [HttpGet("bookings/completed")]
+        public async Task<IActionResult> GetCompletedBookings(CancellationToken ct)
+        {
+            var userId = User.GetUserId();
+            if (userId == 0) return Unauthorized();
+
+            var query = new GetOwnerCompletedBookingsQuery
+            {
+                OwnerUserId = userId
+            };
+
+            var result = await Mediator.Send(query, ct);
+            return Ok(result);
+        }
+
         [HttpPut("bookings/{bookingId}/confirm")]
         public async Task<IActionResult> ConfirmBooking(int bookingId, CancellationToken ct)
         {
@@ -252,6 +268,23 @@ namespace WorkSpace.WebApi.Controllers.v1
 
             var result = await Mediator.Send(query, ct);
 
+            return Ok(result);
+        }
+
+        [HttpPost("register")]
+        [Authorize] 
+        public async Task<IActionResult> RegisterAsOwner([FromBody] RegisterOwnerDto dto, CancellationToken ct)
+        {
+            var userId = User.GetUserId();
+            if (userId == 0) return Unauthorized();
+
+            var command = new RegisterOwnerCommand
+            {
+                UserId = userId,
+                Dto = dto
+            };
+
+            var result = await Mediator.Send(command, ct);
             return Ok(result);
         }
     }

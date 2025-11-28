@@ -4,7 +4,7 @@ using WorkSpace.Application.Exceptions;
 using WorkSpace.Application.Interfaces;
 using WorkSpace.Application.Interfaces.Repositories;
 using WorkSpace.Application.Wrappers;
-using WorkSpace.Application.Interfaces.Services; s
+using WorkSpace.Application.Interfaces.Services;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
