@@ -1,5 +1,7 @@
 ﻿
+
 using System.Text.Json.Serialization;
+
 namespace WorkSpace.Application.DTOs.WorkSpaces
 {
     public class WorkSpaceRoomListItemDto
