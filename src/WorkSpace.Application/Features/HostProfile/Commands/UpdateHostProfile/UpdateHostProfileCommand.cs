@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WorkSpace.Application.Interfaces.Repositories;
@@ -6,18 +6,24 @@ using WorkSpace.Application.Interfaces.Services;
 using WorkSpace.Application.Wrappers;
 using WorkSpace.Domain.Entities;
 using FluentValidation;
+using WorkSpace.Application.Exceptions; 
+using System.Text.Json.Serialization;
 
 namespace WorkSpace.Application.Features.HostProfile.Commands.UpdateHostProfile;
 
 public class UpdateHostProfileCommand : IRequest<Response<int>>
 {
+    [JsonIgnore] 
+    public int RequestingUserId { get; set; }
+
     public int Id { get; set; }
     public string? CompanyName { get; set; }
     public string? Description { get; set; }
     public string? ContactPhone { get; set; }
     public string? LogoUrl { get; set; }
     public string? WebsiteUrl { get; set; }
-    public bool? IsVerified { get; set; }
+
+
     public string? Avatar { get; set; }
     public string? CoverPhoto { get; set; }
 }
@@ -29,8 +35,8 @@ public class UpdateHostProfileCommandHandler : IRequestHandler<UpdateHostProfile
     private readonly IDateTimeService _dateTimeService;
 
     public UpdateHostProfileCommandHandler(
-        IHostProfileAsyncRepository hostProfileRepository, 
-        IMapper mapper, 
+        IHostProfileAsyncRepository hostProfileRepository,
+        IMapper mapper,
         IDateTimeService dateTimeService)
     {
         _hostProfileRepository = hostProfileRepository;
@@ -41,37 +47,43 @@ public class UpdateHostProfileCommandHandler : IRequestHandler<UpdateHostProfile
     public async Task<Response<int>> Handle(UpdateHostProfileCommand request, CancellationToken cancellationToken)
     {
         var hostProfile = await _hostProfileRepository.GetByIdAsync(request.Id, cancellationToken);
-        
+
         if (hostProfile == null)
         {
             return new Response<int>($"Host profile with ID {request.Id} not found.");
         }
 
-        // Update only provided fields
+        if (hostProfile.UserId != request.RequestingUserId)
+        {
+            throw new ApiException("Bạn không có quyền chỉnh sửa hồ sơ Host này.");
+        }
+ 
+
         if (!string.IsNullOrEmpty(request.CompanyName))
             hostProfile.CompanyName = request.CompanyName;
-            
+
         if (!string.IsNullOrEmpty(request.Description))
             hostProfile.Description = request.Description;
-            
+
         if (!string.IsNullOrEmpty(request.ContactPhone))
             hostProfile.ContactPhone = request.ContactPhone;
-            
+
         if (!string.IsNullOrEmpty(request.LogoUrl))
             hostProfile.LogoUrl = request.LogoUrl;
-            
+
         if (!string.IsNullOrEmpty(request.WebsiteUrl))
             hostProfile.WebsiteUrl = request.WebsiteUrl;
+
         if (!string.IsNullOrEmpty(request.Avatar))
             hostProfile.Avatar = request.Avatar;
 
         if (!string.IsNullOrEmpty(request.CoverPhoto))
             hostProfile.CoverPhoto = request.CoverPhoto;
 
-        if (request.IsVerified.HasValue)
-            hostProfile.IsVerified = request.IsVerified.Value;
+ 
 
         hostProfile.LastModifiedUtc = _dateTimeService.NowUtc;
+        hostProfile.LastModifiedById = request.RequestingUserId;
 
         try
         {
@@ -85,7 +97,6 @@ public class UpdateHostProfileCommandHandler : IRequestHandler<UpdateHostProfile
         }
     }
 }
-
 public class UpdateHostProfileCommandValidator : AbstractValidator<UpdateHostProfileCommand>
 {
     public UpdateHostProfileCommandValidator()

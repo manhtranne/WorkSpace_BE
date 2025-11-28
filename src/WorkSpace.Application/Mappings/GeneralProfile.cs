@@ -21,14 +21,14 @@ namespace WorkSpace.Application.Mappings
             CreateMap<AppUser, UserDto>()
                 .ForMember(d => d.PhoneNumber, o => o.MapFrom(s => s.PhoneNumber));
 
-         
+
             CreateMap<Amenity, AmenityDto>();
 
-         
+
             CreateMap<BookingStatus, BookingStatusDto>()
                 .ForMember(d => d.TotalBookings, o => o.MapFrom(s => s.Bookings.Count));
 
-      
+
             CreateMap<Promotion, PromotionDto>()
                 .ForMember(d => d.RemainingUsage, o => o.MapFrom(s => s.UsageLimit == 0 ? int.MaxValue : s.UsageLimit - s.UsedCount));
 
@@ -56,10 +56,13 @@ namespace WorkSpace.Application.Mappings
                 .ForMember(d => d.City, o => o.MapFrom(s => s.Address != null ? s.Address.Ward : null))
                 .ForMember(d => d.TotalRooms, o => o.MapFrom(s => s.WorkSpaceRooms.Count))
                 .ForMember(d => d.ActiveRooms, o => o.MapFrom(s => s.WorkSpaceRooms.Count(r => r.IsActive)))
-        
+
                 .ForMember(d => d.ThumbnailUrl, o => o.MapFrom(s => s.WorkSpaceImages != null && s.WorkSpaceImages.Any()
                     ? s.WorkSpaceImages.FirstOrDefault().ImageUrl
-                    : null));
+                    : null))
+                .ForMember(d => d.ImageUrls, o => o.MapFrom(s => s.WorkSpaceImages != null && s.WorkSpaceImages.Any()
+                    ? s.WorkSpaceImages.Select(img => img.ImageUrl).ToList()
+                    : null)); // Return null if empty
 
             CreateMap<WorkSpace.Domain.Entities.WorkSpace, WorkSpaceModerationDto>()
                 .ForMember(d => d.HostName, o => o.MapFrom(s => s.Host != null && s.Host.User != null ? s.Host.User.GetFullName() : null))
@@ -76,10 +79,13 @@ namespace WorkSpace.Application.Mappings
             CreateMap<WorkSpaceRoom, WorkSpaceRoomListItemDto>()
                 .ForMember(d => d.WorkSpaceTitle, o => o.MapFrom(s => s.WorkSpace.Title))
                 .ForMember(d => d.City, o => o.MapFrom(s => s.WorkSpace.Address != null ? s.WorkSpace.Address.Ward : null))
-            
+
                 .ForMember(d => d.ThumbnailUrl, o => o.MapFrom(s => s.WorkSpaceRoomImages != null && s.WorkSpaceRoomImages.Any()
                     ? s.WorkSpaceRoomImages.FirstOrDefault().ImageUrl
                     : null))
+                .ForMember(d => d.ImageUrls, o => o.MapFrom(s => s.WorkSpaceRoomImages != null && s.WorkSpaceRoomImages.Any()
+                    ? s.WorkSpaceRoomImages.Select(img => img.ImageUrl).ToList()
+                    : null)) // Return null if empty
                 .ForMember(d => d.AverageRating, o => o.MapFrom(s => s.Reviews.Any() ? s.Reviews.Average(r => r.Rating) : 0))
                 .ForMember(d => d.RatingCount, o => o.MapFrom(s => s.Reviews.Count));
 
@@ -131,7 +137,7 @@ namespace WorkSpace.Application.Mappings
         public string? UserName { get; set; }
         public string? UserEmail { get; set; }
 
-      
+
         public int TotalWorkspaces { get; set; }
         public int ActiveWorkspaces { get; set; }
     }
