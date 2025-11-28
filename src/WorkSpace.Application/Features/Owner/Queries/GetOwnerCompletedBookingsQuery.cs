@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,18 +9,17 @@ using WorkSpace.Application.DTOs.Bookings;
 using WorkSpace.Application.Exceptions;
 using WorkSpace.Application.Interfaces;
 using WorkSpace.Application.Interfaces.Repositories;
+using WorkSpace.Application.Wrappers;
 
 namespace WorkSpace.Application.Features.Owner.Queries
 {
-  
-    public class GetOwnerCompletedBookingsQuery : IRequest<IEnumerable<BookingAdminDto>>
+    public class GetOwnerCompletedBookingsQuery : IRequest<Response<IEnumerable<BookingAdminDto>>>
     {
         [JsonIgnore]
         public int OwnerUserId { get; set; }
     }
 
-
-    public class GetOwnerCompletedBookingsQueryHandler : IRequestHandler<GetOwnerCompletedBookingsQuery, IEnumerable<BookingAdminDto>>
+    public class GetOwnerCompletedBookingsQueryHandler : IRequestHandler<GetOwnerCompletedBookingsQuery, Response<IEnumerable<BookingAdminDto>>>
     {
         private readonly IApplicationDbContext _context;
         private readonly IHostProfileAsyncRepository _hostRepo;
@@ -31,7 +30,7 @@ namespace WorkSpace.Application.Features.Owner.Queries
             _hostRepo = hostRepo;
         }
 
-        public async Task<IEnumerable<BookingAdminDto>> Handle(GetOwnerCompletedBookingsQuery request, CancellationToken cancellationToken)
+        public async Task<Response<IEnumerable<BookingAdminDto>>> Handle(GetOwnerCompletedBookingsQuery request, CancellationToken cancellationToken)
         {
             var hostProfile = await _hostRepo.GetHostProfileByUserId(request.OwnerUserId, cancellationToken);
             if (hostProfile == null) throw new ApiException("Owner profile not found.");
@@ -65,10 +64,3 @@ namespace WorkSpace.Application.Features.Owner.Queries
                 CheckedInAt = b.CheckedInAt,
                 CheckedOutAt = b.CheckedOutAt,
                 IsReviewed = b.IsReviewed
-            }).ToList();
-
-     
-            return dtos;
-        }
-    }
-}
