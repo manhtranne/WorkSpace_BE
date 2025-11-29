@@ -6,7 +6,6 @@ using WorkSpace.Application.Features.Users.Commands.DeleteUser;
 using WorkSpace.Application.Features.Users.Commands.UpdateUser;
 using WorkSpace.Application.Features.Users.Queries.GetAllUsers;
 using WorkSpace.Application.Features.Users.Queries.GetUserById;
-using WorkSpace.Application.Features.Users.Queries.GetCurrentUser;
 using WorkSpace.Application.Enums;
 using WorkSpace.Application.Extensions;
 
@@ -17,50 +16,40 @@ namespace WorkSpace.WebApi.Controllers.v1
     [Authorize(Roles = $"{nameof(Roles.Admin)},{nameof(Roles.Staff)}")]
     public class UsersController : BaseApiController
     {
+
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] GetAllUsersQuery query, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetListUsers([FromQuery] string? searchTerm)
         {
-            if (Mediator == null)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Mediator not initialized.");
-            }
-            return Ok(await Mediator.Send(query, cancellationToken));
+       
+            var result = await Mediator.Send(new GetAllUsersQuery { SearchTerm = searchTerm });
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetUserDetail(int id)
         {
-            if (Mediator == null)
-                return StatusCode(StatusCodes.Status500InternalServerError, "Mediator not initialized.");
-
-            return Ok(await Mediator.Send(new GetUserByIdQuery { Id = id }, cancellationToken));
+          
+            var result = await Mediator.Send(new GetUserByIdQuery { Id = id });
+            return Ok(result);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateUserRequest request, CancellationToken cancellationToken)
-        {
-            if (Mediator == null)
-                return StatusCode(StatusCodes.Status500InternalServerError, "Mediator not initialized.");
 
-            return Ok(await Mediator.Send(new CreateUserCommand { CreateUserRequest = request }, cancellationToken));
+        [HttpPost]
+        public async Task<IActionResult> CreateNewUser([FromBody] CreateUserRequest request)
+        {
+            return Ok(await Mediator.Send(new CreateUserCommand { CreateUserRequest = request }));
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] UpdateUserRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> UpdateUserInfo(int id, [FromBody] UpdateUserRequest request)
         {
-            if (Mediator == null)
-                return StatusCode(StatusCodes.Status500InternalServerError, "Mediator not initialized.");
-
-            return Ok(await Mediator.Send(new UpdateUserCommand { Id = id, UpdateUserRequest = request }, cancellationToken));
+            return Ok(await Mediator.Send(new UpdateUserCommand { Id = id, UpdateUserRequest = request }));
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> DeleteUserAccount(int id)
         {
-            if (Mediator == null)
-                return StatusCode(StatusCodes.Status500InternalServerError, "Mediator not initialized.");
-
-            return Ok(await Mediator.Send(new DeleteUserCommand { Id = id }, cancellationToken));
+            return Ok(await Mediator.Send(new DeleteUserCommand { Id = id }));
         }
     }
 }
