@@ -9,6 +9,6 @@ namespace WorkSpace.Application.Interfaces.Services
 {
     public interface IUserService
     {
-        Task<CustomerInfo> GetCustomerInfoAsync();
+        Task<CustomerInfo> GetCurrentCustomerInfoAsync();
     }
 }
