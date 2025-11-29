@@ -161,6 +161,23 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(result.Data);
         }
 
+        [HttpGet("bookings/pending")]
+        public async Task<IActionResult> GetPendingBookings(CancellationToken ct)
+        {
+            var userId = User.GetUserId();
+            if (userId == 0) return Unauthorized();
+
+            var query = new GetOwnerPendingBookingsQuery
+            {
+                OwnerUserId = userId
+            };
+
+   
+            var result = await Mediator.Send(query, ct);
+
+            return Ok(result);
+        }
+
         [HttpPut("bookings/{bookingId}/confirm")]
         public async Task<IActionResult> ConfirmBooking(int bookingId, CancellationToken ct)
         {
