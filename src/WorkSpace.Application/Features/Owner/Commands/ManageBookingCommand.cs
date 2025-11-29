@@ -63,15 +63,32 @@ namespace WorkSpace.Application.Features.Owner.Commands
                 case BookingAction.Confirm:
                     newStatusId = 4; 
 
-                    bool isBlocked = await _blockedTimeSlotRepo.IsTimeSlotBlockedAsync(
+                
+                    var overlappingSlots = await _blockedTimeSlotRepo.GetBlockedTimeSlotsForRoomAsync(
                         booking.WorkSpaceRoomId, booking.StartTimeUtc, booking.EndTimeUtc, cancellationToken);
 
-                    if (isBlocked) return new Response<bool>("Khung giờ này đã bị khóa.");
+             
+                    var realConflicts = overlappingSlots.Where(slot =>
+                        slot.Reason == null || !slot.Reason.Contains($"booking ID: {booking.Id}")
+                    ).ToList();
 
-                    await _blockedTimeSlotRepo.CreateBlockedTimeSlotForBookingAsync(
-                        booking.WorkSpaceRoomId, booking.Id, booking.StartTimeUtc, booking.EndTimeUtc, cancellationToken);
+                 
+                    if (realConflicts.Any())
+                    {
+                        return new Response<bool>("Khung giờ này đã bị khóa bởi một đơn đặt hoặc lịch chặn khác.");
+                    }
+
+                    var isAlreadyBlockedByThisBooking = overlappingSlots.Any(slot =>
+                        slot.Reason != null && slot.Reason.Contains($"booking ID: {booking.Id}")
+                    );
+
+                    if (!isAlreadyBlockedByThisBooking)
+                    {
+                        await _blockedTimeSlotRepo.CreateBlockedTimeSlotForBookingAsync(
+                            booking.WorkSpaceRoomId, booking.Id, booking.StartTimeUtc, booking.EndTimeUtc, cancellationToken);
+                    }
+
                     break;
-
                 case BookingAction.Cancel:
                     newStatusId = 7; 
                     booking.CancellationReason = string.IsNullOrWhiteSpace(request.Reason)

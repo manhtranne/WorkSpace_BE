@@ -64,3 +64,18 @@ namespace WorkSpace.Application.Features.Owner.Queries
                 CheckedInAt = b.CheckedInAt,
                 CheckedOutAt = b.CheckedOutAt,
                 IsReviewed = b.IsReviewed
+            });
+
+
+            return new Response<IEnumerable<BookingAdminDto>>
+            {
+                Succeeded = true,
+                Data = dtos.ToList(),
+                Message = "Completed bookings retrieved successfully."
+            };
+
+            return new Response<IEnumerable<BookingAdminDto>>(dtos.ToList());
+
+        }
+    }
+}
