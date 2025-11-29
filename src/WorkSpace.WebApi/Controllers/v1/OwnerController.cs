@@ -144,8 +144,6 @@ namespace WorkSpace.WebApi.Controllers.v1
 
             return Ok(result.Data);
         }
-
-
         [HttpGet("bookings/completed")]
         public async Task<IActionResult> GetCompletedBookings(CancellationToken ct)
         {
@@ -158,7 +156,9 @@ namespace WorkSpace.WebApi.Controllers.v1
             };
 
             var result = await Mediator.Send(query, ct);
-            return Ok(result);
+
+        
+            return Ok(result.Data);
         }
 
         [HttpPut("bookings/{bookingId}/confirm")]
