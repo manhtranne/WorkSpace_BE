@@ -1,40 +1,41 @@
-﻿
-using AutoMapper;
-using MediatR;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+﻿using MediatR;
 using WorkSpace.Application.DTOs.Users;
-using WorkSpace.Application.Wrappers;
-using WorkSpace.Domain.Entities;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
+using Microsoft.EntityFrameworkCore;
 
 namespace WorkSpace.Application.Features.Users.Queries.GetAllUsers
 {
-    public class GetAllUsersQuery : IRequest<PagedResponse<IEnumerable<UserDto>>>
+    public class GetAllUsersQuery : IRequest<IEnumerable<UserDto>>
     {
-        public int PageNumber { get; set; }
-        public int PageSize { get; set; }
+        public string? SearchTerm { get; set; }
     }
 
-    public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, PagedResponse<IEnumerable<UserDto>>>
+    public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, IEnumerable<UserDto>>
     {
-        private readonly UserManager<AppUser> _userManager;
-        private readonly IMapper _mapper;
+  
+        private readonly Microsoft.AspNetCore.Identity.UserManager<global::WorkSpace.Domain.Entities.AppUser> _userManager;
+        private readonly AutoMapper.IMapper _mapper;
 
-        public GetAllUsersQueryHandler(UserManager<AppUser> userManager, IMapper mapper)
+        public GetAllUsersQueryHandler(
+            Microsoft.AspNetCore.Identity.UserManager<global::WorkSpace.Domain.Entities.AppUser> userManager,
+            AutoMapper.IMapper mapper)
         {
             _userManager = userManager;
             _mapper = mapper;
         }
 
-        public async Task<PagedResponse<IEnumerable<UserDto>>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<UserDto>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
         {
-            var users = await _userManager.Users
-                .Skip((request.PageNumber - 1) * request.PageSize)
-                .Take(request.PageSize)
-                .ToListAsync(cancellationToken);
+            var query = _userManager.Users.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+            {
+                query = query.Where(u => u.UserName.Contains(request.SearchTerm) || u.Email.Contains(request.SearchTerm));
+            }
+
+         
+            var users = await query.ToListAsync(cancellationToken);
 
             var userDtos = new List<UserDto>();
 
@@ -45,12 +46,7 @@ namespace WorkSpace.Application.Features.Users.Queries.GetAllUsers
                 userDtos.Add(userDto);
             }
 
-            var totalRecords = await _userManager.Users.CountAsync(cancellationToken);
-
-            return new PagedResponse<IEnumerable<UserDto>>(userDtos, request.PageNumber, request.PageSize)
-            {
-                Message = $"Total Users: {totalRecords}"
-            };
+            return userDtos;
         }
     }
 }

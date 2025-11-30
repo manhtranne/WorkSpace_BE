@@ -23,7 +23,7 @@ namespace WorkSpace.Infrastructure.Services
             _httpContextAccessor = httpContextAccessor;
             _userRepository = userRepository;
         }
-        public async Task<CustomerInfo> GetCustomerInfoAsync()
+        public async Task<CustomerInfo> GetCurrentCustomerInfoAsync()
         {
             var currentUser = _httpContextAccessor.HttpContext?.User;
             if (currentUser == null || !currentUser.Identity.IsAuthenticated)
