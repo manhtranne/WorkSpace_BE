@@ -23,6 +23,7 @@ namespace WorkSpace.Infrastructure.Repositories
                 .Include(w => w.WorkSpaceType)
                 .Include(w => w.WorkSpaceRooms)
                     .ThenInclude(wr => wr.WorkSpaceRoomType)
+                .Include(w => w.WorkSpaceImages)
                 .Include(w => w.WorkSpaceRooms)
                     .ThenInclude(wr => wr.WorkSpaceRoomImages)
                 .Include(w => w.WorkSpaceRooms)

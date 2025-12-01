@@ -1,11 +1,16 @@
 ﻿using MediatR;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using WorkSpace.Application.DTOs.Chat;
 using WorkSpace.Application.Interfaces.Repositories;
-using WorkSpace.Application.Wrappers;
+// using WorkSpace.Application.Wrappers; // Bỏ wrapper
 
 namespace WorkSpace.Application.Features.GuestChat.Queries.GetActiveGuestSessions;
 
-public class GetActiveGuestSessionsQueryHandler : IRequestHandler<GetActiveGuestSessionsQuery, Response<IEnumerable<GuestChatSessionDto>>>
+// Thay đổi interface implement
+public class GetActiveGuestSessionsQueryHandler : IRequestHandler<GetActiveGuestSessionsQuery, IEnumerable<GuestChatSessionDto>>
 {
     private readonly IGuestChatSessionRepository _sessionRepository;
 
@@ -13,7 +18,8 @@ public class GetActiveGuestSessionsQueryHandler : IRequestHandler<GetActiveGuest
     {
         _sessionRepository = sessionRepository;
     }
-    public async Task<Response<IEnumerable<GuestChatSessionDto>>> Handle(GetActiveGuestSessionsQuery request, CancellationToken cancellationToken)
+
+    public async Task<IEnumerable<GuestChatSessionDto>> Handle(GetActiveGuestSessionsQuery request, CancellationToken cancellationToken)
     {
         List<Domain.Entities.GuestChatSession> sessions;
 
@@ -38,6 +44,7 @@ public class GetActiveGuestSessionsQueryHandler : IRequestHandler<GetActiveGuest
             AssignedStaffName = s.AssignedStaff?.GetFullName()
         }).ToList();
 
-        return new Response<IEnumerable<GuestChatSessionDto>>(dtos);
+
+        return dtos;
     }
 }
