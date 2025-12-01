@@ -1,10 +1,12 @@
 ﻿using MediatR;
+using System.Collections.Generic;
 using WorkSpace.Application.DTOs.Chat;
-using WorkSpace.Application.Wrappers;
+
 
 namespace WorkSpace.Application.Features.GuestChat.Queries.GetActiveGuestSessions;
 
-public class GetActiveGuestSessionsQuery : IRequest<Response<IEnumerable<GuestChatSessionDto>>>
+
+public class GetActiveGuestSessionsQuery : IRequest<IEnumerable<GuestChatSessionDto>>
 {
     public int? StaffId { get; set; }
 }

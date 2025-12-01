@@ -58,6 +58,20 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(await Mediator.Send(command, ct));
         }
 
+        [HttpGet("workspaces/{id}/detail")]
+        public async Task<IActionResult> GetWorkSpaceDetail(int id, CancellationToken ct)
+        {
+            var userId = User.GetUserId();
+            var query = new WorkSpace.Application.Features.Owner.Queries.GetOwnerWorkSpaceDetailQuery
+            {
+                WorkSpaceId = id,
+                OwnerUserId = userId
+            };
+
+            var result = await Mediator.Send(query, ct);
+            return Ok(result.Data);
+        }
+
         [HttpPost("workspaces")]
         public async Task<IActionResult> CreateWorkSpace([FromBody] CreateWorkSpaceDto dto, CancellationToken ct)
         {

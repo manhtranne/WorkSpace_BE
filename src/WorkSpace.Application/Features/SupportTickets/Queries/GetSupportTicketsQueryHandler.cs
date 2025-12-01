@@ -24,14 +24,19 @@ namespace WorkSpace.Application.Features.SupportTickets.Queries
             var query = _context.SupportTickets
                 .Include(t => t.SubmittedByUser)
                 .Include(t => t.AssignedToStaff)
+                // Cần đảm bảo EF Core nhận biết được quan hệ Replies để lọc
                 .AsNoTracking();
+
+            // === THÊM ĐOẠN CODE NÀY ===
+            // Chỉ lấy những ticket chưa có phản hồi nào (Replies rỗng)
+            query = query.Where(t => !t.Replies.Any());
+            // ===========================
 
             if (request.StatusFilter.HasValue)
             {
                 query = query.Where(t => t.Status == request.StatusFilter.Value);
             }
 
-            // 2. Bỏ Skip/Take
             var tickets = await query
                 .OrderByDescending(t => t.CreateUtc)
                 .ToListAsync(cancellationToken);
