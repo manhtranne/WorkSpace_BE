@@ -24,13 +24,9 @@ namespace WorkSpace.Application.Features.SupportTickets.Queries
             var query = _context.SupportTickets
                 .Include(t => t.SubmittedByUser)
                 .Include(t => t.AssignedToStaff)
-                // Cần đảm bảo EF Core nhận biết được quan hệ Replies để lọc
-                .AsNoTracking();
+                .AsNoTracking()
+                .AsQueryable(); 
 
-            // === THÊM ĐOẠN CODE NÀY ===
-            // Chỉ lấy những ticket chưa có phản hồi nào (Replies rỗng)
-            query = query.Where(t => !t.Replies.Any());
-            // ===========================
 
             if (request.StatusFilter.HasValue)
             {
