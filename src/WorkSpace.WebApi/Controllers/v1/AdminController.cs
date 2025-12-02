@@ -18,11 +18,7 @@ public class AdminController : BaseApiController
         _accountService = accountService;
     }
 
-    // User Management Endpoints
-    
-    /// <summary>
-    /// Lấy danh sách tất cả người dùng với filter và phân trang
-    /// </summary>
+  
     [HttpGet("users")]
     public async Task<IActionResult> GetAllUsers([FromQuery] GetAllUsersRequestDto request)
     {
@@ -30,9 +26,7 @@ public class AdminController : BaseApiController
         return Ok(result);
     }
 
-    /// <summary>
-    /// Lấy thông tin chi tiết của một người dùng
-    /// </summary>
+
     [HttpGet("users/{userId}")]
     public async Task<IActionResult> GetUserById([FromRoute] int userId)
     {
@@ -40,9 +34,7 @@ public class AdminController : BaseApiController
         return Ok(result);
     }
 
-    /// <summary>
-    /// Tạo tài khoản người dùng mới (chỉ Admin)
-    /// </summary>
+
     [HttpPost("users")]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserByAdminDto request)
     {
@@ -50,9 +42,6 @@ public class AdminController : BaseApiController
         return Ok(result);
     }
 
-    /// <summary>
-    /// Ẩn/hiện tài khoản người dùng (cập nhật trạng thái IsActive)
-    /// </summary>
     [HttpPut("users/{userId}/status")]
     public async Task<IActionResult> UpdateUserStatus(
         [FromRoute] int userId,
