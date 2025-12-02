@@ -310,7 +310,7 @@ public class StaffAdminController : BaseApiController
         return Ok(result);
     }
 
-    // Thêm vào StaffAdminController
+
     [HttpGet("bookings/today")]
     public async Task<IActionResult> GetBookingsToday(CancellationToken cancellationToken)
     {
