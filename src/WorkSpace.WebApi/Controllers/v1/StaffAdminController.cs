@@ -309,6 +309,18 @@ public class StaffAdminController : BaseApiController
         var result = await Mediator.Send(query, cancellationToken);
         return Ok(result);
     }
+
+    // Thêm vào StaffAdminController
+    [HttpGet("bookings/today")]
+    public async Task<IActionResult> GetBookingsToday(CancellationToken cancellationToken)
+    {
+        var query = new WorkSpace.Application.Features.Staff.Queries.GetBookingsToday.GetBookingsTodayQuery();
+        var result = await Mediator.Send(query, cancellationToken);
+
+  
+        return Ok(result);
+    }
+
     [HttpGet("guest-chats")]
     public async Task<IActionResult> GetActiveGuestChatSessions(
         [FromQuery] int? staffId = null,
