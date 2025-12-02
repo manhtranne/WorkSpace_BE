@@ -3,13 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using WorkSpace.Application.DTOs.WorkSpaces;
 using WorkSpace.Application.Interfaces.Services;
 using WorkSpace.Application.Wrappers;
-using WorkSpace.Domain.Entities;
 using WorkSpace.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Threading;
 
 namespace WorkSpace.Infrastructure.Services
 {
@@ -26,7 +24,6 @@ namespace WorkSpace.Infrastructure.Services
 
         public async Task<Response<IEnumerable<WorkSpaceSearchResultDto>>> SearchWorkSpacesAsync(SearchRequestDto request)
         {
-
             CancellationToken cancellationToken = default;
 
             var query = _context.Workspaces
@@ -53,10 +50,12 @@ namespace WorkSpace.Infrastructure.Services
                 query = query.Where(w => w.Title.Contains(request.Keyword)
                                          || (w.Description != null && w.Description.Contains(request.Keyword)));
             }
+
             if (request.Capacity.HasValue && request.Capacity > 0)
             {
                 query = query.Where(w => w.WorkSpaceRooms.Any(r => r.Capacity >= request.Capacity.Value && r.IsActive && r.IsVerified));
             }
+
             if (request.MinPrice.HasValue)
             {
                 query = query.Where(w => w.WorkSpaceRooms.Any(r => r.PricePerDay >= request.MinPrice.Value && r.IsActive && r.IsVerified));
@@ -80,7 +79,6 @@ namespace WorkSpace.Infrastructure.Services
 
             if (request.HasDateTimeFilter())
             {
-               
                 DateTime effectiveStartTime = request.StartTime ?? DateTime.MinValue;
                 DateTime effectiveEndTime = request.EndTime ?? DateTime.MaxValue;
 
@@ -89,10 +87,8 @@ namespace WorkSpace.Infrastructure.Services
                     return new Response<IEnumerable<WorkSpaceSearchResultDto>>("End time must be after start time.") { Succeeded = false };
                 }
 
-              
                 effectiveStartTime = (effectiveStartTime.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(effectiveStartTime, DateTimeKind.Utc) : effectiveStartTime.ToUniversalTime());
                 effectiveEndTime = (effectiveEndTime.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(effectiveEndTime, DateTimeKind.Utc) : effectiveEndTime.ToUniversalTime());
-
 
                 query = query.Where(w => w.WorkSpaceRooms.Any(room =>
                    room.IsActive && room.IsVerified &&
@@ -100,18 +96,16 @@ namespace WorkSpace.Infrastructure.Services
                        b.StartTimeUtc < effectiveEndTime && b.EndTimeUtc > effectiveStartTime &&
                        b.BookingStatus != null &&
                        (b.BookingStatus.Name == "Confirmed" || b.BookingStatus.Name == "InProgress" || b.BookingStatus.Name == "Pending")) &&
-               
+
                    !room.BlockedTimeSlots.Any(slot =>
                        slot.StartTime < effectiveEndTime && slot.EndTime > effectiveStartTime
                    )
                ));
             }
 
-
             var workspaces = await query
                 .Distinct()
                 .ToListAsync(cancellationToken);
-
 
             var dtoList = workspaces.Select(w => new WorkSpaceSearchResultDto
             {
@@ -150,7 +144,6 @@ namespace WorkSpace.Infrastructure.Services
                 return new Response<IEnumerable<RoomWithAmenitiesDto>>("Start time cannot be in the past.") { Succeeded = false };
             }
 
-  
             var effectiveStartTime = (request.StartTime.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(request.StartTime, DateTimeKind.Utc) : request.StartTime.ToUniversalTime());
             var effectiveEndTime = (request.EndTime.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(request.EndTime, DateTimeKind.Utc) : request.EndTime.ToUniversalTime());
 
@@ -167,18 +160,14 @@ namespace WorkSpace.Infrastructure.Services
                             r.IsActive && r.IsVerified)
                 .AsQueryable();
 
-
             query = query.Where(r => r.Capacity >= request.Capacity);
 
-
             query = query.Where(room =>
-
                !room.Bookings.Any(b =>
                    b.StartTimeUtc < effectiveEndTime && b.EndTimeUtc > effectiveStartTime &&
                    b.BookingStatus != null &&
                    (b.BookingStatus.Name == "Confirmed" || b.BookingStatus.Name == "InProgress" || b.BookingStatus.Name == "Pending")) &&
 
-           
                !room.BlockedTimeSlots.Any(slot =>
                    slot.StartTime < effectiveEndTime && slot.EndTime > effectiveStartTime
                )
@@ -188,27 +177,22 @@ namespace WorkSpace.Infrastructure.Services
                 .Distinct()
                 .ToListAsync();
 
-
             var dtoList = availableRooms.Select(room => new RoomWithAmenitiesDto
             {
                 Id = room.Id,
                 Title = room.Title,
                 Description = room.Description,
                 RoomType = room.WorkSpaceRoomType?.Name,
-
                 PricePerHour = room.PricePerHour,
                 PricePerDay = room.PricePerDay,
                 PricePerMonth = room.PricePerMonth,
-
                 Capacity = room.Capacity,
                 Area = room.Area,
                 IsActive = room.IsActive,
                 IsVerified = room.IsVerified,
-
                 Images = room.WorkSpaceRoomImages
                     .Select(img => img.ImageUrl)
                     .ToList(),
-
                 Amenities = room.WorkSpaceRoomAmenities
                     .Where(a => a.Amenity != null)
                     .Select(a => new SimpleRoomAmenityDto
@@ -218,15 +202,11 @@ namespace WorkSpace.Infrastructure.Services
                         IconClass = a.Amenity.IconClass
                     })
                     .ToList(),
-
                 AverageRating = room.Reviews.Any()
                     ? room.Reviews.Average(r => r.Rating)
                     : 0,
                 ReviewCount = room.Reviews.Count,
-
                 IsAvailable = true,
-
-
                 BlockedTimes = room.BlockedTimeSlots
                 .Select(bt => new SimpleBlockedTimeSlotDto
                 {
@@ -240,6 +220,7 @@ namespace WorkSpace.Infrastructure.Services
 
             return new Response<IEnumerable<RoomWithAmenitiesDto>>(dtoList, $"Found {dtoList.Count} available rooms matching criteria.");
         }
+
         public async Task<IEnumerable<string>> GetLocationSuggestionsAsync(string query)
         {
             if (string.IsNullOrWhiteSpace(query))
@@ -273,6 +254,5 @@ namespace WorkSpace.Infrastructure.Services
                 .ToListAsync();
             return wards;
         }
-
     }
 }
