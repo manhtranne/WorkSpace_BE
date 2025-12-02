@@ -20,7 +20,7 @@ public static class WebApplicationBuilderExtensions
                 b => b.MigrationsAssembly("WorkSpace.Infrastructure") 
             )
         );
-        // Dùng AddIdentity để có đầy đủ services cho SignInManager
+
         builder.Services
             .AddIdentity<AppUser, AppRole>(options =>
             {
@@ -38,12 +38,10 @@ public static class WebApplicationBuilderExtensions
             .AddEntityFrameworkStores<WorkSpaceContext>()  
             .AddDefaultTokenProviders();
         
-        // ✅ QUAN TRỌNG: Config lại Authentication Options SAU AddIdentity
-        // AddIdentity tự động thêm Cookie auth và có thể override default scheme
-        // Phải force lại JWT Bearer làm default cho API endpoints
+
         builder.Services.PostConfigure<Microsoft.AspNetCore.Authentication.AuthenticationOptions>(options =>
         {
-            // Force JWT Bearer làm default scheme cho tất cả API endpoints
+     
             options.DefaultAuthenticateScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
             options.DefaultChallengeScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
             options.DefaultScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
@@ -51,7 +49,7 @@ public static class WebApplicationBuilderExtensions
         
         builder.Services.ConfigureApplicationCookie(options =>
         {
-            // Disable redirect to login page for API
+     
             options.Events.OnRedirectToLogin = context =>
             {
                 context.Response.StatusCode = 401;

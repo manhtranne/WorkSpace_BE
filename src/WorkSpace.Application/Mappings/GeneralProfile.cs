@@ -62,7 +62,7 @@ namespace WorkSpace.Application.Mappings
                     : null))
                 .ForMember(d => d.ImageUrls, o => o.MapFrom(s => s.WorkSpaceImages != null && s.WorkSpaceImages.Any()
                     ? s.WorkSpaceImages.Select(img => img.ImageUrl).ToList()
-                    : null)); // Return null if empty
+                    : null)); 
 
             CreateMap<WorkSpace.Domain.Entities.WorkSpace, WorkSpaceModerationDto>()
                 .ForMember(d => d.HostName, o => o.MapFrom(s => s.Host != null && s.Host.User != null ? s.Host.User.GetFullName() : null))
@@ -85,7 +85,7 @@ namespace WorkSpace.Application.Mappings
                     : null))
                 .ForMember(d => d.ImageUrls, o => o.MapFrom(s => s.WorkSpaceRoomImages != null && s.WorkSpaceRoomImages.Any()
                     ? s.WorkSpaceRoomImages.Select(img => img.ImageUrl).ToList()
-                    : null)) // Return null if empty
+                    : null)) 
                 .ForMember(d => d.AverageRating, o => o.MapFrom(s => s.Reviews.Any() ? s.Reviews.Average(r => r.Rating) : 0))
                 .ForMember(d => d.RatingCount, o => o.MapFrom(s => s.Reviews.Count));
 
@@ -101,6 +101,10 @@ namespace WorkSpace.Application.Mappings
                 .ForMember(d => d.AverageRating, o => o.MapFrom(s => s.Reviews.Any() ? s.Reviews.Average(r => r.Rating) : 0))
                 .ForMember(d => d.ReviewCount, o => o.MapFrom(s => s.Reviews.Count))
                 .ForMember(d => d.Amenities, o => o.MapFrom(s => s.WorkSpaceRoomAmenities.Select(a => a.Amenity.Name).ToList()));
+
+            CreateMap<GeneratePromotionDto, Promotion>()
+               .ForMember(d => d.Code, o => o.Ignore()) 
+               .ForMember(d => d.IsActive, o => o.Ignore());
 
             CreateMap<Review, ReviewModerationDto>()
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.GetFullName() : null))
