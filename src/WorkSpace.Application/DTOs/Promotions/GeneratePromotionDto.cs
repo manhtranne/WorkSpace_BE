@@ -16,7 +16,7 @@ namespace WorkSpace.Application.DTOs.Promotions
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
 
-        public int UsageLimit { get; set; } 
+        public int UsageLimit { get; set; }
         public double MinimumAmount { get; set; }
     }
 }

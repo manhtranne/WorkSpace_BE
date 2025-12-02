@@ -9,14 +9,15 @@ using WorkSpace.Domain.Entities;
 
 namespace WorkSpace.Application.Features.Promotions.Commands.GeneratePromotion
 {
-    public class GeneratePromotionCommand : IRequest<Response<string>>
+
+    public class GeneratePromotionCommand : IRequest<Response<PromotionGeneratedDto>>
     {
         public GeneratePromotionDto Dto { get; set; }
         public int RequestUserId { get; set; }
-        public bool IsOwnerCode { get; set; } 
+        public bool IsOwnerCode { get; set; }
     }
 
-    public class GeneratePromotionCommandHandler : IRequestHandler<GeneratePromotionCommand, Response<string>>
+    public class GeneratePromotionCommandHandler : IRequestHandler<GeneratePromotionCommand, Response<PromotionGeneratedDto>>
     {
         private readonly IPromotionRepository _promotionRepo;
         private readonly IHostProfileAsyncRepository _hostRepo;
@@ -35,38 +36,38 @@ namespace WorkSpace.Application.Features.Promotions.Commands.GeneratePromotion
             _mapper = mapper;
         }
 
-        public async Task<Response<string>> Handle(GeneratePromotionCommand request, CancellationToken cancellationToken)
+        public async Task<Response<PromotionGeneratedDto>> Handle(GeneratePromotionCommand request, CancellationToken cancellationToken)
         {
-     
             var promotion = _mapper.Map<Promotion>(request.Dto);
 
-     
+        
             string randomSuffix = Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper();
-            promotion.Code = $"SALE-{randomSuffix}";
+            promotion.Code = request.IsOwnerCode ? $"OWNER-{randomSuffix}" : $"SALE-{randomSuffix}";
 
-      
-            promotion.IsActive = false;
+            promotion.IsActive = false; 
             promotion.CreateUtc = _dateTimeService.NowUtc;
             promotion.CreatedById = request.RequestUserId;
 
-       
             if (request.IsOwnerCode)
             {
                 var hostProfile = await _hostRepo.GetHostProfileByUserId(request.RequestUserId, cancellationToken);
-                if (hostProfile == null)
-                    throw new ApiException("Bạn không có hồ sơ Host để tạo mã.");
-
+                if (hostProfile == null) throw new ApiException("Bạn không có hồ sơ Host.");
                 promotion.HostId = hostProfile.Id;
             }
             else
             {
-            
-                promotion.HostId = null;
+                promotion.HostId = null; 
             }
 
             await _promotionRepo.AddAsync(promotion, cancellationToken);
 
-            return new Response<string>(promotion.Code, $"Đã tạo mã {promotion.Code} (Chưa kích hoạt). ID: {promotion.Id}");
+            var resultDto = new PromotionGeneratedDto
+            {
+                Id = promotion.Id,
+                Code = promotion.Code
+            };
+
+            return new Response<PromotionGeneratedDto>(resultDto);
         }
     }
 }
