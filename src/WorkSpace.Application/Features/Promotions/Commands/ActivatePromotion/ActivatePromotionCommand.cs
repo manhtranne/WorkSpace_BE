@@ -9,7 +9,7 @@ namespace WorkSpace.Application.Features.Promotions.Commands.ActivatePromotion
     {
         public int PromotionId { get; set; }
         public int RequestUserId { get; set; }
-        public bool IsOwnerAction { get; set; } 
+        public bool IsOwnerAction { get; set; }
     }
 
     public class ActivatePromotionCommandHandler : IRequestHandler<ActivatePromotionCommand, Response<bool>>
@@ -28,28 +28,23 @@ namespace WorkSpace.Application.Features.Promotions.Commands.ActivatePromotion
             var promotion = await _promotionRepo.GetByIdAsync(request.PromotionId, cancellationToken);
             if (promotion == null) throw new ApiException("Không tìm thấy mã khuyến mãi.");
 
-    
             if (request.IsOwnerAction)
             {
                 var hostProfile = await _hostRepo.GetHostProfileByUserId(request.RequestUserId, cancellationToken);
                 if (hostProfile == null || promotion.HostId != hostProfile.Id)
                 {
-                    throw new ApiException("Bạn không có quyền kích hoạt mã này (Mã không thuộc về bạn hoặc là mã hệ thống).");
+                    throw new ApiException("Bạn không có quyền kích hoạt mã này.");
                 }
             }
             else
             {
-              
-                if (promotion.HostId != null)
-                {
-                    throw new ApiException("Admin/Staff chỉ được kích hoạt mã hệ thống.");
-                }
+                if (promotion.HostId != null) throw new ApiException("Admin chỉ được kích hoạt mã hệ thống.");
             }
 
             promotion.IsActive = true;
             await _promotionRepo.UpdateAsync(promotion, cancellationToken);
 
-            return new Response<bool>(true, $"Mã {promotion.Code} đã được kích hoạt thành công!");
+            return new Response<bool>(true, "Đã kích hoạt.");
         }
     }
 }
