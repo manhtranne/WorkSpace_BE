@@ -444,82 +444,75 @@ public class AccountService : IAccountService
             }
         }
 
-   
-        public async Task<PagedResponse<List<UserDto>>> GetAllUsersAsync(GetAllUsersRequestDto request)
+
+    public async Task<List<UserDto>> GetAllUsersAsync(GetAllUsersRequestDto request)
+    {
+        try
         {
-            try
+            _logger.LogInformation("Getting all users (No Pagination)");
+
+            var query = _userManager.Users.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(request.SearchTerm))
             {
-                _logger.LogInformation("Getting all users - Page: {PageNumber}, PageSize: {PageSize}", request.PageNumber, request.PageSize);
-                
-                var query = _userManager.Users.AsQueryable();
-
-                if (!string.IsNullOrWhiteSpace(request.SearchTerm))
-                {
-                    var searchTerm = request.SearchTerm.ToLower();
-                    query = query.Where(u => 
-                        u.UserName.ToLower().Contains(searchTerm) || 
-                        u.Email.ToLower().Contains(searchTerm) ||
-                        (u.FirstName != null && u.FirstName.ToLower().Contains(searchTerm)) ||
-                        (u.LastName != null && u.LastName.ToLower().Contains(searchTerm))
-                    );
-                }
-
-                if (request.IsActive.HasValue)
-                {
-                    query = query.Where(u => u.IsActive == request.IsActive.Value);
-                }
-
-             
-                var totalRecords = await query.CountAsync();
-
-                var users = await query
-                    .OrderByDescending(u => u.DateCreated)
-                    .Skip((request.PageNumber - 1) * request.PageSize)
-                    .Take(request.PageSize)
-                    .ToListAsync();
-
-                var userDtos = new List<UserDto>();
-
-                foreach (var user in users)
-                {
-                    var roles = await _userManager.GetRolesAsync(user);
-                    
-                
-                    if (!string.IsNullOrWhiteSpace(request.Role) && !roles.Contains(request.Role))
-                    {
-                        continue;
-                    }
-
-                    userDtos.Add(new UserDto
-                    {
-                        Id = user.Id,
-                        UserName = user.UserName,
-                        Email = user.Email,
-                        FirstName = user.FirstName,
-                        LastName = user.LastName,
-                        Avatar = user.Avatar,
-                        IsActive = user.IsActive,
-                        EmailConfirmed = user.EmailConfirmed,
-                        DateCreated = user.DateCreated,
-                        Dob = user.Dob,
-                        LastLoginDate = user.LastLoginDate,
-                        Roles = roles.ToList(),
-                        FullName = user.GetFullName()
-                    });
-                }
-
-                _logger.LogInformation("Retrieved {Count} users out of {Total} total", userDtos.Count, totalRecords);
-
-                return new PagedResponse<List<UserDto>>(userDtos, request.PageNumber, request.PageSize, totalRecords);
+                var searchTerm = request.SearchTerm.ToLower();
+                query = query.Where(u =>
+                    u.UserName.ToLower().Contains(searchTerm) ||
+                    u.Email.ToLower().Contains(searchTerm) ||
+                    (u.FirstName != null && u.FirstName.ToLower().Contains(searchTerm)) ||
+                    (u.LastName != null && u.LastName.ToLower().Contains(searchTerm))
+                );
             }
-            catch (Exception ex)
+
+            if (request.IsActive.HasValue)
             {
-                _logger.LogError(ex, "Error getting all users");
-                throw new ApiException("An error occurred while retrieving users");
+                query = query.Where(u => u.IsActive == request.IsActive.Value);
             }
+
+            // Bỏ Skip/Take để lấy toàn bộ
+            var users = await query
+                .OrderByDescending(u => u.DateCreated)
+                .ToListAsync();
+
+            var userDtos = new List<UserDto>();
+
+            foreach (var user in users)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+
+                // Filter role trên memory (vì Identity lưu role ở bảng riêng)
+                if (!string.IsNullOrWhiteSpace(request.Role) && !roles.Contains(request.Role))
+                {
+                    continue;
+                }
+
+                userDtos.Add(new UserDto
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Avatar = user.Avatar,
+                    IsActive = user.IsActive,
+                    EmailConfirmed = user.EmailConfirmed,
+                    DateCreated = user.DateCreated,
+                    Dob = user.Dob,
+                    LastLoginDate = user.LastLoginDate,
+                    Roles = roles.ToList(),
+                    FullName = user.GetFullName()
+                });
+            }
+
+            return userDtos; 
         }
-
-        public async Task<Response<UserDto>> GetUserByIdAsync(int userId)
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting all users");
+            throw new ApiException("An error occurred while retrieving users");
+        }
+    }
+    public async Task<Response<UserDto>> GetUserByIdAsync(int userId)
         {
             try
             {
