@@ -8,6 +8,6 @@ public class GuestChatSessionDto
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? LastMessageAt { get; set; }
     public bool IsActive { get; set; } = true;
-    public int? AssignedStaffId { get; set; }
-    public string? AssignedStaffName { get; set; }
+    public int? AssignedOwnerId { get; set; }
+    public string? AssignedOwnerName { get; set; }
 }
