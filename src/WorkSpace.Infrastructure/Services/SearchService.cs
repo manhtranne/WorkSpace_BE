@@ -30,6 +30,7 @@ namespace WorkSpace.Infrastructure.Services
                 .Include(w => w.Address)
                 .Include(w => w.Host)
                     .ThenInclude(h => h.User)
+                    .Include(w => w.WorkSpaceImages)
                 .Include(w => w.WorkSpaceRooms)
                     .ThenInclude(r => r.WorkSpaceRoomAmenities)
                         .ThenInclude(wra => wra.Amenity)
@@ -117,7 +118,12 @@ namespace WorkSpace.Infrastructure.Services
                 HostName = w.Host?.User?.GetFullName()
                            ?? w.Host?.User?.UserName
                            ?? "N/A",
-
+                ThumbnailUrl = (w.WorkSpaceImages?.Select(img => img.ImageUrl) ?? Enumerable.Empty<string>())
+                        .Concat(w.WorkSpaceRooms
+                            .Where(r => r.IsActive && r.IsVerified)
+                            .SelectMany(r => r.WorkSpaceRoomImages)
+                            .Select(img => img.ImageUrl))
+                        .FirstOrDefault(),
                 ImageUrls = w.WorkSpaceRooms
                                 .Where(r => r.IsActive && r.IsVerified)
                                 .SelectMany(r => r.WorkSpaceRoomImages)
