@@ -141,11 +141,17 @@ public class StaffAdminController : BaseApiController
 
     [HttpPut("workspaces/{workSpaceId}/approve")]
     public async Task<IActionResult> ApproveWorkSpace(
-         [FromRoute] int workSpaceId,
-         [FromBody] Application.DTOs.WorkSpaces.ApproveWorkSpaceDto dto,
-         CancellationToken cancellationToken = default)
+             [FromRoute] int workSpaceId,
+             CancellationToken cancellationToken = default)
     {
-        dto.WorkSpaceId = workSpaceId;
+
+        var dto = new Application.DTOs.WorkSpaces.ApproveWorkSpaceDto
+        {
+            WorkSpaceId = workSpaceId,
+            IsApproved = true,
+            RejectionReason = null
+        };
+
         var command = new ApproveWorkSpaceCommand(dto);
         var result = await Mediator.Send(command, cancellationToken);
 
