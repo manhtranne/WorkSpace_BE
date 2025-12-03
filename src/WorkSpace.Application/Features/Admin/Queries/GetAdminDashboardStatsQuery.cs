@@ -38,7 +38,6 @@ namespace WorkSpace.Application.Features.Admin.Queries
                 .CountAsync(cancellationToken);
 
             var totalUsers = await _context.Users.CountAsync(cancellationToken);
-
             var chartData = new List<RevenueChartDto>();
             for (int i = 11; i >= 0; i--)
             {
@@ -52,13 +51,17 @@ namespace WorkSpace.Application.Features.Admin.Queries
                              && b.EndTimeUtc <= monthEnd)
                     .SumAsync(b => b.FinalAmount, cancellationToken);
 
-                chartData.Add(new RevenueChartDto
+            
+                if (revenue > 0)
                 {
-                    Month = date.Month,
-                    Year = date.Year,
-                    Label = $"{date.Month}/{date.Year}",
-                    Revenue = revenue
-                });
+                    chartData.Add(new RevenueChartDto
+                    {
+                        Month = date.Month,
+                        Year = date.Year,
+                        Label = $"{date.Month}/{date.Year}",
+                        Revenue = revenue
+                    });
+                }
             }
 
             return new AdminDashboardStatsDto
