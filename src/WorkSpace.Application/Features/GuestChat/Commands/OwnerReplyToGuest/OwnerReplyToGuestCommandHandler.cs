@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using WorkSpace.Application.DTOs.Chat;
 using WorkSpace.Application.Exceptions;
@@ -7,16 +7,16 @@ using WorkSpace.Application.Interfaces.Services;
 using WorkSpace.Application.Wrappers;
 using WorkSpace.Domain.Entities;
 
-namespace WorkSpace.Application.Features.GuestChat.Commands.StaffReplyToGuest;
+namespace WorkSpace.Application.Features.GuestChat.Commands.OwnerReplyToGuest;
 
-public class StaffReplyToGuestCommandHandler : IRequestHandler<StaffReplyToGuestCommand, Response<GuestChatMessageDto>>
+public class OwnerReplyToGuestCommandHandler : IRequestHandler<OwnerReplyToGuestCommand, Response<GuestChatMessageDto>>
 {
     private readonly IGuestChatSessionRepository _sessionRepository;
     private readonly IGenericRepositoryAsync<GuestChatMessage> _messageRepository;
     private readonly IDateTimeService _dateTimeService;
     private readonly UserManager<AppUser> _userManager;
 
-    public StaffReplyToGuestCommandHandler(
+    public OwnerReplyToGuestCommandHandler(
         IGuestChatSessionRepository sessionRepository,
         IGenericRepositoryAsync<GuestChatMessage> messageRepository,
         IDateTimeService dateTimeService,
@@ -27,7 +27,7 @@ public class StaffReplyToGuestCommandHandler : IRequestHandler<StaffReplyToGuest
         _dateTimeService = dateTimeService;
         _userManager = userManager;
     }
-    public async Task<Response<GuestChatMessageDto>> Handle(StaffReplyToGuestCommand request, CancellationToken cancellationToken)
+    public async Task<Response<GuestChatMessageDto>> Handle(OwnerReplyToGuestCommand request, CancellationToken cancellationToken)
     {
         var session = await _sessionRepository.GetBySessionIdAsync(request.SessionId, cancellationToken);
             
@@ -36,18 +36,18 @@ public class StaffReplyToGuestCommandHandler : IRequestHandler<StaffReplyToGuest
             throw new ApiException($"Guest chat session not found: {request.SessionId}");
         }
 
-        var staff = await _userManager.FindByIdAsync(request.StaffUserId.ToString());
-        if (staff == null)
+        var owner = await _userManager.FindByIdAsync(request.OwnerUserId.ToString());
+        if (owner == null)
         {
-            throw new ApiException("Staff user not found");
+            throw new ApiException("Owner user not found");
         }
 
-        var staffName = GetStaffName(staff);
+        var ownerName = GetOwnerName(owner);
         var now = _dateTimeService.NowUtc;
 
-        if (session.AssignedStaffId == null)
+        if (session.AssignedOwnerId == null)
         {
-            session.AssignedStaffId = request.StaffUserId;
+            session.AssignedOwnerId = request.OwnerUserId;
             await _sessionRepository.UpdateAsync(session, cancellationToken);
         }
 
@@ -55,9 +55,9 @@ public class StaffReplyToGuestCommandHandler : IRequestHandler<StaffReplyToGuest
         {
             GuestChatSessionId = session.Id,
             Content = request.Message,
-            SenderName = staffName,
-            IsStaff = true,
-            StaffId = request.StaffUserId,
+            SenderName = ownerName,
+            IsOwner = true,
+            OwnerId = request.OwnerUserId,
             CreateUtc = now
         };
 
@@ -71,17 +71,18 @@ public class StaffReplyToGuestCommandHandler : IRequestHandler<StaffReplyToGuest
             Id = message.Id,
             SessionId = session.SessionId,
             SenderName = message.SenderName,
-            IsStaff = message.IsStaff,
+            IsOwner = message.IsOwner,
             Content = message.Content,
             SentAt = message.CreateUtc
         };
 
-        return new Response<GuestChatMessageDto>(dto, "Staff reply sent successfully");
+        return new Response<GuestChatMessageDto>(dto, "Owner reply sent successfully");
     }
     
-    private static string GetStaffName(AppUser user)
+    private static string GetOwnerName(AppUser user)
     {
         var fullName = $"{user.FirstName ?? string.Empty} {user.LastName ?? string.Empty}".Trim();
-        return string.IsNullOrWhiteSpace(fullName) ? user.UserName ?? "Staff" : fullName;
+        return string.IsNullOrWhiteSpace(fullName) ? user.UserName ?? "Owner" : fullName;
     }
 }
+

@@ -43,7 +43,7 @@ public class GetGuestChatMessagesQueryHandler : IRequestHandler<GetGuestChatMess
             Id = m.Id,
             SessionId = session.SessionId,
             SenderName = m.SenderName,
-            IsStaff = m.IsStaff,
+            IsOwner = m.IsOwner,
             Content = m.Content,
             SentAt = m.CreateUtc
         }).ToList();

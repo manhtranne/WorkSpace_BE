@@ -19,11 +19,11 @@ public class GuestChatSession : AuditableBaseEntity
 
     public bool IsActive { get; set; } = true;
 
-    public int? AssignedStaffId { get; set; }
+    public int? AssignedOwnerId { get; set; }
 
     public DateTimeOffset? LastMessageAt { get; set; }
 
     
-    public virtual AppUser? AssignedStaff { get; set; }
+    public virtual AppUser? AssignedOwner { get; set; }
     public virtual List<GuestChatMessage> Messages { get; set; } = new();
 }

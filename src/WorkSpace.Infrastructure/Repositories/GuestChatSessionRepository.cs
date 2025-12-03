@@ -15,7 +15,7 @@ public class GuestChatSessionRepository : GenericRepositoryAsync<GuestChatSessio
     public async Task<GuestChatSession?> GetBySessionIdAsync(string sessionId, CancellationToken cancellationToken = default)
     {
         return await _context.GuestChatSessions
-            .Include(s => s.AssignedStaff)
+            .Include(s => s.AssignedOwner)
             .AsNoTracking()
             .FirstOrDefaultAsync(s => s.SessionId == sessionId, cancellationToken);
     }
@@ -23,18 +23,18 @@ public class GuestChatSessionRepository : GenericRepositoryAsync<GuestChatSessio
     public async Task<List<GuestChatSession>> GetActiveSessionsAsync(CancellationToken cancellationToken = default)
     {
         return await _context.GuestChatSessions
-            .Include(s => s.AssignedStaff)
+            .Include(s => s.AssignedOwner)
             .Where(s => s.IsActive)
             .OrderByDescending(s => s.LastMessageAt ?? s.CreateUtc)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<GuestChatSession>> GetSessionsByStaffIdAsync(int staffId, CancellationToken cancellationToken = default)
+    public async Task<List<GuestChatSession>> GetSessionsByOwnerIdAsync(int ownerId, CancellationToken cancellationToken = default)
     {
         return await _context.GuestChatSessions
-            .Include(s => s.AssignedStaff)
-            .Where(s => s.AssignedStaffId == staffId && s.IsActive)
+            .Include(s => s.AssignedOwner)
+            .Where(s => s.AssignedOwnerId == ownerId && s.IsActive)
             .OrderByDescending(s => s.LastMessageAt ?? s.CreateUtc)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
@@ -43,7 +43,7 @@ public class GuestChatSessionRepository : GenericRepositoryAsync<GuestChatSessio
     public async Task<GuestChatSession?> GetSessionWithMessagesAsync(string sessionId, CancellationToken cancellationToken = default)
     {
         return await _context.GuestChatSessions
-            .Include(s => s.AssignedStaff)
+            .Include(s => s.AssignedOwner)
             .Include(s => s.Messages.OrderBy(m => m.CreateUtc))
             .AsNoTracking()
             .FirstOrDefaultAsync(s => s.SessionId == sessionId, cancellationToken);

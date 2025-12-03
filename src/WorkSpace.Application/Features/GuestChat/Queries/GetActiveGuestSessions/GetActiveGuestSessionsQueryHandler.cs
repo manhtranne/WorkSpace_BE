@@ -23,9 +23,9 @@ public class GetActiveGuestSessionsQueryHandler : IRequestHandler<GetActiveGuest
     {
         List<Domain.Entities.GuestChatSession> sessions;
 
-        if (request.StaffId.HasValue)
+        if (request.OwnerId.HasValue)
         {
-            sessions = await _sessionRepository.GetSessionsByStaffIdAsync(request.StaffId.Value, cancellationToken);
+            sessions = await _sessionRepository.GetSessionsByOwnerIdAsync(request.OwnerId.Value, cancellationToken);
         }
         else
         {
@@ -40,8 +40,8 @@ public class GetActiveGuestSessionsQueryHandler : IRequestHandler<GetActiveGuest
             CreatedAt = s.CreateUtc,
             LastMessageAt = s.LastMessageAt,
             IsActive = s.IsActive,
-            AssignedStaffId = s.AssignedStaffId,
-            AssignedStaffName = s.AssignedStaff?.GetFullName()
+            AssignedOwnerId = s.AssignedOwnerId,
+            AssignedOwnerName = s.AssignedOwner?.GetFullName()
         }).ToList();
 
 
