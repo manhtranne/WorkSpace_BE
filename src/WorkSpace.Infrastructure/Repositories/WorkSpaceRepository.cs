@@ -173,7 +173,11 @@ namespace WorkSpace.Infrastructure.Repositories
                 .Include(w => w.Host)
                     .ThenInclude(h => h.User)
                 .Include(w => w.WorkSpaceType)
+                .Include(w => w.WorkSpaceImages)
                 .Include(w => w.WorkSpaceRooms)
+                    .ThenInclude(wr => wr.WorkSpaceRoomImages)
+  
+
                 .AsNoTracking()
                 .Where(w => w.WorkSpaceTypeId == typeId)
                 .OrderByDescending(w => w.IsVerified)
