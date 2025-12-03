@@ -43,11 +43,7 @@ public class SendCustomerMessageCommandHandler : IRequestHandler<SendCustomerMes
         {
             CustomerChatSessionId = session.Id,
             Content = request.RequestDto.Message,
-<<<<<<< HEAD:src/WorkSpace.Application/Features/GuestChat/Commands/SendGuestMessage/SendGuestMessageCommandHandler.cs
-            SenderName = session.GuestName,
-=======
             SenderName = session.CustomerName,
->>>>>>> manh/future-2:src/WorkSpace.Application/Features/CustomerChat/Commands/SendCustomerMessage/SendCustomerMessageCommandHandler.cs
             IsOwner = false,
             CreateUtc = now
         };

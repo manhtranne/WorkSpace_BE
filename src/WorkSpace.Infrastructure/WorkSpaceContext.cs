@@ -296,10 +296,6 @@ namespace WorkSpace.Infrastructure
                         .HasDatabaseName("IX_CustomerChatSessions_IsActive");
                     
                     entity.HasIndex(e => e.AssignedOwnerId)
-<<<<<<< HEAD
-                        .HasDatabaseName("IX_GuestChatSessions_AssignedOwnerId");
-                    
-=======
                         .HasDatabaseName("IX_CustomerChatSessions_AssignedOwnerId");
                     
                     // Customer relationship
@@ -308,7 +304,6 @@ namespace WorkSpace.Infrastructure
                         .HasForeignKey(e => e.CustomerId)
                         .OnDelete(DeleteBehavior.Restrict);
                     
->>>>>>> manh/future-2
                     entity.HasOne(e => e.AssignedOwner)
                         .WithMany() 
                         .HasForeignKey(e => e.AssignedOwnerId)
