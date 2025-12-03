@@ -48,21 +48,29 @@ namespace WorkSpace.Application.Mappings
                 .ForMember(d => d.Country, o => o.MapFrom(s => s.Address!.Country))
                 .ForMember(d => d.HostName, o => o.MapFrom(s => s.Host.User.GetFullName()))
                 .ForMember(d => d.Rooms, o => o.MapFrom(s => s.WorkSpaceRooms));
-
+            CreateMap<WorkSpaceType, WorkSpaceTypeDto>();
             CreateMap<WorkSpace.Domain.Entities.WorkSpace, WorkSpaceListItemDto>()
-                .ForMember(d => d.HostName, o => o.MapFrom(s => s.Host != null && s.Host.User != null ? s.Host.User.GetFullName() : null))
-                .ForMember(d => d.WorkSpaceTypeName, o => o.MapFrom(s => s.WorkSpaceType != null ? s.WorkSpaceType.Name : null))
-                .ForMember(d => d.AddressLine, o => o.MapFrom(s => s.Address != null ? $"{s.Address.Street}, {s.Address.Ward}" : null))
-                .ForMember(d => d.City, o => o.MapFrom(s => s.Address != null ? s.Address.Ward : null))
-                .ForMember(d => d.TotalRooms, o => o.MapFrom(s => s.WorkSpaceRooms.Count))
-                .ForMember(d => d.ActiveRooms, o => o.MapFrom(s => s.WorkSpaceRooms.Count(r => r.IsActive)))
+              .ForMember(d => d.HostName, o => o.MapFrom(s => s.Host != null && s.Host.User != null ? s.Host.User.GetFullName() : null))
+              .ForMember(d => d.WorkSpaceTypeName, o => o.MapFrom(s => s.WorkSpaceType != null ? s.WorkSpaceType.Name : null))
+              .ForMember(d => d.AddressLine, o => o.MapFrom(s => s.Address != null ? $"{s.Address.Street}, {s.Address.Ward}" : null))
+              .ForMember(d => d.City, o => o.MapFrom(s => s.Address != null ? s.Address.Ward : null))
+              .ForMember(d => d.TotalRooms, o => o.MapFrom(s => s.WorkSpaceRooms.Count))
+              .ForMember(d => d.ActiveRooms, o => o.MapFrom(s => s.WorkSpaceRooms.Count(r => r.IsActive)))
 
-                .ForMember(d => d.ThumbnailUrl, o => o.MapFrom(s => s.WorkSpaceImages != null && s.WorkSpaceImages.Any()
-                    ? s.WorkSpaceImages.FirstOrDefault().ImageUrl
-                    : null))
-                .ForMember(d => d.ImageUrls, o => o.MapFrom(s => s.WorkSpaceImages != null && s.WorkSpaceImages.Any()
-                    ? s.WorkSpaceImages.Select(img => img.ImageUrl).ToList()
-                    : null)); 
+
+              .ForMember(d => d.ThumbnailUrl, o => o.MapFrom(s =>
+                  (s.WorkSpaceImages != null && s.WorkSpaceImages.Any())
+                      ? s.WorkSpaceImages.FirstOrDefault().ImageUrl
+                      : (s.WorkSpaceRooms != null
+                          ? s.WorkSpaceRooms.Where(r => r.IsActive).SelectMany(r => r.WorkSpaceRoomImages).Select(i => i.ImageUrl).FirstOrDefault()
+                          : null)))
+
+              .ForMember(d => d.ImageUrls, o => o.MapFrom(s =>
+                  (s.WorkSpaceImages != null ? s.WorkSpaceImages.Select(i => i.ImageUrl) : Enumerable.Empty<string>())
+                  .Concat(s.WorkSpaceRooms != null
+                      ? s.WorkSpaceRooms.Where(r => r.IsActive).SelectMany(r => r.WorkSpaceRoomImages).Select(i => i.ImageUrl)
+                      : Enumerable.Empty<string>())
+                  .Distinct().ToList()));
 
             CreateMap<WorkSpace.Domain.Entities.WorkSpace, WorkSpaceModerationDto>()
                 .ForMember(d => d.HostName, o => o.MapFrom(s => s.Host != null && s.Host.User != null ? s.Host.User.GetFullName() : null))
