@@ -6,6 +6,11 @@ using WorkSpace.Application.Extensions;
 using WorkSpace.Application.Features.Owner.Commands;
 using WorkSpace.Application.Features.Owner.Queries;
 using WorkSpace.Application.Features.Refunds.Commands;
+using WorkSpace.Application.Features.GuestChat.Commands.CloseGuestSession;
+using WorkSpace.Application.Features.GuestChat.Commands.OwnerReplyToGuest;
+using WorkSpace.Application.Features.GuestChat.Queries.GetActiveGuestSessions;
+using WorkSpace.Application.Features.GuestChat.Queries.GetGuestChatMessages;
+using WorkSpace.Application.Wrappers;
 
 namespace WorkSpace.WebApi.Controllers.v1
 {
@@ -56,6 +61,20 @@ namespace WorkSpace.WebApi.Controllers.v1
             };
 
             return Ok(await Mediator.Send(command, ct));
+        }
+
+        [HttpGet("workspaces/{id}/detail")]
+        public async Task<IActionResult> GetWorkSpaceDetail(int id, CancellationToken ct)
+        {
+            var userId = User.GetUserId();
+            var query = new WorkSpace.Application.Features.Owner.Queries.GetOwnerWorkSpaceDetailQuery
+            {
+                WorkSpaceId = id,
+                OwnerUserId = userId
+            };
+
+            var result = await Mediator.Send(query, ct);
+            return Ok(result.Data);
         }
 
         [HttpPost("workspaces")]
@@ -232,6 +251,21 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(await Mediator.Send(command, ct));
         }
 
+
+        [HttpPut("bookings/{bookingId}/complete")]
+        public async Task<IActionResult> CompleteBooking(int bookingId, CancellationToken ct)
+        {
+            var userId = User.GetUserId();
+            var command = new ManageBookingCommand
+            {
+                BookingId = bookingId,
+                Action = BookingAction.Complete,
+                OwnerUserId = userId
+            };
+            return Ok(await Mediator.Send(command, ct));
+        }
+ 
+
         [HttpPost("refund-requests/{refundRequestId}/approve")]
         public async Task<IActionResult> ApproveOrRejectRefund(
             [FromRoute] int refundRequestId,
@@ -322,5 +356,75 @@ namespace WorkSpace.WebApi.Controllers.v1
             var result = await Mediator.Send(command, ct);
             return Ok(result);
         }
+
+        #region Guest Chat Management
+
+        [HttpGet("guest-chats")]
+        public async Task<IActionResult> GetActiveGuestChatSessions(
+            [FromQuery] int? ownerId = null,
+            CancellationToken cancellationToken = default)
+        {
+            var query = new GetActiveGuestSessionsQuery
+            {
+                OwnerId = ownerId
+            };
+        
+            var result = await Mediator.Send(query, cancellationToken);
+            return Ok(result);
+        }
+        
+        [HttpGet("guest-chats/{sessionId}/messages")]
+        public async Task<IActionResult> GetGuestChatMessages(
+            [FromRoute] string sessionId,
+            CancellationToken cancellationToken)
+        {
+            var query = new GetGuestChatMessagesQuery
+            {
+                SessionId = sessionId
+            };
+        
+            var result = await Mediator.Send(query, cancellationToken);
+            return Ok(result);
+        }
+        
+        [HttpPost("guest-chats/{sessionId}/reply")]
+        public async Task<IActionResult> ReplyToGuestChat(
+            [FromRoute] string sessionId,
+            [FromBody] string message,
+            CancellationToken cancellationToken)
+        {
+            var ownerUserId = User.GetUserId();
+            if (ownerUserId == 0) return Unauthorized(new Response<string>("Invalid user token"));
+
+            var command = new OwnerReplyToGuestCommand
+            {
+                SessionId = sessionId,
+                Message = message,
+                OwnerUserId = ownerUserId
+            };
+        
+            var result = await Mediator.Send(command, cancellationToken);
+            return Ok(result);
+        }
+        
+        [HttpPut("guest-chats/{sessionId}/close")]
+        public async Task<IActionResult> CloseGuestChatSession(
+            [FromRoute] string sessionId,
+            CancellationToken cancellationToken)
+        {
+            var ownerUserId = User.GetUserId();
+            if (ownerUserId == 0) return Unauthorized(new Response<string>("Invalid user token"));
+
+            var command = new CloseGuestChatSessionCommand
+            {
+                SessionId = sessionId,
+                OwnerUserId = ownerUserId
+            };
+        
+            var result = await Mediator.Send(command, cancellationToken);
+            return Ok(result);
+        }
+
+        #endregion
     }
 }

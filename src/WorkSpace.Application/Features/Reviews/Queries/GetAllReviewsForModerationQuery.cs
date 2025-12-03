@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 
 namespace WorkSpace.Application.Features.Reviews.Queries;
 
-
 public class GetAllReviewsForModerationQuery : IRequest<IEnumerable<ReviewModerationDto>>
 {
     public bool? IsVerifiedFilter { get; set; }
@@ -30,7 +29,9 @@ public class GetAllReviewsForModerationQueryHandler : IRequestHandler<GetAllRevi
     {
         var query = _dbContext.Reviews
             .Include(r => r.User)
+            .Include(r => r.Booking) 
             .Include(r => r.WorkSpaceRoom)
+                .ThenInclude(wr => wr.WorkSpace) 
             .AsNoTracking();
 
         if (request.IsVerifiedFilter.HasValue)
@@ -38,25 +39,26 @@ public class GetAllReviewsForModerationQueryHandler : IRequestHandler<GetAllRevi
             query = query.Where(r => r.IsVerified == request.IsVerifiedFilter.Value);
         }
 
+
         if (request.IsPublicFilter.HasValue)
         {
             query = query.Where(r => r.IsPublic == request.IsPublicFilter.Value);
         }
 
-      
         var reviews = await query
             .OrderByDescending(r => r.CreateUtc)
             .ToListAsync(cancellationToken);
 
-   
         var reviewDtos = reviews.Select(r => new ReviewModerationDto
         {
             Id = r.Id,
             BookingId = r.BookingId,
+            BookingCode = r.Booking?.BookingCode,
             UserId = r.UserId,
             UserName = r.User?.GetFullName(),
             WorkSpaceRoomId = r.WorkSpaceRoomId,
             WorkSpaceRoomTitle = r.WorkSpaceRoom?.Title,
+            WorkSpaceName = r.WorkSpaceRoom?.WorkSpace?.Title,
             Rating = r.Rating,
             Comment = r.Comment,
             IsVerified = r.IsVerified,

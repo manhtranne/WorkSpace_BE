@@ -10,9 +10,7 @@ namespace WorkSpace.WebApi.Controllers.v1;
 [ApiController]
 public class GuestChatController : BaseApiController
 {
-    /// <summary>
-    /// Bắt đầu phiên chat mới cho guest (không cần login)
-    /// </summary>
+
     [HttpPost("start")]
     public async Task<ActionResult<Response<GuestChatSessionDto>>> StartChat(
         [FromBody] StartGuestChatRequestDto request,
@@ -27,9 +25,7 @@ public class GuestChatController : BaseApiController
         return Ok(result);
     }
 
-    /// <summary>
-    /// Gửi tin nhắn từ guest
-    /// </summary>
+
     [HttpPost("messages")]
     public async Task<ActionResult<Response<GuestChatMessageDto>>> SendMessage(
         [FromBody] SendGuestMessageRequestDto request,
@@ -44,9 +40,6 @@ public class GuestChatController : BaseApiController
         return Ok(result);
     }
 
-    /// <summary>
-    /// Lấy tất cả tin nhắn trong phiên chat
-    /// </summary>
     [HttpGet("{sessionId}/messages")]
     public async Task<ActionResult<Response<IEnumerable<GuestChatMessageDto>>>> GetMessages(
         [FromRoute] string sessionId,

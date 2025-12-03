@@ -44,7 +44,7 @@ public class SendGuestMessageCommandHandler : IRequestHandler<SendGuestMessageCo
             GuestChatSessionId = session.Id,
             Content = request.RequestDto.Message,
             SenderName = session.GuestName,
-            IsStaff = false,
+            IsOwner = false,
             CreateUtc = now
         };
         
@@ -58,7 +58,7 @@ public class SendGuestMessageCommandHandler : IRequestHandler<SendGuestMessageCo
             Id = message.Id,
             SessionId = session.SessionId,
             SenderName = message.SenderName,
-            IsStaff = message.IsStaff,
+            IsOwner = message.IsOwner,
             Content = message.Content,
             SentAt = message.CreateUtc
         };

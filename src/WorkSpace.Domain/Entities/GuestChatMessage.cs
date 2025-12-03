@@ -17,11 +17,11 @@ public class GuestChatMessage : AuditableBaseEntity
     public string SenderName { get; set; } = string.Empty;
 
     
-    public bool IsStaff { get; set; } = false;
+    public bool IsOwner { get; set; } = false;
 
-    public int? StaffId { get; set; }
+    public int? OwnerId { get; set; }
 
    
     public virtual GuestChatSession? GuestChatSession { get; set; }
-    public virtual AppUser? Staff { get; set; }
+    public virtual AppUser? Owner { get; set; }
 }

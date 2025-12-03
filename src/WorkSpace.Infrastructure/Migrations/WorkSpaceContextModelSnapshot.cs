@@ -819,7 +819,7 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Property<int>("GuestChatSessionId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("IsStaff")
+                    b.Property<bool>("IsOwner")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
@@ -830,13 +830,13 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("LastModifiedUtc")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<int?>("OwnerId")
+                        .HasColumnType("int");
+
                     b.Property<string>("SenderName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<int?>("StaffId")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -846,7 +846,7 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.HasIndex("GuestChatSessionId")
                         .HasDatabaseName("IX_GuestChatMessages_SessionId");
 
-                    b.HasIndex("StaffId");
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("GuestChatMessages", (string)null);
                 });
@@ -859,7 +859,7 @@ namespace WorkSpace.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("AssignedStaffId")
+                    b.Property<int?>("AssignedOwnerId")
                         .HasColumnType("int");
 
                     b.Property<DateTimeOffset>("CreateUtc")
@@ -898,8 +898,8 @@ namespace WorkSpace.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AssignedStaffId")
-                        .HasDatabaseName("IX_GuestChatSessions_AssignedStaffId");
+                    b.HasIndex("AssignedOwnerId")
+                        .HasDatabaseName("IX_GuestChatSessions_AssignedOwnerId");
 
                     b.HasIndex("IsActive")
                         .HasDatabaseName("IX_GuestChatSessions_IsActive");
@@ -1073,6 +1073,9 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("HostId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -1095,6 +1098,8 @@ namespace WorkSpace.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("HostId");
 
                     b.ToTable("Promotions");
                 });
@@ -1878,24 +1883,24 @@ namespace WorkSpace.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("WorkSpace.Domain.Entities.AppUser", "Staff")
+                    b.HasOne("WorkSpace.Domain.Entities.AppUser", "Owner")
                         .WithMany()
-                        .HasForeignKey("StaffId")
+                        .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("GuestChatSession");
 
-                    b.Navigation("Staff");
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("WorkSpace.Domain.Entities.GuestChatSession", b =>
                 {
-                    b.HasOne("WorkSpace.Domain.Entities.AppUser", "AssignedStaff")
+                    b.HasOne("WorkSpace.Domain.Entities.AppUser", "AssignedOwner")
                         .WithMany()
-                        .HasForeignKey("AssignedStaffId")
+                        .HasForeignKey("AssignedOwnerId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("AssignedStaff");
+                    b.Navigation("AssignedOwner");
                 });
 
             modelBuilder.Entity("WorkSpace.Domain.Entities.HostProfile", b =>
@@ -1918,6 +1923,15 @@ namespace WorkSpace.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("WorkSpace.Domain.Entities.Promotion", b =>
+                {
+                    b.HasOne("WorkSpace.Domain.Entities.HostProfile", "Host")
+                        .WithMany()
+                        .HasForeignKey("HostId");
+
+                    b.Navigation("Host");
                 });
 
             modelBuilder.Entity("WorkSpace.Domain.Entities.PromotionUsage", b =>

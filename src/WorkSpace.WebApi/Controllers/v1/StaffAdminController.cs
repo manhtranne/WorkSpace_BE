@@ -5,19 +5,17 @@ using WorkSpace.Application.DTOs.Refund;
 using WorkSpace.Application.DTOs.Support;
 using WorkSpace.Application.Enums;
 using WorkSpace.Application.Extensions;
-using WorkSpace.Application.Features.GuestChat.Commands.CloseGuestSession;
-using WorkSpace.Application.Features.GuestChat.Commands.StaffReplyToGuest;
-using WorkSpace.Application.Features.GuestChat.Queries.GetActiveGuestSessions;
-using WorkSpace.Application.Features.GuestChat.Queries.GetGuestChatMessages;
+using WorkSpace.Application.Features.HostProfile.Commands.ApproveHostProfile;
+using WorkSpace.Application.Features.HostProfile.Queries.GetAllHostProfiles;
 using WorkSpace.Application.Features.Refunds.Commands;
 using WorkSpace.Application.Features.Reviews.Commands;
 using WorkSpace.Application.Features.Reviews.Queries;
+using WorkSpace.Application.Features.Staff.Queries;
 using WorkSpace.Application.Features.SupportTickets.Commands;
 using WorkSpace.Application.Features.SupportTickets.Queries;
 using WorkSpace.Application.Features.WorkSpace.Commands;
 using WorkSpace.Application.Features.WorkSpace.Queries;
 using WorkSpace.Application.Wrappers;
-using WorkSpace.Application.Features.HostProfile.Commands.ApproveHostProfile;
 
 namespace WorkSpace.WebApi.Controllers.v1;
 
@@ -30,36 +28,82 @@ public class StaffAdminController : BaseApiController
 {
     [HttpGet("reviews")]
     public async Task<IActionResult> GetAllReviewsForModeration(
-            [FromQuery] bool? isVerified,
-            [FromQuery] bool? isPublic,
-            CancellationToken cancellationToken)
+                [FromQuery] bool? isVerified,
+                [FromQuery] bool? isPublic,
+                CancellationToken cancellationToken)
     {
         var query = new GetAllReviewsForModerationQuery
         {
             IsVerifiedFilter = isVerified,
             IsPublicFilter = isPublic
         };
-        
+
         var result = await Mediator.Send(query, cancellationToken);
         return Ok(result);
     }
-    [HttpPut("reviews/{reviewId}/moderate")]
-    public async Task<IActionResult> ModerateReview(
-        [FromRoute] int reviewId,
-        [FromBody] ModerateReviewCommand command,
-        CancellationToken cancellationToken)
+
+    [HttpGet("reviews/{id}")]
+    public async Task<IActionResult> GetReviewDetail([FromRoute] int id, CancellationToken cancellationToken)
     {
-        command.ReviewId = reviewId;
-        var result = await Mediator.Send(command, cancellationToken);
+        var query = new GetReviewDetailQuery(id);
+        var result = await Mediator.Send(query, cancellationToken);
 
         if (!result.Succeeded)
         {
-            return BadRequest(new { error = result.Message });
+            return NotFound(new { error = result.Message });
         }
-    
+
+
         return Ok(result.Data);
     }
 
+    [HttpPut("reviews/{id}/toggle-visibility")]
+    public async Task<IActionResult> ToggleReviewVisibility([FromRoute] int id, CancellationToken cancellationToken)
+    {
+        var command = new ToggleReviewVisibilityCommand(id);
+        var result = await Mediator.Send(command, cancellationToken);
+
+        if (!result.Succeeded) return BadRequest(result);
+        return Ok(result);
+    }
+    [HttpPut("reviews/{reviewId}/approve")]
+    public async Task<IActionResult> ApproveReview(
+         [FromRoute] int reviewId,
+         CancellationToken cancellationToken)
+    {
+   
+        var command = new ApproveReviewCommand(reviewId);
+        var result = await Mediator.Send(command, cancellationToken);
+
+        if (!result.Succeeded) return BadRequest(result);
+        return Ok(result);
+    }
+
+
+    //[HttpPut("reviews/{reviewId}/hide")]
+    //public async Task<IActionResult> HideReview(
+    //    [FromRoute] int reviewId,
+    //    CancellationToken cancellationToken)
+    //{
+    //    var command = new HideReviewCommand(reviewId);
+    //    var result = await Mediator.Send(command, cancellationToken);
+
+    //    if (!result.Succeeded) return BadRequest(result);
+    //    return Ok(result);
+    //}
+
+ 
+    //[HttpPut("reviews/{reviewId}/show")]
+    //public async Task<IActionResult> ShowReview(
+    //    [FromRoute] int reviewId,
+    //    CancellationToken cancellationToken)
+    //{
+    //    var command = new ShowReviewCommand(reviewId);
+    //    var result = await Mediator.Send(command, cancellationToken);
+
+    //    if (!result.Succeeded) return BadRequest(result);
+    //    return Ok(result);
+    //}
 
     //[HttpGet("bookings")]
     //public async Task<IActionResult> GetAllBookings(
@@ -69,11 +113,13 @@ public class StaffAdminController : BaseApiController
     //    var result = await Mediator.Send(query, cancellationToken);
     //    return Ok(result); 
     //}
+    // src/WorkSpace.WebApi/Controllers/v1/StaffAdminController.cs
 
     [HttpGet("workspaces/pending")]
     public async Task<IActionResult> GetPendingWorkSpaces(
            CancellationToken cancellationToken = default)
     {
+
         var query = new GetPendingWorkSpacesQuery();
         var result = await Mediator.Send(query, cancellationToken);
         return Ok(result);
@@ -91,11 +137,17 @@ public class StaffAdminController : BaseApiController
 
     [HttpPut("workspaces/{workSpaceId}/approve")]
     public async Task<IActionResult> ApproveWorkSpace(
-         [FromRoute] int workSpaceId,
-         [FromBody] Application.DTOs.WorkSpaces.ApproveWorkSpaceDto dto,
-         CancellationToken cancellationToken = default)
+             [FromRoute] int workSpaceId,
+             CancellationToken cancellationToken = default)
     {
-        dto.WorkSpaceId = workSpaceId;
+
+        var dto = new Application.DTOs.WorkSpaces.ApproveWorkSpaceDto
+        {
+            WorkSpaceId = workSpaceId,
+            IsApproved = true,
+            RejectionReason = null
+        };
+
         var command = new ApproveWorkSpaceCommand(dto);
         var result = await Mediator.Send(command, cancellationToken);
 
@@ -219,6 +271,47 @@ public class StaffAdminController : BaseApiController
       
         return Ok(new { transactionId = result.Data });
     }
+    [HttpGet("owner-registrations")]
+    public async Task<IActionResult> GetOwnerRegistrations(
+            CancellationToken cancellationToken = default)
+    {
+
+        var query = new GetAllHostProfilesQuery
+        {
+            IsVerified = false,
+            PageNumber = 1,
+            PageSize = int.MaxValue
+        };
+
+        var result = await Mediator.Send(query, cancellationToken);
+
+        return Ok(result.Data);
+    }
+
+    [HttpPut("owner-registrations/{hostProfileId}/approve")]
+    public async Task<IActionResult> ApproveOwnerRegistration(
+         [FromRoute] int hostProfileId,
+         [FromQuery] bool isApproved = true, 
+         CancellationToken cancellationToken = default)
+    {
+        var command = new ApproveHostProfileCommand
+        {
+            HostProfileId = hostProfileId,
+            IsApproved = isApproved
+        };
+
+        var result = await Mediator.Send(command, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            
+            return BadRequest(new { error = result.Message });
+        }
+
+     
+        return Ok(new { success = true, isVerified = isApproved });
+    }
+
     [HttpGet("support-tickets")]
     public async Task<IActionResult> GetSupportTickets(
             [FromQuery] GetSupportTicketsQuery query,
@@ -277,72 +370,23 @@ public class StaffAdminController : BaseApiController
     
         return Ok(result.Data);
     }
-    
-    [HttpGet("guest-chats")]
-    public async Task<IActionResult> GetActiveGuestChatSessions(
-        [FromQuery] int? staffId = null,
-        CancellationToken cancellationToken = default)
+
+    [HttpGet("dashboard")]
+    public async Task<IActionResult> GetStaffDashboard(CancellationToken cancellationToken)
     {
-        var query = new GetActiveGuestSessionsQuery
-        {
-            StaffId = staffId
-        };
-    
+        var query = new GetStaffDashboardQuery();
         var result = await Mediator.Send(query, cancellationToken);
         return Ok(result);
     }
-    
-    [HttpGet("guest-chats/{sessionId}/messages")]
-    public async Task<IActionResult> GetGuestChatMessages(
-        [FromRoute] string sessionId,
-        CancellationToken cancellationToken)
+
+
+    [HttpGet("bookings/today")]
+    public async Task<IActionResult> GetBookingsToday(CancellationToken cancellationToken)
     {
-        var query = new GetGuestChatMessagesQuery
-        {
-            SessionId = sessionId
-        };
-    
+        var query = new WorkSpace.Application.Features.Staff.Queries.GetBookingsToday.GetBookingsTodayQuery();
         var result = await Mediator.Send(query, cancellationToken);
+
+  
         return Ok(result);
     }
-    
-    [HttpPost("guest-chats/{sessionId}/reply")]
-    public async Task<IActionResult> ReplyToGuestChat(
-        [FromRoute] string sessionId,
-        [FromBody] string message,
-        CancellationToken cancellationToken)
-    {
-        var staffUserId = User.GetUserId();
-        if (staffUserId == 0) return Unauthorized(new Response<string>("Invalid user token"));
-
-        var command = new StaffReplyToGuestCommand
-        {
-            SessionId = sessionId,
-            Message = message,
-            StaffUserId = staffUserId
-        };
-    
-        var result = await Mediator.Send(command, cancellationToken);
-        return Ok(result);
-    }
-    
-
-    [HttpPut("guest-chats/{sessionId}/close")]
-    public async Task<IActionResult> CloseGuestChatSession(
-        [FromRoute] string sessionId,
-        CancellationToken cancellationToken)
-    {
-        var staffUserId = User.GetUserId();
-        if (staffUserId == 0) return Unauthorized(new Response<string>("Invalid user token"));
-
-        var command = new CloseGuestChatSessionCommand
-        {
-            SessionId = sessionId,
-            StaffUserId = staffUserId
-        };
-    
-        var result = await Mediator.Send(command, cancellationToken);
-        return Ok(result);
-    }
-    
 }

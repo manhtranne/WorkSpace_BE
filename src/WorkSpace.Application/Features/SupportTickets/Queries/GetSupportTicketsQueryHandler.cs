@@ -24,14 +24,15 @@ namespace WorkSpace.Application.Features.SupportTickets.Queries
             var query = _context.SupportTickets
                 .Include(t => t.SubmittedByUser)
                 .Include(t => t.AssignedToStaff)
-                .AsNoTracking();
+                .AsNoTracking()
+                .AsQueryable(); 
+
 
             if (request.StatusFilter.HasValue)
             {
                 query = query.Where(t => t.Status == request.StatusFilter.Value);
             }
 
-            // 2. Bỏ Skip/Take
             var tickets = await query
                 .OrderByDescending(t => t.CreateUtc)
                 .ToListAsync(cancellationToken);
