@@ -294,11 +294,10 @@ public class StaffAdminController : BaseApiController
 
     [HttpPut("owner-registrations/{hostProfileId}/approve")]
     public async Task<IActionResult> ApproveOwnerRegistration(
-        [FromRoute] int hostProfileId,
-        [FromBody] bool isApproved,
-        CancellationToken cancellationToken)
+         [FromRoute] int hostProfileId,
+         [FromQuery] bool isApproved = true, 
+         CancellationToken cancellationToken = default)
     {
-
         var command = new ApproveHostProfileCommand
         {
             HostProfileId = hostProfileId,
@@ -307,8 +306,14 @@ public class StaffAdminController : BaseApiController
 
         var result = await Mediator.Send(command, cancellationToken);
 
-        if (!result.Succeeded) return BadRequest(result);
-        return Ok(result);
+        if (!result.Succeeded)
+        {
+            
+            return BadRequest(new { error = result.Message });
+        }
+
+     
+        return Ok(new { success = true, isVerified = isApproved });
     }
 
     [HttpGet("support-tickets")]
