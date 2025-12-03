@@ -125,6 +125,7 @@ public class RecommendationService : IRecommendationService
             .Include(w => w.Host)
                 .ThenInclude(h => h.User)
             .Include(w => w.WorkSpaceType)
+            .Include(w => w.WorkSpaceImages)
             .Include(w => w.WorkSpaceRooms)
                 .ThenInclude(r => r.WorkSpaceRoomImages)
             .Include(w => w.WorkSpaceRooms)
@@ -223,6 +224,7 @@ public class RecommendationService : IRecommendationService
             .Include(w => w.Host)
                 .ThenInclude(h => h.User)
             .Include(w => w.WorkSpaceType)
+            .Include(w => w.WorkSpaceImages)
             .Include(w => w.WorkSpaceRooms)
                 .ThenInclude(r => r.WorkSpaceRoomImages)
             .Include(w => w.WorkSpaceRooms)
@@ -441,13 +443,21 @@ public class RecommendationService : IRecommendationService
                 .Distinct()
                 .ToList();
 
-            dto.ImageUrls = activeRooms
-                .SelectMany(r => r.WorkSpaceRoomImages)
-                .Select(img => img.ImageUrl)
-                .Distinct()
-                .ToList();
-
-            dto.ThumbnailUrl = dto.ImageUrls.FirstOrDefault();
+            
+            if (workspace.WorkSpaceImages != null && workspace.WorkSpaceImages.Any())
+            {
+                dto.ThumbnailUrl = workspace.WorkSpaceImages.First().ImageUrl;
+                dto.ImageUrls = workspace.WorkSpaceImages.Select(img => img.ImageUrl).ToList();
+            }
+            else
+            {
+                dto.ImageUrls = activeRooms
+                    .SelectMany(r => r.WorkSpaceRoomImages)
+                    .Select(img => img.ImageUrl)
+                    .Distinct()
+                    .ToList();
+                dto.ThumbnailUrl = dto.ImageUrls.FirstOrDefault();
+            }
         }
 
       

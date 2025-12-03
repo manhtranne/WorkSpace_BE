@@ -6,10 +6,17 @@ using WorkSpace.Application.Extensions;
 using WorkSpace.Application.Features.Owner.Commands;
 using WorkSpace.Application.Features.Owner.Queries;
 using WorkSpace.Application.Features.Refunds.Commands;
+<<<<<<< HEAD
 using WorkSpace.Application.Features.GuestChat.Commands.CloseGuestSession;
 using WorkSpace.Application.Features.GuestChat.Commands.OwnerReplyToGuest;
 using WorkSpace.Application.Features.GuestChat.Queries.GetActiveGuestSessions;
 using WorkSpace.Application.Features.GuestChat.Queries.GetGuestChatMessages;
+=======
+using WorkSpace.Application.Features.CustomerChat.Commands.CloseCustomerSession;
+using WorkSpace.Application.Features.CustomerChat.Commands.OwnerReplyToCustomer;
+using WorkSpace.Application.Features.CustomerChat.Queries.GetActiveCustomerSessions;
+using WorkSpace.Application.Features.CustomerChat.Queries.GetCustomerChatMessages;
+>>>>>>> manh/future-2
 using WorkSpace.Application.Wrappers;
 
 namespace WorkSpace.WebApi.Controllers.v1
@@ -357,6 +364,7 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(result);
         }
 
+<<<<<<< HEAD
         #region Guest Chat Management
 
         [HttpGet("guest-chats")]
@@ -365,6 +373,16 @@ namespace WorkSpace.WebApi.Controllers.v1
             CancellationToken cancellationToken = default)
         {
             var query = new GetActiveGuestSessionsQuery
+=======
+        #region Customer Chat Management
+
+        [HttpGet("customer-chats")]
+        public async Task<IActionResult> GetActiveCustomerChatSessions(
+            [FromQuery] int? ownerId = null,
+            CancellationToken cancellationToken = default)
+        {
+            var query = new GetActiveCustomerSessionsQuery
+>>>>>>> manh/future-2
             {
                 OwnerId = ownerId
             };
@@ -373,12 +391,21 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(result);
         }
         
+<<<<<<< HEAD
         [HttpGet("guest-chats/{sessionId}/messages")]
         public async Task<IActionResult> GetGuestChatMessages(
             [FromRoute] string sessionId,
             CancellationToken cancellationToken)
         {
             var query = new GetGuestChatMessagesQuery
+=======
+        [HttpGet("customer-chats/{sessionId}/messages")]
+        public async Task<IActionResult> GetCustomerChatMessages(
+            [FromRoute] string sessionId,
+            CancellationToken cancellationToken)
+        {
+            var query = new GetCustomerChatMessagesQuery
+>>>>>>> manh/future-2
             {
                 SessionId = sessionId
             };
@@ -387,8 +414,13 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(result);
         }
         
+<<<<<<< HEAD
         [HttpPost("guest-chats/{sessionId}/reply")]
         public async Task<IActionResult> ReplyToGuestChat(
+=======
+        [HttpPost("customer-chats/{sessionId}/reply")]
+        public async Task<IActionResult> ReplyToCustomerChat(
+>>>>>>> manh/future-2
             [FromRoute] string sessionId,
             [FromBody] string message,
             CancellationToken cancellationToken)
@@ -396,7 +428,11 @@ namespace WorkSpace.WebApi.Controllers.v1
             var ownerUserId = User.GetUserId();
             if (ownerUserId == 0) return Unauthorized(new Response<string>("Invalid user token"));
 
+<<<<<<< HEAD
             var command = new OwnerReplyToGuestCommand
+=======
+            var command = new OwnerReplyToCustomerCommand
+>>>>>>> manh/future-2
             {
                 SessionId = sessionId,
                 Message = message,
@@ -407,15 +443,24 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(result);
         }
         
+<<<<<<< HEAD
         [HttpPut("guest-chats/{sessionId}/close")]
         public async Task<IActionResult> CloseGuestChatSession(
+=======
+        [HttpPut("customer-chats/{sessionId}/close")]
+        public async Task<IActionResult> CloseCustomerChatSession(
+>>>>>>> manh/future-2
             [FromRoute] string sessionId,
             CancellationToken cancellationToken)
         {
             var ownerUserId = User.GetUserId();
             if (ownerUserId == 0) return Unauthorized(new Response<string>("Invalid user token"));
 
+<<<<<<< HEAD
             var command = new CloseGuestChatSessionCommand
+=======
+            var command = new CloseCustomerChatSessionCommand
+>>>>>>> manh/future-2
             {
                 SessionId = sessionId,
                 OwnerUserId = ownerUserId
