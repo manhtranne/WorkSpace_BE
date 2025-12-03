@@ -10,6 +10,7 @@ using WorkSpace.Application.Features.GuestChat.Commands.StaffReplyToGuest;
 using WorkSpace.Application.Features.GuestChat.Queries.GetActiveGuestSessions;
 using WorkSpace.Application.Features.GuestChat.Queries.GetGuestChatMessages;
 using WorkSpace.Application.Features.HostProfile.Commands.ApproveHostProfile;
+using WorkSpace.Application.Features.HostProfile.Queries.GetAllHostProfiles;
 using WorkSpace.Application.Features.Refunds.Commands;
 using WorkSpace.Application.Features.Reviews.Commands;
 using WorkSpace.Application.Features.Reviews.Queries;
@@ -268,6 +269,45 @@ public class StaffAdminController : BaseApiController
       
         return Ok(new { transactionId = result.Data });
     }
+
+    [HttpGet("owner-registrations")]
+    public async Task<IActionResult> GetOwnerRegistrations(
+        [FromQuery] bool? isVerified,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
+    {
+   
+        var query = new GetAllHostProfilesQuery
+        {
+            IsVerified = isVerified,
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        };
+
+        var result = await Mediator.Send(query, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPut("owner-registrations/{hostProfileId}/approve")]
+    public async Task<IActionResult> ApproveOwnerRegistration(
+        [FromRoute] int hostProfileId,
+        [FromBody] bool isApproved,
+        CancellationToken cancellationToken)
+    {
+
+        var command = new ApproveHostProfileCommand
+        {
+            HostProfileId = hostProfileId,
+            IsApproved = isApproved
+        };
+
+        var result = await Mediator.Send(command, cancellationToken);
+
+        if (!result.Succeeded) return BadRequest(result);
+        return Ok(result);
+    }
+
     [HttpGet("support-tickets")]
     public async Task<IActionResult> GetSupportTickets(
             [FromQuery] GetSupportTicketsQuery query,
