@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
+using System.Linq; 
 using WorkSpace.Application.Enums;
 using WorkSpace.Application.Interfaces.Repositories;
 using WorkSpace.Application.Wrappers;
@@ -28,37 +29,40 @@ public class ApproveHostProfileHandler : IRequestHandler<ApproveHostProfileComma
 
     public async Task<Response<bool>> Handle(ApproveHostProfileCommand request, CancellationToken cancellationToken)
     {
-    
         var hostProfile = await _hostProfileRepository.GetByIdAsync(request.HostProfileId, cancellationToken);
         if (hostProfile == null)
         {
             return new Response<bool>("Không tìm thấy hồ sơ Host.");
         }
 
-
         hostProfile.IsVerified = request.IsApproved;
         hostProfile.LastModifiedUtc = DateTime.UtcNow;
 
         await _hostProfileRepository.UpdateAsync(hostProfile, cancellationToken);
 
-  
+
         if (request.IsApproved)
         {
             var user = await _userManager.FindByIdAsync(hostProfile.UserId.ToString());
             if (user != null)
             {
-        
-                if (!await _userManager.IsInRoleAsync(user, nameof(Roles.Owner)))
+                var currentRoles = await _userManager.GetRolesAsync(user);
+
+              
+                if (currentRoles.Any())
                 {
-                    await _userManager.AddToRoleAsync(user, nameof(Roles.Owner));
+                    await _userManager.RemoveFromRolesAsync(user, currentRoles);
                 }
 
-        
-   
+              
+                await _userManager.AddToRoleAsync(user, nameof(Roles.Owner));
             }
         }
 
-        var message = request.IsApproved ? "Đã duyệt hồ sơ và cấp quyền Owner." : "Đã từ chối hồ sơ Host.";
+        var message = request.IsApproved
+            ? "Đã duyệt hồ sơ và chuyển tài khoản sang quyền Owner."
+            : "Đã từ chối hồ sơ Host.";
+
         return new Response<bool>(true, message);
     }
 }
