@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace WorkSpace.Application.Features.Owner.Commands
 {
-    public enum BookingAction { Confirm, Cancel, Reject, CheckIn, CheckOut }
+    public enum BookingAction { Confirm, Cancel, Reject, CheckIn, CheckOut, Complete }
 
     public class ManageBookingCommand : IRequest<Response<bool>>
     {
@@ -114,17 +114,23 @@ namespace WorkSpace.Application.Features.Owner.Commands
                     newStatusId = 5; 
                     booking.CheckedInAt = now;
                     break;
-
                 case BookingAction.CheckOut:
-    
                     if (booking.BookingStatusId != 5)
                     {
                         throw new ApiException("Chỉ có thể Check-Out các đơn có trạng thái CheckedIn (5).");
                     }
                     newStatusId = 6;
                     booking.CheckedOutAt = now;
+                    break;
 
-       
+               
+                case BookingAction.Complete:
+            
+                    if (booking.BookingStatusId != 6)
+                    {
+                        throw new ApiException("Chỉ có thể Hoàn tất (Complete) các đơn đã Check-Out (6).");
+                    }
+                    newStatusId = 9;
                     break;
 
                 default:
@@ -137,7 +143,6 @@ namespace WorkSpace.Application.Features.Owner.Commands
 
             await _context.SaveChangesAsync(cancellationToken);
 
-  
             string actionName = request.Action.ToString();
             return new Response<bool>(true, $"Booking {actionName} successfully (New Status ID: {newStatusId}).");
         }

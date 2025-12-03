@@ -67,14 +67,14 @@ namespace WorkSpace.Application.Features.Owner.Commands
             await _hostRepo.AddAsync(hostProfile, cancellationToken);
 
          
-            if (!await _userManager.IsInRoleAsync(user, nameof(Roles.Owner)))
-            {
-                var result = await _userManager.AddToRoleAsync(user, nameof(Roles.Owner));
-                if (!result.Succeeded)
-                {
-                    throw new ApiException("Profile created but failed to assign Owner role.");
-                }
-            }
+            //if (!await _userManager.IsInRoleAsync(user, nameof(Roles.Owner)))
+            //{
+            //    var result = await _userManager.AddToRoleAsync(user, nameof(Roles.Owner));
+            //    if (!result.Succeeded)
+            //    {
+            //        throw new ApiException("Profile created but failed to assign Owner role.");
+            //    }
+            //}
 
             return new Response<int>(hostProfile.Id, "Registered as Owner successfully.");
         }

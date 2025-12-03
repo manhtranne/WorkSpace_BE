@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic; 
+using System.Collections.Generic;
 
 namespace WorkSpace.Application.DTOs.WorkSpaces
 {
@@ -20,7 +20,9 @@ namespace WorkSpace.Application.DTOs.WorkSpaces
         public DateTime CreatedDate { get; set; }
         public int TotalRooms { get; set; }
 
-   
         public List<string> ImageUrls { get; set; } = new List<string>();
+
+ 
+        public IEnumerable<WorkSpaceRoomListItemDto> Rooms { get; set; } = new List<WorkSpaceRoomListItemDto>();
     }
 }

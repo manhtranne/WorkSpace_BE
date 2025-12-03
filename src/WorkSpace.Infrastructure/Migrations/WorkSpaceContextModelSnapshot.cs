@@ -1073,6 +1073,9 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("HostId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -1095,6 +1098,8 @@ namespace WorkSpace.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("HostId");
 
                     b.ToTable("Promotions");
                 });
@@ -1918,6 +1923,15 @@ namespace WorkSpace.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("WorkSpace.Domain.Entities.Promotion", b =>
+                {
+                    b.HasOne("WorkSpace.Domain.Entities.HostProfile", "Host")
+                        .WithMany()
+                        .HasForeignKey("HostId");
+
+                    b.Navigation("Host");
                 });
 
             modelBuilder.Entity("WorkSpace.Domain.Entities.PromotionUsage", b =>

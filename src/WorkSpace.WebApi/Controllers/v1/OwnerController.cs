@@ -58,6 +58,20 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(await Mediator.Send(command, ct));
         }
 
+        [HttpGet("workspaces/{id}/detail")]
+        public async Task<IActionResult> GetWorkSpaceDetail(int id, CancellationToken ct)
+        {
+            var userId = User.GetUserId();
+            var query = new WorkSpace.Application.Features.Owner.Queries.GetOwnerWorkSpaceDetailQuery
+            {
+                WorkSpaceId = id,
+                OwnerUserId = userId
+            };
+
+            var result = await Mediator.Send(query, ct);
+            return Ok(result.Data);
+        }
+
         [HttpPost("workspaces")]
         public async Task<IActionResult> CreateWorkSpace([FromBody] CreateWorkSpaceDto dto, CancellationToken ct)
         {
@@ -231,6 +245,21 @@ namespace WorkSpace.WebApi.Controllers.v1
             };
             return Ok(await Mediator.Send(command, ct));
         }
+
+
+        [HttpPut("bookings/{bookingId}/complete")]
+        public async Task<IActionResult> CompleteBooking(int bookingId, CancellationToken ct)
+        {
+            var userId = User.GetUserId();
+            var command = new ManageBookingCommand
+            {
+                BookingId = bookingId,
+                Action = BookingAction.Complete,
+                OwnerUserId = userId
+            };
+            return Ok(await Mediator.Send(command, ct));
+        }
+ 
 
         [HttpPost("refund-requests/{refundRequestId}/approve")]
         public async Task<IActionResult> ApproveOrRejectRefund(
