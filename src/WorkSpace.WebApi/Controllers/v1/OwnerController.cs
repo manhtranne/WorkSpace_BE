@@ -6,10 +6,10 @@ using WorkSpace.Application.Extensions;
 using WorkSpace.Application.Features.Owner.Commands;
 using WorkSpace.Application.Features.Owner.Queries;
 using WorkSpace.Application.Features.Refunds.Commands;
-using WorkSpace.Application.Features.GuestChat.Commands.CloseGuestSession;
-using WorkSpace.Application.Features.GuestChat.Commands.OwnerReplyToGuest;
-using WorkSpace.Application.Features.GuestChat.Queries.GetActiveGuestSessions;
-using WorkSpace.Application.Features.GuestChat.Queries.GetGuestChatMessages;
+using WorkSpace.Application.Features.CustomerChat.Commands.CloseCustomerSession;
+using WorkSpace.Application.Features.CustomerChat.Commands.OwnerReplyToCustomer;
+using WorkSpace.Application.Features.CustomerChat.Queries.GetActiveCustomerSessions;
+using WorkSpace.Application.Features.CustomerChat.Queries.GetCustomerChatMessages;
 using WorkSpace.Application.Wrappers;
 
 namespace WorkSpace.WebApi.Controllers.v1
@@ -357,14 +357,14 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(result);
         }
 
-        #region Guest Chat Management
+        #region Customer Chat Management
 
-        [HttpGet("guest-chats")]
-        public async Task<IActionResult> GetActiveGuestChatSessions(
+        [HttpGet("customer-chats")]
+        public async Task<IActionResult> GetActiveCustomerChatSessions(
             [FromQuery] int? ownerId = null,
             CancellationToken cancellationToken = default)
         {
-            var query = new GetActiveGuestSessionsQuery
+            var query = new GetActiveCustomerSessionsQuery
             {
                 OwnerId = ownerId
             };
@@ -373,12 +373,12 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(result);
         }
         
-        [HttpGet("guest-chats/{sessionId}/messages")]
-        public async Task<IActionResult> GetGuestChatMessages(
+        [HttpGet("customer-chats/{sessionId}/messages")]
+        public async Task<IActionResult> GetCustomerChatMessages(
             [FromRoute] string sessionId,
             CancellationToken cancellationToken)
         {
-            var query = new GetGuestChatMessagesQuery
+            var query = new GetCustomerChatMessagesQuery
             {
                 SessionId = sessionId
             };
@@ -387,8 +387,8 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(result);
         }
         
-        [HttpPost("guest-chats/{sessionId}/reply")]
-        public async Task<IActionResult> ReplyToGuestChat(
+        [HttpPost("customer-chats/{sessionId}/reply")]
+        public async Task<IActionResult> ReplyToCustomerChat(
             [FromRoute] string sessionId,
             [FromBody] string message,
             CancellationToken cancellationToken)
@@ -396,7 +396,7 @@ namespace WorkSpace.WebApi.Controllers.v1
             var ownerUserId = User.GetUserId();
             if (ownerUserId == 0) return Unauthorized(new Response<string>("Invalid user token"));
 
-            var command = new OwnerReplyToGuestCommand
+            var command = new OwnerReplyToCustomerCommand
             {
                 SessionId = sessionId,
                 Message = message,
@@ -407,15 +407,15 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(result);
         }
         
-        [HttpPut("guest-chats/{sessionId}/close")]
-        public async Task<IActionResult> CloseGuestChatSession(
+        [HttpPut("customer-chats/{sessionId}/close")]
+        public async Task<IActionResult> CloseCustomerChatSession(
             [FromRoute] string sessionId,
             CancellationToken cancellationToken)
         {
             var ownerUserId = User.GetUserId();
             if (ownerUserId == 0) return Unauthorized(new Response<string>("Invalid user token"));
 
-            var command = new CloseGuestChatSessionCommand
+            var command = new CloseCustomerChatSessionCommand
             {
                 SessionId = sessionId,
                 OwnerUserId = ownerUserId
