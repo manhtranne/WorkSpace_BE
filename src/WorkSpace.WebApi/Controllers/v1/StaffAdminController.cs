@@ -275,24 +275,21 @@ public class StaffAdminController : BaseApiController
       
         return Ok(new { transactionId = result.Data });
     }
-
     [HttpGet("owner-registrations")]
     public async Task<IActionResult> GetOwnerRegistrations(
-        [FromQuery] bool? isVerified,
-        [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 20,
-        CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default)
     {
-   
+
         var query = new GetAllHostProfilesQuery
         {
-            IsVerified = isVerified,
-            PageNumber = pageNumber,
-            PageSize = pageSize
+            IsVerified = false,
+            PageNumber = 1,
+            PageSize = int.MaxValue
         };
 
         var result = await Mediator.Send(query, cancellationToken);
-        return Ok(result);
+
+        return Ok(result.Data);
     }
 
     [HttpPut("owner-registrations/{hostProfileId}/approve")]
