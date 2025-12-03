@@ -73,7 +73,8 @@ namespace WorkSpace.Application.Mappings
                 .ForMember(d => d.Country, o => o.MapFrom(s => s.Address != null ? s.Address.Country : null))
                 .ForMember(d => d.CreatedDate, o => o.MapFrom(s => s.CreateUtc.DateTime))
                 .ForMember(d => d.TotalRooms, o => o.MapFrom(s => s.WorkSpaceRooms.Count))
-                .ForMember(d => d.ImageUrls, o => o.MapFrom(s => s.WorkSpaceImages.Select(img => img.ImageUrl).ToList()));
+                .ForMember(d => d.ImageUrls, o => o.MapFrom(s => s.WorkSpaceImages.Select(img => img.ImageUrl).ToList()))
+                .ForMember(d => d.Rooms, o => o.MapFrom(s => s.WorkSpaceRooms));
 
 
             CreateMap<WorkSpaceRoom, WorkSpaceRoomListItemDto>()
