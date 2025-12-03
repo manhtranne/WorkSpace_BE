@@ -102,12 +102,10 @@ public class AdminController : BaseApiController
 
         return Ok(updateResult.Data);
     }
-
-  
     [HttpPut("approve-owner/{hostProfileId}")]
     public async Task<IActionResult> ApproveOwnerRegistration(
-        [FromRoute] int hostProfileId,
-        [FromBody] bool isApproved)
+            [FromRoute] int hostProfileId,
+            [FromQuery] bool isApproved = true) 
     {
         var command = new ApproveHostProfileCommand
         {
@@ -125,7 +123,6 @@ public class AdminController : BaseApiController
         return Ok(new { success = true, isVerified = isApproved });
     }
 
-  
     [HttpGet("users/{userId}")]
     public async Task<IActionResult> GetUserById([FromRoute] int userId)
     {
