@@ -29,21 +29,16 @@ public class GetAllReviewsForModerationQueryHandler : IRequestHandler<GetAllRevi
     {
         var query = _dbContext.Reviews
             .Include(r => r.User)
-            .Include(r => r.WorkSpaceRoom.WorkSpace) // Include thêm WorkSpace để lấy thông tin đầy đủ nếu cần
+            .Include(r => r.Booking) 
+            .Include(r => r.WorkSpaceRoom)
+                .ThenInclude(wr => wr.WorkSpace) 
             .AsNoTracking();
 
-        // --- LOGIC MỚI ---
-        // Nếu có truyền filter cụ thể (true/false) -> Lọc theo yêu cầu
-        // Nếu KHÔNG truyền (null) -> Mặc định chỉ lấy những cái CHƯA DUYỆT (false)
         if (request.IsVerifiedFilter.HasValue)
         {
             query = query.Where(r => r.IsVerified == request.IsVerifiedFilter.Value);
         }
-        else
-        {
-            // Mặc định: Chỉ hiện review chưa duyệt (Pending)
-            query = query.Where(r => r.IsVerified == false);
-        }
+
 
         if (request.IsPublicFilter.HasValue)
         {
@@ -58,10 +53,12 @@ public class GetAllReviewsForModerationQueryHandler : IRequestHandler<GetAllRevi
         {
             Id = r.Id,
             BookingId = r.BookingId,
+            BookingCode = r.Booking?.BookingCode,
             UserId = r.UserId,
             UserName = r.User?.GetFullName(),
             WorkSpaceRoomId = r.WorkSpaceRoomId,
-            WorkSpaceRoomTitle = r.WorkSpaceRoom?.Title, 
+            WorkSpaceRoomTitle = r.WorkSpaceRoom?.Title,
+            WorkSpaceName = r.WorkSpaceRoom?.WorkSpace?.Title,
             Rating = r.Rating,
             Comment = r.Comment,
             IsVerified = r.IsVerified,

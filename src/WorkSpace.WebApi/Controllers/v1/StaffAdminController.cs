@@ -31,17 +31,42 @@ public class StaffAdminController : BaseApiController
 {
     [HttpGet("reviews")]
     public async Task<IActionResult> GetAllReviewsForModeration(
-            [FromQuery] bool? isVerified,
-            [FromQuery] bool? isPublic,
-            CancellationToken cancellationToken)
+                [FromQuery] bool? isVerified,
+                [FromQuery] bool? isPublic,
+                CancellationToken cancellationToken)
     {
         var query = new GetAllReviewsForModerationQuery
         {
             IsVerifiedFilter = isVerified,
             IsPublicFilter = isPublic
         };
-        
+
         var result = await Mediator.Send(query, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("reviews/{id}")]
+    public async Task<IActionResult> GetReviewDetail([FromRoute] int id, CancellationToken cancellationToken)
+    {
+        var query = new GetReviewDetailQuery(id);
+        var result = await Mediator.Send(query, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return NotFound(new { error = result.Message });
+        }
+
+
+        return Ok(result.Data);
+    }
+
+    [HttpPut("reviews/{id}/toggle-visibility")]
+    public async Task<IActionResult> ToggleReviewVisibility([FromRoute] int id, CancellationToken cancellationToken)
+    {
+        var command = new ToggleReviewVisibilityCommand(id);
+        var result = await Mediator.Send(command, cancellationToken);
+
+        if (!result.Succeeded) return BadRequest(result);
         return Ok(result);
     }
     [HttpPut("reviews/{reviewId}/approve")]
@@ -58,30 +83,30 @@ public class StaffAdminController : BaseApiController
     }
 
 
-    [HttpPut("reviews/{reviewId}/hide")]
-    public async Task<IActionResult> HideReview(
-        [FromRoute] int reviewId,
-        CancellationToken cancellationToken)
-    {
-        var command = new HideReviewCommand(reviewId);
-        var result = await Mediator.Send(command, cancellationToken);
+    //[HttpPut("reviews/{reviewId}/hide")]
+    //public async Task<IActionResult> HideReview(
+    //    [FromRoute] int reviewId,
+    //    CancellationToken cancellationToken)
+    //{
+    //    var command = new HideReviewCommand(reviewId);
+    //    var result = await Mediator.Send(command, cancellationToken);
 
-        if (!result.Succeeded) return BadRequest(result);
-        return Ok(result);
-    }
+    //    if (!result.Succeeded) return BadRequest(result);
+    //    return Ok(result);
+    //}
 
  
-    [HttpPut("reviews/{reviewId}/show")]
-    public async Task<IActionResult> ShowReview(
-        [FromRoute] int reviewId,
-        CancellationToken cancellationToken)
-    {
-        var command = new ShowReviewCommand(reviewId);
-        var result = await Mediator.Send(command, cancellationToken);
+    //[HttpPut("reviews/{reviewId}/show")]
+    //public async Task<IActionResult> ShowReview(
+    //    [FromRoute] int reviewId,
+    //    CancellationToken cancellationToken)
+    //{
+    //    var command = new ShowReviewCommand(reviewId);
+    //    var result = await Mediator.Send(command, cancellationToken);
 
-        if (!result.Succeeded) return BadRequest(result);
-        return Ok(result);
-    }
+    //    if (!result.Succeeded) return BadRequest(result);
+    //    return Ok(result);
+    //}
 
     //[HttpGet("bookings")]
     //public async Task<IActionResult> GetAllBookings(

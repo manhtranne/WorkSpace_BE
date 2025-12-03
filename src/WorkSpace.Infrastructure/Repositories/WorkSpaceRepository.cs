@@ -304,9 +304,13 @@ namespace WorkSpace.Infrastructure.Repositories
                 .Include(w => w.Host)
                     .ThenInclude(h => h.User)
                 .Include(w => w.WorkSpaceType)
-                .Include(w => w.WorkSpaceRooms)
-                .Include(w => w.WorkSpaceImages)
-                .AsNoTracking()
+           .Include(w => w.WorkSpaceRooms)
+            .ThenInclude(r => r.WorkSpaceRoomImages) 
+        .Include(w => w.WorkSpaceRooms)
+            .ThenInclude(r => r.Reviews)           
+                                                    
+        .Include(w => w.WorkSpaceImages)
+        .AsNoTracking()
                 .AsQueryable();
 
             if (isVerified.HasValue)
