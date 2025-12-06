@@ -140,6 +140,7 @@ public class RecommendationService : IRecommendationService
             .Include(w => w.WorkSpaceRooms)
                 .ThenInclude(r => r.Reviews)
             .Where(w => w.IsActive && w.IsVerified)
+            .Where(w => w.Host != null && w.Host.User != null && w.Host.User.IsActive)
             .Where(w => w.WorkSpaceRooms.Any(r => r.IsActive && r.IsVerified))
             .AsNoTracking()
             .AsQueryable();
@@ -241,6 +242,7 @@ public class RecommendationService : IRecommendationService
             .Include(w => w.WorkSpaceRooms)
                 .ThenInclude(r => r.Bookings)
             .Where(w => w.IsActive && w.IsVerified)
+            .Where(w => w.Host != null && w.Host.User != null && w.Host.User.IsActive)
             .Where(w => w.WorkSpaceRooms.Any(r => r.IsActive && r.IsVerified))
             .AsNoTracking()
             .ToListAsync(cancellationToken);
