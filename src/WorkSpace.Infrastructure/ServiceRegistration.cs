@@ -110,17 +110,19 @@ public static class ServiceRegistration
             {
                 OnAuthenticationFailed = context =>
                 {
+                    // NGĂN không cho OnChallenge ghi response lần nữa
+                    context.NoResult();
+
+                    context.Response.StatusCode = 401;
+                    context.Response.ContentType = "application/json";
+
                     if (context.Exception is SecurityTokenExpiredException)
                     {
-                        context.Response.StatusCode = 401;
-                        context.Response.ContentType = "application/json";
                         return context.Response.WriteAsync(
                             JsonConvert.SerializeObject(new Response<string>("Token expired"))
                         );
                     }
 
-                    context.Response.StatusCode = 401;
-                    context.Response.ContentType = "application/json";
                     return context.Response.WriteAsync(
                         JsonConvert.SerializeObject(new Response<string>("Authentication failed"))
                     );
@@ -128,25 +130,31 @@ public static class ServiceRegistration
 
                 OnChallenge = context =>
                 {
+                    // Ngăn ASP.NET tự ghi challenge mặc định
                     context.HandleResponse();
-                    context.Response.StatusCode = 401;
-                    context.Response.ContentType = "application/json";
 
-                    return context.Response.WriteAsync(
-                        JsonConvert.SerializeObject(new Response<string>("You are not Authorized"))
-                    );
+                    if (!context.Response.HasStarted)
+                    {
+                        context.Response.StatusCode = 401;
+                        context.Response.ContentType = "application/json";
+                        return context.Response.WriteAsync(
+                            JsonConvert.SerializeObject(new Response<string>("You are not Authorized"))
+                        );
+                    }
+
+                    return Task.CompletedTask;
                 },
 
                 OnForbidden = context =>
                 {
                     context.Response.StatusCode = 403;
                     context.Response.ContentType = "application/json";
-
                     return context.Response.WriteAsync(
                         JsonConvert.SerializeObject(new Response<string>("Forbidden"))
                     );
                 }
             };
+
         });
 
         #endregion
