@@ -76,59 +76,79 @@ public static class ServiceRegistration
         services.Configure<VNPaySettings>(configuration.GetSection("VNPaySettings"));
         services.Configure<GoogleSettings>(configuration.GetSection("GoogleSettings"));
         #endregion
-        
+
         #region Authentication
 
         services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-                .AddJwtBearer(o =>
-                {
-                    o.RequireHttpsMetadata = false;
-                    o.SaveToken = false;
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(o =>
+        {
+            o.RequireHttpsMetadata = false;
+            o.SaveToken = false;
 
-                    o.MapInboundClaims = false; 
-                    o.TokenValidationParameters = new TokenValidationParameters
+            o.MapInboundClaims = false;
+
+            o.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero,
+                ValidIssuer = configuration["JWTSettings:Issuer"],
+                ValidAudience = configuration["JWTSettings:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(configuration["JWTSettings:Key"])
+                ),
+                RoleClaimType = "role" // Nếu bạn dùng "role" trong token
+            };
+
+            o.Events = new JwtBearerEvents
+            {
+                OnAuthenticationFailed = context =>
+                {
+                    if (context.Exception is SecurityTokenExpiredException)
                     {
-                        ValidateIssuerSigningKey = true,
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ClockSkew = TimeSpan.Zero,
-                        ValidIssuer = configuration["JWTSettings:Issuer"],
-                        ValidAudience = configuration["JWTSettings:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWTSettings:Key"])),
-                        RoleClaimType = "role"
-                    };
-                    o.Events = new JwtBearerEvents()
-                    {
-                        OnAuthenticationFailed = c =>
-                        {
-                            c.NoResult();
-                            c.Response.StatusCode = 500;
-                            c.Response.ContentType = "text/plain";
-                            return c.Response.WriteAsync(c.Exception.ToString());
-                        },
-                        OnChallenge = context =>
-                        {
-                            context.HandleResponse();
-                            context.Response.StatusCode = 401;
-                            context.Response.ContentType = "application/json";
-                            var result = JsonConvert.SerializeObject(new Response<string>("You are not Authorized"));
-                            return context.Response.WriteAsync(result);
-                        },
-                        OnForbidden = context =>
-                        {
-                            context.Response.StatusCode = 403;
-                            context.Response.ContentType = "application/json";
-                            var result = JsonConvert.SerializeObject(new Response<string>("You are not authorized to access this resource"));
-                            return context.Response.WriteAsync(result);
-                        },
-                    };
-                });
+                        context.Response.StatusCode = 401;
+                        context.Response.ContentType = "application/json";
+                        return context.Response.WriteAsync(
+                            JsonConvert.SerializeObject(new Response<string>("Token expired"))
+                        );
+                    }
+
+                    context.Response.StatusCode = 401;
+                    context.Response.ContentType = "application/json";
+                    return context.Response.WriteAsync(
+                        JsonConvert.SerializeObject(new Response<string>("Authentication failed"))
+                    );
+                },
+
+                OnChallenge = context =>
+                {
+                    context.HandleResponse();
+                    context.Response.StatusCode = 401;
+                    context.Response.ContentType = "application/json";
+
+                    return context.Response.WriteAsync(
+                        JsonConvert.SerializeObject(new Response<string>("You are not Authorized"))
+                    );
+                },
+
+                OnForbidden = context =>
+                {
+                    context.Response.StatusCode = 403;
+                    context.Response.ContentType = "application/json";
+
+                    return context.Response.WriteAsync(
+                        JsonConvert.SerializeObject(new Response<string>("Forbidden"))
+                    );
+                }
+            };
+        });
+
         #endregion
     }
 }
