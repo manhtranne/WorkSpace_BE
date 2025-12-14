@@ -1,4 +1,4 @@
-﻿// src/WorkSpace.Domain/Entities/WorkSpace.cs
+﻿
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using WorkSpace.Domain.Common;
@@ -32,5 +32,6 @@ namespace WorkSpace.Domain.Entities
         public virtual WorkSpaceType? WorkSpaceType { get; set; }
         public virtual List<WorkSpaceRoom> WorkSpaceRooms { get; set; } = new();
         public virtual List<WorkSpaceFavorite> WorkSpaceFavorites { get; set; } = new();
+        public virtual List<WorkSpaceService> Services { get; set; } = new();
     }
 }
