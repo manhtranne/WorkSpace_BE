@@ -8,5 +8,5 @@ namespace WorkSpace.Application.Features.GuestChat.Queries.GetActiveGuestSession
 
 public class GetActiveGuestSessionsQuery : IRequest<IEnumerable<GuestChatSessionDto>>
 {
-    public int? StaffId { get; set; }
+    public int? OwnerId { get; set; }
 }

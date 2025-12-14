@@ -295,12 +295,12 @@ namespace WorkSpace.Infrastructure
                     entity.HasIndex(e => e.IsActive)
                         .HasDatabaseName("IX_GuestChatSessions_IsActive");
                     
-                    entity.HasIndex(e => e.AssignedStaffId)
-                        .HasDatabaseName("IX_GuestChatSessions_AssignedStaffId");
+                    entity.HasIndex(e => e.AssignedOwnerId)
+                        .HasDatabaseName("IX_GuestChatSessions_AssignedOwnerId");
                     
-                    entity.HasOne(e => e.AssignedStaff)
+                    entity.HasOne(e => e.AssignedOwner)
                         .WithMany() 
-                        .HasForeignKey(e => e.AssignedStaffId)
+                        .HasForeignKey(e => e.AssignedOwnerId)
                         .OnDelete(DeleteBehavior.SetNull); 
                     
                     // Properties configuration
@@ -341,9 +341,9 @@ namespace WorkSpace.Infrastructure
                         .OnDelete(DeleteBehavior.Cascade); 
                     
                
-                    entity.HasOne(e => e.Staff)
+                    entity.HasOne(e => e.Owner)
                         .WithMany()
-                        .HasForeignKey(e => e.StaffId)
+                        .HasForeignKey(e => e.OwnerId)
                         .OnDelete(DeleteBehavior.SetNull); 
                     
               
@@ -355,7 +355,7 @@ namespace WorkSpace.Infrastructure
                         .IsRequired()
                         .HasMaxLength(100);
                     
-                    entity.Property(e => e.IsStaff)
+                    entity.Property(e => e.IsOwner)
                         .HasDefaultValue(false);
                 });
 

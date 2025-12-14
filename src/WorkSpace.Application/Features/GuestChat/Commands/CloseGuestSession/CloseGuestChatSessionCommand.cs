@@ -6,5 +6,5 @@ namespace WorkSpace.Application.Features.GuestChat.Commands.CloseGuestSession;
 public class CloseGuestChatSessionCommand : IRequest<Response<bool>>
 {
     public string SessionId { get; set; } = string.Empty;
-    public int StaffUserId { get; set; }
+    public int OwnerUserId { get; set; }
 }
