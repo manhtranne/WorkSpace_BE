@@ -1,16 +1,25 @@
-﻿
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using WorkSpace.Application.DTOs.WorkSpaces;
 using WorkSpace.Application.Features.WorkSpace.Commands;
 using WorkSpace.Application.Features.WorkSpace.Queries;
 using WorkSpace.Application.Features.WorkSpace.Queries.GetByWard;
 using WorkSpace.Application.Features.WorkSpace.Queries.GetWards;
+using WorkSpace.Domain.Entities;
+using WorkSpace.Infrastructure;
 
 namespace WorkSpace.WebApi.Controllers.v1
 {
     [Route("api/v1/workspaces")]
     public class WorkSpaceController : BaseApiController
     {
+        private readonly WorkSpaceContext _context;
+
+        public WorkSpaceController(WorkSpaceContext context)
+        {
+            _context = context;
+        }
+
         [HttpGet("by-type")]
         public async Task<IActionResult> GetAllByType(
             [FromQuery] string? type = null,
@@ -30,6 +39,7 @@ namespace WorkSpace.WebApi.Controllers.v1
             [FromRoute] int typeId,
             CancellationToken cancellationToken = default)
         {
+            // Đã sửa: Thêm chữ 's' vào GetWorkSpacesByTypeIdQuery
             var result = await Mediator.Send(new GetWorkSpacesByTypeIdQuery(typeId), cancellationToken);
             return Ok(result);
         }
@@ -56,14 +66,13 @@ namespace WorkSpace.WebApi.Controllers.v1
             CancellationToken cancellationToken = default)
         {
             var result = await Mediator.Send(new GetWorkSpaceDetailQuery(id), cancellationToken);
-            
+
             if (result == null)
                 return NotFound(new { message = $"Workspace with ID {id} not found" });
-            
+
             return Ok(result);
         }
 
-  
         [HttpGet("rooms")]
         public async Task<IActionResult> GetPagedRooms(
             [FromQuery] int pageNumber = 1,
@@ -95,7 +104,6 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(result);
         }
 
-
         [HttpGet("all-ward/{wardName}")]
         public async Task<IActionResult> GetWorkSpacesByWard([FromRoute] string wardName, CancellationToken cancellationToken)
         {
@@ -106,17 +114,31 @@ namespace WorkSpace.WebApi.Controllers.v1
         [HttpGet("rooms/{roomId}")]
         public async Task<IActionResult> GetRoomById([FromRoute] int roomId, CancellationToken cancellationToken)
         {
-        
             return Ok("This endpoint is ready. Please implement GetWorkSpaceRoomByIdQuery and its handler.");
         }
-
-
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateWorkSpaceRequest request, CancellationToken cancellationToken)
         {
             var result = await Mediator.Send(new CreateWorkSpaceCommand(request), cancellationToken);
             return Ok(result.Data);
+        }
+
+        // API Lấy Menu Dịch vụ
+        [HttpGet("{workspaceId}/services")]
+        public async Task<IActionResult> GetServicesByWorkspace(int workspaceId)
+        {
+            var services = await _context.Set<WorkSpaceService>()
+                                         .Where(s => s.WorkSpaceId == workspaceId && s.IsActive)
+                                         .Select(s => new {
+                                             s.Id,
+                                             s.Name,
+                                             s.Price,
+                                             s.Description,
+                                             s.ImageUrl
+                                         })
+                                         .ToListAsync();
+            return Ok(services);
         }
     }
 }

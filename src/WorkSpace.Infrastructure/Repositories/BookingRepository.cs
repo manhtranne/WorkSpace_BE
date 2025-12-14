@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Utilities;
 using WorkSpace.Application.DTOs.Bookings;
 using WorkSpace.Application.Interfaces.Repositories;
 using WorkSpace.Domain.Entities;
@@ -20,9 +19,41 @@ public class BookingRepository : IBookingRepository
         return "CSB-" + Guid.NewGuid().ToString("N")[..8].ToUpper();
     }
 
-
     public async Task<int> CreateBookingCustomerAsync(int userId, CreateBookingDto bookingDto)
     {
+        // --- Xử lý tính toán tiền dịch vụ đi kèm ---
+        decimal servicesTotal = 0;
+        var bookingServiceItems = new List<BookingServiceItem>();
+
+        if (bookingDto.Services != null && bookingDto.Services.Any())
+        {
+            var serviceIds = bookingDto.Services.Select(s => s.ServiceId).ToList();
+
+            // Lấy giá hiện tại từ Database để đảm bảo chính xác
+            var dbServices = await _context.Set<WorkSpaceService>()
+                                           .Where(s => serviceIds.Contains(s.Id))
+                                           .ToDictionaryAsync(s => s.Id);
+
+            foreach (var item in bookingDto.Services)
+            {
+                if (dbServices.TryGetValue(item.ServiceId, out var serviceDb))
+                {
+                    var price = serviceDb.Price;
+                    servicesTotal += price * item.Quantity;
+
+                    bookingServiceItems.Add(new BookingServiceItem
+                    {
+                        ServiceId = item.ServiceId,
+                        Quantity = item.Quantity,
+                        UnitPrice = price
+                    });
+                }
+            }
+        }
+
+        // Tính lại tổng tiền cuối cùng = Giá phòng (đã trừ KM nếu có) + Tiền dịch vụ
+        var finalAmountWithServices = bookingDto.FinalAmount + servicesTotal;
+
         var booking = new Booking
         {
             BookingCode = GenerateBookingCode(),
@@ -33,13 +64,19 @@ public class BookingRepository : IBookingRepository
             EndTimeUtc = bookingDto.EndTimeUtc,
             NumberOfParticipants = bookingDto.NumberOfParticipants,
             SpecialRequests = bookingDto.SpecialRequests,
+
             TotalPrice = bookingDto.TotalPrice,
             TaxAmount = bookingDto.TaxAmount,
             ServiceFee = bookingDto.ServiceFee,
-            FinalAmount = bookingDto.FinalAmount,
+            FinalAmount = finalAmountWithServices, // Cập nhật giá cuối
+
             Currency = "VND",
-            BookingStatusId = 11 // 'Pending'
+            BookingStatusId = 11, // 'Pending'
+
+            // Gán danh sách dịch vụ
+            BookingServiceItems = bookingServiceItems
         };
+
         _context.Bookings.Add(booking);
         await _context.SaveChangesAsync();
         return booking.Id;
@@ -47,6 +84,36 @@ public class BookingRepository : IBookingRepository
 
     public async Task<int> CreateBookingGuestAsync(int guestId, CreateBookingDto bookingDto)
     {
+        // --- Xử lý tính toán tiền dịch vụ đi kèm (Tương tự Customer) ---
+        decimal servicesTotal = 0;
+        var bookingServiceItems = new List<BookingServiceItem>();
+
+        if (bookingDto.Services != null && bookingDto.Services.Any())
+        {
+            var serviceIds = bookingDto.Services.Select(s => s.ServiceId).ToList();
+            var dbServices = await _context.Set<WorkSpaceService>()
+                                           .Where(s => serviceIds.Contains(s.Id))
+                                           .ToDictionaryAsync(s => s.Id);
+
+            foreach (var item in bookingDto.Services)
+            {
+                if (dbServices.TryGetValue(item.ServiceId, out var serviceDb))
+                {
+                    var price = serviceDb.Price;
+                    servicesTotal += price * item.Quantity;
+
+                    bookingServiceItems.Add(new BookingServiceItem
+                    {
+                        ServiceId = item.ServiceId,
+                        Quantity = item.Quantity,
+                        UnitPrice = price
+                    });
+                }
+            }
+        }
+
+        var finalAmountWithServices = bookingDto.FinalAmount + servicesTotal;
+
         var booking = new Booking
         {
             BookingCode = GenerateBookingCode(),
@@ -57,13 +124,18 @@ public class BookingRepository : IBookingRepository
             EndTimeUtc = bookingDto.EndTimeUtc,
             NumberOfParticipants = bookingDto.NumberOfParticipants,
             SpecialRequests = bookingDto.SpecialRequests,
+
             TotalPrice = bookingDto.TotalPrice,
             TaxAmount = bookingDto.TaxAmount,
             ServiceFee = bookingDto.ServiceFee,
-            FinalAmount = bookingDto.FinalAmount,
+            FinalAmount = finalAmountWithServices,
+
             Currency = "VND",
-            BookingStatusId = 11 // 'Pending'
+            BookingStatusId = 11, // 'Pending'
+
+            BookingServiceItems = bookingServiceItems
         };
+
         _context.Bookings.Add(booking);
         await _context.SaveChangesAsync();
         return booking.Id;
@@ -86,17 +158,20 @@ public class BookingRepository : IBookingRepository
 
     public async Task<Booking> GetBookingByIdAsync(int id)
     {
-        return await _context.Bookings.FindAsync(id);
+        // Nên include thêm BookingServiceItems để xem chi tiết đơn hàng
+        return await _context.Bookings
+            .Include(b => b.BookingServiceItems)
+            .ThenInclude(bs => bs.Service)
+            .FirstOrDefaultAsync(b => b.Id == id);
     }
-
-
 
     public async Task<IEnumerable<Booking>> GetBookingsByUserIdAsync(int userId)
     {
         return await _context.Bookings
             .Include(b => b.WorkSpaceRoom)
+            .Include(b => b.BookingServiceItems) // Include thêm dịch vụ
             .Where(b => b.CustomerId == userId)
-            .OrderByDescending(b => b.CreateUtc) 
+            .OrderByDescending(b => b.CreateUtc)
             .ToListAsync();
     }
 
@@ -104,12 +179,12 @@ public class BookingRepository : IBookingRepository
     {
         if (id != booking.Id)
         {
-        
             return;
         }
         _context.Entry(booking).State = EntityState.Modified;
         await _context.SaveChangesAsync();
     }
+
     public async Task UpdateBookingStatusAsync(int bookingId, int bookingStatusId)
     {
         var booking = await _context.Bookings.FindAsync(bookingId);
@@ -119,7 +194,6 @@ public class BookingRepository : IBookingRepository
             await _context.SaveChangesAsync();
         }
     }
-
 
     public Task<Booking?> GetByCodeAsync(string bookingCode, CancellationToken ct)
         => _context.Bookings.Include(x => x.LastModifiedById).FirstOrDefaultAsync(x => x.BookingCode == bookingCode, ct);
@@ -132,6 +206,8 @@ public class BookingRepository : IBookingRepository
             .ThenInclude(r => r.WorkSpace)
             .ThenInclude(ws => ws.Host)
             .ThenInclude(h => h.User)
+            .Include(b => b.BookingServiceItems) // Include thêm dịch vụ
+            .ThenInclude(bs => bs.Service)
             .FirstOrDefaultAsync(b => b.Id == bookingId, ct);
     }
 
@@ -162,7 +238,7 @@ public class BookingRepository : IBookingRepository
                 FinalAmount = b.FinalAmount,
                 StartTimeUtc = b.StartTimeUtc,
                 EndTimeUtc = b.EndTimeUtc,
-                Title = b.WorkSpaceRoom.Title    
+                Title = b.WorkSpaceRoom.Title
             })
             .FirstOrDefaultAsync();
     }
