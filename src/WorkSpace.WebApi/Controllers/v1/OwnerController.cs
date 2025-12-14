@@ -341,7 +341,8 @@ namespace WorkSpace.WebApi.Controllers.v1
             };
 
             var result = await Mediator.Send(query, ct);
-            return Ok(result);
+         
+            return Ok(result.Data);
         }
 
 
@@ -360,10 +361,11 @@ namespace WorkSpace.WebApi.Controllers.v1
             };
 
             var result = await Mediator.Send(command, ct);
-            return Ok(result);
+       
+            return Ok(result.Data);
         }
 
-   
+
         [HttpPut("services/{serviceId}")]
         public async Task<IActionResult> UpdateServiceItem(
             int serviceId,
@@ -380,7 +382,8 @@ namespace WorkSpace.WebApi.Controllers.v1
             };
 
             var result = await Mediator.Send(command, ct);
-            return Ok(result);
+      
+            return Ok(result.Data);
         }
 
 
@@ -395,7 +398,8 @@ namespace WorkSpace.WebApi.Controllers.v1
             };
 
             var result = await Mediator.Send(command, ct);
-            return Ok(result);
+       
+            return Ok(result.Data);
         }
 
         #endregion
