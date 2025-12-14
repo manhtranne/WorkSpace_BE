@@ -1,15 +1,20 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WorkSpace.Application.DTOs.Owner;
+using WorkSpace.Application.DTOs.Services;
 using WorkSpace.Application.Enums;
 using WorkSpace.Application.Extensions;
-using WorkSpace.Application.Features.Owner.Commands;
-using WorkSpace.Application.Features.Owner.Queries;
-using WorkSpace.Application.Features.Refunds.Commands;
 using WorkSpace.Application.Features.CustomerChat.Commands.CloseCustomerSession;
 using WorkSpace.Application.Features.CustomerChat.Commands.OwnerReplyToCustomer;
 using WorkSpace.Application.Features.CustomerChat.Queries.GetActiveCustomerSessions;
 using WorkSpace.Application.Features.CustomerChat.Queries.GetCustomerChatMessages;
+using WorkSpace.Application.Features.Owner.Commands;
+using WorkSpace.Application.Features.Owner.Queries;
+using WorkSpace.Application.Features.Refunds.Commands;
+using WorkSpace.Application.Features.Services.Commands.CreateWorkSpaceServices;
+using WorkSpace.Application.Features.Services.Commands.DeleteWorkSpaceService;
+using WorkSpace.Application.Features.Services.Commands.UpdateWorkSpaceService;
+using WorkSpace.Application.Features.Services.Queries.GetServicesByWorkSpace;
 using WorkSpace.Application.Wrappers;
 
 namespace WorkSpace.WebApi.Controllers.v1
@@ -322,6 +327,78 @@ namespace WorkSpace.WebApi.Controllers.v1
 
         #endregion
 
+
+        #region Service / Menu Management
+
+        [HttpGet("workspaces/{workspaceId}/services")]
+        public async Task<IActionResult> GetWorkSpaceMenu(int workspaceId, CancellationToken ct)
+        {
+            var userId = User.GetUserId();
+            var query = new GetServicesByWorkSpaceQuery
+            {
+                WorkSpaceId = workspaceId,
+                OwnerUserId = userId
+            };
+
+            var result = await Mediator.Send(query, ct);
+            return Ok(result);
+        }
+
+
+        [HttpPost("workspaces/{workspaceId}/services")]
+        public async Task<IActionResult> AddServicesToMenu(
+            int workspaceId,
+            [FromBody] List<CreateWorkSpaceServiceDto> dtos,
+            CancellationToken ct)
+        {
+            var userId = User.GetUserId();
+            var command = new CreateWorkSpaceServicesCommand
+            {
+                WorkSpaceId = workspaceId,
+                Services = dtos,
+                OwnerUserId = userId
+            };
+
+            var result = await Mediator.Send(command, ct);
+            return Ok(result);
+        }
+
+   
+        [HttpPut("services/{serviceId}")]
+        public async Task<IActionResult> UpdateServiceItem(
+            int serviceId,
+            [FromBody] UpdateWorkSpaceServiceDto dto,
+            CancellationToken ct)
+        {
+            if (serviceId != dto.Id) return BadRequest(new Response<string>("Id mismatch"));
+
+            var userId = User.GetUserId();
+            var command = new UpdateWorkSpaceServiceCommand
+            {
+                Dto = dto,
+                OwnerUserId = userId
+            };
+
+            var result = await Mediator.Send(command, ct);
+            return Ok(result);
+        }
+
+
+        [HttpDelete("services/{serviceId}")]
+        public async Task<IActionResult> DeleteServiceItem(int serviceId, CancellationToken ct)
+        {
+            var userId = User.GetUserId();
+            var command = new DeleteWorkSpaceServiceCommand
+            {
+                ServiceId = serviceId,
+                OwnerUserId = userId
+            };
+
+            var result = await Mediator.Send(command, ct);
+            return Ok(result);
+        }
+
+        #endregion
         [HttpGet("workspaces/{workspaceId}/rooms")]
         public async Task<IActionResult> GetRoomsInWorkspace(
             int workspaceId,
