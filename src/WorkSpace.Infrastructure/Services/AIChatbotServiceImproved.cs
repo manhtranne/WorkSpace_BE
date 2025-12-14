@@ -34,7 +34,7 @@ public class AIChatbotServiceImproved : IAIChatbotService
         {
             throw new InvalidOperationException("OpenAI API Key is not configured");
         }
-        
+
         _chatClient = new ChatClient("gpt-4o", apiKey);
     }
 
@@ -58,7 +58,7 @@ public class AIChatbotServiceImproved : IAIChatbotService
                 "Processing chatbot message for UserId: {UserId}, ConversationId: {ConversationId}",
                 request.UserId, request.ConversationId);
 
-    
+
             var conversation = request.ConversationId.HasValue
                 ? await _conversationRepository.GetChatbotConversationWithMessagesAsync(
                     request.ConversationId.Value, cancellationToken)
@@ -70,7 +70,7 @@ public class AIChatbotServiceImproved : IAIChatbotService
                 throw new ConversationNotFoundException(request.ConversationId ?? 0);
             }
 
-         
+
             ExtractedIntentDto intent;
             try
             {
@@ -79,8 +79,8 @@ public class AIChatbotServiceImproved : IAIChatbotService
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to extract intent from message: {Message}", request.Message);
-                
-              
+
+
                 intent = new ExtractedIntentDto
                 {
                     Intent = "general_query"
@@ -91,7 +91,7 @@ public class AIChatbotServiceImproved : IAIChatbotService
             var parsedEndTime = intent.GetParsedEndTime();
 
             List<RecommendedWorkSpaceDto>? recommendations = null;
-            
+
             if (intent.Intent == "search_workspace")
             {
                 try
@@ -101,7 +101,7 @@ public class AIChatbotServiceImproved : IAIChatbotService
                         UserId = request.UserId,
                         PreferredWard = intent.Ward,
                         DesiredCapacity = intent.Capacity,
-                        MaxBudgetPerDay = intent.MaxBudget,
+                        MaxBudgetPerHour = intent.MaxBudget,
                         DesiredStartTime = parsedStartTime,
                         DesiredEndTime = parsedEndTime,
                         RequiredAmenities = intent.Amenities,
@@ -117,11 +117,10 @@ public class AIChatbotServiceImproved : IAIChatbotService
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Failed to get recommendations for UserId: {UserId}", request.UserId);
-                
                 }
             }
 
-          
+
             await _conversationRepository.AddMessageAsync(
                 conversation.Id,
                 "user",
@@ -144,7 +143,7 @@ public class AIChatbotServiceImproved : IAIChatbotService
                 })
                 .ToList();
 
-         
+
             string responseMessage;
             try
             {
@@ -158,7 +157,7 @@ public class AIChatbotServiceImproved : IAIChatbotService
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to generate AI response");
-                
+
                 // Fallback response
                 responseMessage = recommendations?.Any() == true
                     ? $"Tôi đã tìm thấy {recommendations.Count} workspace phù hợp cho bạn. Vui lòng xem danh sách bên dưới."
@@ -198,7 +197,7 @@ public class AIChatbotServiceImproved : IAIChatbotService
         catch (ChatbotException ex)
         {
             _logger.LogWarning(ex, "Chatbot exception: {ErrorCode}", ex.ErrorCode);
-            
+
             return new ChatbotResponseDto
             {
                 Success = false,
@@ -210,7 +209,7 @@ public class AIChatbotServiceImproved : IAIChatbotService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unexpected error in ProcessUserMessageAsync");
-            
+
             return new ChatbotResponseDto
             {
                 Success = false,
@@ -240,7 +239,7 @@ Nhiệm vụ: Trích xuất thông tin từ tin nhắn người dùng và trả 
 
 Thông tin người dùng (để tham khảo):
 - Vùng thường đặt: {userPreferences.MostFrequentWard ?? "chưa có"}
-- Giá trung bình: {userPreferences.AveragePricePerDay:N0} VND/ngày
+- Giá trung bình: {userPreferences.AveragePricePerHour:N0} VND/giờ
 - Sức chứa trung bình: {userPreferences.AverageCapacity} người
 - Tiện ích ưa thích: {string.Join(", ", userPreferences.PreferredAmenities.Take(5))}
 
@@ -249,7 +248,7 @@ Trả về JSON với format:
   ""intent"": ""search_workspace"",
   ""ward"": ""tên phường/quận hoặc null"",
   ""capacity"": số người hoặc null,
-  ""maxBudget"": giá tối đa/ngày hoặc null,
+  ""maxBudget"": giá tối đa/giờ hoặc null,
   ""startTime"": ""mô tả thời gian (ví dụ: 'ngày mai 9:00', 'hôm nay 14:00', '2025-01-21 09:00')"",
   ""endTime"": ""mô tả thời gian"",
   ""amenities"": [""WiFi"", ""Máy chiếu""] hoặc []
@@ -273,8 +272,8 @@ CHỈ trả về JSON, không thêm text khác.";
             try
             {
                 completion = await _chatClient.CompleteChatAsync(
-                    messages, 
-                    chatCompletionOptions, 
+                    messages,
+                    chatCompletionOptions,
                     cancellationToken);
             }
             catch (Exception ex)
@@ -313,6 +312,191 @@ CHỈ trả về JSON, không thêm text khác.";
             throw new IntentExtractionException(
                 "Failed to extract intent from message", userMessage, ex);
         }
+    }
+
+    public async Task<GuestChatbotResponseDto> ProcessGuestMessageAsync(GuestChatbotRequestDto request,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            // Generate or use existing session ID
+            var sessionId = request.SessionId ?? Guid.NewGuid().ToString();
+
+            // Extract intent without userId (use 0 or create default preferences)
+            var intent = await ExtractGuestIntentAsync(request.Message, cancellationToken);
+
+            var parsedStartTime = intent.GetParsedStartTime();
+            var parsedEndTime = intent.GetParsedEndTime();
+
+            // Get recommendations
+            List<RecommendedWorkSpaceDto>? recommendations = null;
+
+            if (intent.Intent == "search_workspace")
+            {
+                var recommendRequest = new GetRecommendationsRequestDto
+                {
+                    UserId = 0, // Guest user
+                    PreferredWard = intent.Ward,
+                    DesiredCapacity = intent.Capacity,
+                    MaxBudgetPerHour = intent.MaxBudget,
+                    DesiredStartTime = parsedStartTime,
+                    DesiredEndTime = parsedEndTime,
+                    RequiredAmenities = intent.Amenities,
+                    PageNumber = 1,
+                    PageSize = 10
+                };
+
+                // Get non-personalized recommendations
+                var (recommendedWorkspaces, _) = await _recommendationService
+                    .GetPersonalizedRecommendationsAsync(recommendRequest, cancellationToken);
+
+                recommendations = recommendedWorkspaces;
+            }
+
+            // Generate response
+            var responseMessage = await GenerateGuestResponseAsync(
+                request.Message,
+                intent,
+                recommendations,
+                request.ConversationHistory,
+                cancellationToken);
+
+            return new GuestChatbotResponseDto
+            {
+                Success = true,
+                Message = responseMessage,
+                Recommendations = recommendations,
+                ExtractedIntent = intent,
+                SessionId = sessionId
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in ProcessGuestMessageAsync");
+
+            return new GuestChatbotResponseDto
+            {
+                Success = false,
+                ErrorMessage = "Đã có lỗi xảy ra. Vui lòng thử lại.",
+                SessionId = request.SessionId ?? Guid.NewGuid().ToString()
+            };
+        }
+    }
+
+    private async Task<ExtractedIntentDto> ExtractGuestIntentAsync(
+        string userMessage,
+        CancellationToken cancellationToken = default)
+    {
+        var currentDateTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+
+        var systemPrompt = $@"Bạn là trợ lý AI chuyên phân tích yêu cầu tìm kiếm workspace.
+Thời gian hiện tại: {currentDateTime}
+
+Nhiệm vụ: Trích xuất thông tin từ tin nhắn người dùng và trả về JSON.
+
+Trả về JSON với format:
+{{
+  ""intent"": ""search_workspace"",
+  ""ward"": ""tên phường/quận hoặc null"",
+  ""capacity"": số người hoặc null,
+  ""maxBudget"": giá tối đa/giờ hoặc null,
+  ""startTime"": ""mô tả thời gian (ví dụ: 'ngày mai 9:00', 'hôm nay 14:00', '2025-01-21 09:00')"",
+  ""endTime"": ""mô tả thời gian"",
+  ""amenities"": [""WiFi"", ""Máy chiếu""] hoặc []
+}}
+
+Quy tắc xử lý thời gian:
+- ""ngày mai 9h"" → ""ngày mai 9:00""
+- ""hôm nay chiều 2h"" → ""hôm nay 14:00""
+- ""tuần sau"" → ""tuần sau 9:00""
+- Nếu không nói rõ giờ, mặc định 9:00 (sáng)
+- Nếu nói ""chiều"" thêm 12 giờ
+
+CHỈ trả về JSON, không thêm text khác.";
+
+        var messages = new List<ChatMessage>
+        {
+            new SystemChatMessage(systemPrompt),
+            new UserChatMessage(userMessage)
+        };
+
+        var chatCompletionOptions = new ChatCompletionOptions
+        {
+            Temperature = 0.3f,
+            ResponseFormat = ChatResponseFormat.CreateJsonObjectFormat()
+        };
+
+        var completion = await _chatClient.CompleteChatAsync(messages, chatCompletionOptions, cancellationToken);
+        var jsonResponse = completion.Value.Content[0].Text;
+
+        var intent = JsonSerializer.Deserialize<ExtractedIntentDto>(
+            jsonResponse,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+        ) ?? new ExtractedIntentDto();
+
+        return intent;
+    }
+
+    private async Task<string> GenerateGuestResponseAsync(
+        string userMessage,
+        ExtractedIntentDto intent,
+        List<RecommendedWorkSpaceDto>? recommendations,
+        List<ChatbotMessageDto> conversationHistory,
+        CancellationToken cancellationToken)
+    {
+        var systemPrompt = @"Bạn là trợ lý AI thân thiện của hệ thống đặt workspace.
+Nhiệm vụ: Trả lời người dùng về các workspace được đề xuất bằng tiếng Việt tự nhiên, thân thiện.
+
+Lưu ý: Người dùng này là KHÁCH (chưa đăng nhập), vì vậy:
+1. Khuyến khích họ đăng nhập để có trải nghiệm cá nhân hóa tốt hơn
+2. Giới thiệu các workspace phổ biến và được đánh giá cao
+3. Thân thiện và hữu ích
+
+Quy tắc:
+1. Nếu có recommendations: Giới thiệu ngắn gọn các workspace phù hợp nhất
+2. Nếu không có recommendations: Hỏi thêm thông tin
+3. Giọng điệu: Thân thiện, chuyên nghiệp, hữu ích
+4. Luôn kết thúc bằng câu hỏi để khuyến khích tương tác";
+
+        var messages = new List<ChatMessage>
+        {
+            new SystemChatMessage(systemPrompt)
+        };
+
+        // Add conversation history
+        foreach (var msg in conversationHistory.TakeLast(5))
+        {
+            if (msg.Role == "user")
+                messages.Add(new UserChatMessage(msg.Content));
+            else if (msg.Role == "assistant")
+                messages.Add(new AssistantChatMessage(msg.Content));
+        }
+
+        messages.Add(new UserChatMessage(userMessage));
+
+        if (recommendations?.Any() == true)
+        {
+            var top3 = recommendations.Take(3).ToList();
+            var context = $@"Đã tìm thấy {recommendations.Count} workspace phù hợp. Top 3:
+
+{string.Join("\n\n", top3.Select((ws, i) => $@"{i + 1}. {ws.Title}
+   - Vị trí: {ws.Ward}, {ws.Street}
+   - Giá: {ws.AveragePricePerHour:N0} VND/giờ
+   - Sức chứa: {ws.MinCapacity}-{ws.MaxCapacity} người
+   - Đánh giá: {ws.AverageRating:F1}★ ({ws.TotalReviews} reviews)"))}
+
+Hãy giới thiệu các workspace này. Nhắc khách rằng đăng nhập sẽ có đề xuất cá nhân hóa tốt hơn.";
+
+            messages.Add(new SystemChatMessage(context));
+        }
+        else
+        {
+            messages.Add(new SystemChatMessage(
+                "Không tìm thấy workspace phù hợp. Hỏi thông tin: vị trí, ngày giờ, số người, ngân sách."));
+        }
+
+        var completion = await _chatClient.CompleteChatAsync(messages, cancellationToken: cancellationToken);
+        return completion.Value.Content[0].Text;
     }
 
     private async Task<string> GenerateResponseAsync(
@@ -360,7 +544,7 @@ KHÔNG đề cập đến điểm số (RecommendationScore), chỉ nói về l�
 
 {string.Join("\n\n", top3.Select((ws, i) => $@"{i + 1}. {ws.Title}
    - Vị trí: {ws.Ward}, {ws.Street}
-   - Giá: {ws.AveragePricePerDay:N0} VND/ngày
+   - Giá: {ws.AveragePricePerHour:N0} VND/giờ
    - Sức chứa: {ws.MinCapacity}-{ws.MaxCapacity} người
    - Đánh giá: {ws.AverageRating:F1}★ ({ws.TotalReviews} reviews)
    - Lý do phù hợp: {ws.RecommendationReason}"))}
@@ -376,9 +560,9 @@ Hãy giới thiệu các workspace này cho người dùng.";
             }
 
             var completion = await _chatClient.CompleteChatAsync(
-                messages, 
+                messages,
                 cancellationToken: cancellationToken);
-                
+
             return completion.Value.Content[0].Text;
         }
         catch (Exception ex)
@@ -391,10 +575,10 @@ Hãy giới thiệu các workspace này cho người dùng.";
     private string GenerateConversationTitle(string firstMessage)
     {
         // Simple title generation from first message (max 50 chars)
-        var title = firstMessage.Length > 50 
-            ? firstMessage.Substring(0, 47) + "..." 
+        var title = firstMessage.Length > 50
+            ? firstMessage.Substring(0, 47) + "..."
             : firstMessage;
-            
+
         return title;
     }
 

@@ -765,6 +765,125 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.ToTable("ChatbotConversationMessages");
                 });
 
+            modelBuilder.Entity("WorkSpace.Domain.Entities.CustomerChatMessage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(5000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("CreateUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CustomerChatSessionId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsOwner")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<int?>("LastModifiedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("LastModifiedUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("OwnerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SenderName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreateUtc")
+                        .HasDatabaseName("IX_CustomerChatMessages_CreateUtc");
+
+                    b.HasIndex("CustomerChatSessionId")
+                        .HasDatabaseName("IX_CustomerChatMessages_SessionId");
+
+                    b.HasIndex("OwnerId");
+
+                    b.ToTable("CustomerChatMessages", (string)null);
+                });
+
+            modelBuilder.Entity("WorkSpace.Domain.Entities.CustomerChatSession", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("AssignedOwnerId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("CreateUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CustomerEmail")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<DateTimeOffset?>("LastMessageAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("LastModifiedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("LastModifiedUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("SessionId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssignedOwnerId")
+                        .HasDatabaseName("IX_CustomerChatSessions_AssignedOwnerId");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("IsActive")
+                        .HasDatabaseName("IX_CustomerChatSessions_IsActive");
+
+                    b.HasIndex("SessionId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_CustomerChatSessions_SessionId");
+
+                    b.ToTable("CustomerChatSessions", (string)null);
+                });
+
             modelBuilder.Entity("WorkSpace.Domain.Entities.Guest", b =>
                 {
                     b.Property<int>("Id")
@@ -795,120 +914,6 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Guests");
-                });
-
-            modelBuilder.Entity("WorkSpace.Domain.Entities.GuestChatMessage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(5000)
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset>("CreateUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int?>("CreatedById")
-                        .HasColumnType("int");
-
-                    b.Property<int>("GuestChatSessionId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsOwner")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<int?>("LastModifiedById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset?>("LastModifiedUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int?>("OwnerId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SenderName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreateUtc")
-                        .HasDatabaseName("IX_GuestChatMessages_CreateUtc");
-
-                    b.HasIndex("GuestChatSessionId")
-                        .HasDatabaseName("IX_GuestChatMessages_SessionId");
-
-                    b.HasIndex("OwnerId");
-
-                    b.ToTable("GuestChatMessages", (string)null);
-                });
-
-            modelBuilder.Entity("WorkSpace.Domain.Entities.GuestChatSession", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("AssignedOwnerId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset>("CreateUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int?>("CreatedById")
-                        .HasColumnType("int");
-
-                    b.Property<string>("GuestEmail")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("GuestName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<DateTimeOffset?>("LastMessageAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int?>("LastModifiedById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset?>("LastModifiedUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("SessionId")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AssignedOwnerId")
-                        .HasDatabaseName("IX_GuestChatSessions_AssignedOwnerId");
-
-                    b.HasIndex("IsActive")
-                        .HasDatabaseName("IX_GuestChatSessions_IsActive");
-
-                    b.HasIndex("SessionId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_GuestChatSessions_SessionId");
-
-                    b.ToTable("GuestChatSessions", (string)null);
                 });
 
             modelBuilder.Entity("WorkSpace.Domain.Entities.HostProfile", b =>
@@ -969,6 +974,29 @@ namespace WorkSpace.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("HostProfiles");
+                });
+
+            modelBuilder.Entity("WorkSpace.Domain.Entities.HostProfileDocument", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FileUrl")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("HostProfileId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HostProfileId");
+
+                    b.ToTable("HostProfileDocuments", (string)null);
                 });
 
             modelBuilder.Entity("WorkSpace.Domain.Entities.PaymentMethod", b =>
@@ -1875,11 +1903,11 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Navigation("Conversation");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Entities.GuestChatMessage", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.CustomerChatMessage", b =>
                 {
-                    b.HasOne("WorkSpace.Domain.Entities.GuestChatSession", "GuestChatSession")
+                    b.HasOne("WorkSpace.Domain.Entities.CustomerChatSession", "CustomerChatSession")
                         .WithMany("Messages")
-                        .HasForeignKey("GuestChatSessionId")
+                        .HasForeignKey("CustomerChatSessionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1888,19 +1916,27 @@ namespace WorkSpace.Infrastructure.Migrations
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("GuestChatSession");
+                    b.Navigation("CustomerChatSession");
 
                     b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Entities.GuestChatSession", b =>
+            modelBuilder.Entity("WorkSpace.Domain.Entities.CustomerChatSession", b =>
                 {
                     b.HasOne("WorkSpace.Domain.Entities.AppUser", "AssignedOwner")
                         .WithMany()
                         .HasForeignKey("AssignedOwnerId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("WorkSpace.Domain.Entities.AppUser", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("AssignedOwner");
+
+                    b.Navigation("Customer");
                 });
 
             modelBuilder.Entity("WorkSpace.Domain.Entities.HostProfile", b =>
@@ -1912,6 +1948,17 @@ namespace WorkSpace.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("WorkSpace.Domain.Entities.HostProfileDocument", b =>
+                {
+                    b.HasOne("WorkSpace.Domain.Entities.HostProfile", "HostProfile")
+                        .WithMany("Documents")
+                        .HasForeignKey("HostProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("HostProfile");
                 });
 
             modelBuilder.Entity("WorkSpace.Domain.Entities.Post", b =>
@@ -2209,18 +2256,20 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Navigation("Messages");
                 });
 
+            modelBuilder.Entity("WorkSpace.Domain.Entities.CustomerChatSession", b =>
+                {
+                    b.Navigation("Messages");
+                });
+
             modelBuilder.Entity("WorkSpace.Domain.Entities.Guest", b =>
                 {
                     b.Navigation("Bookings");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Entities.GuestChatSession", b =>
-                {
-                    b.Navigation("Messages");
-                });
-
             modelBuilder.Entity("WorkSpace.Domain.Entities.HostProfile", b =>
                 {
+                    b.Navigation("Documents");
+
                     b.Navigation("Workspaces");
                 });
 
