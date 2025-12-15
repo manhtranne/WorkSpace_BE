@@ -534,35 +534,6 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.ToTable("BookingParticipants");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Entities.BookingServiceItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BookingId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ServiceId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BookingId");
-
-                    b.HasIndex("ServiceId");
-
-                    b.ToTable("BookingServiceItems", (string)null);
-                });
-
             modelBuilder.Entity("WorkSpace.Domain.Entities.BookingStatus", b =>
                 {
                     b.Property<int>("Id")
@@ -1026,48 +997,6 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.HasIndex("HostProfileId");
 
                     b.ToTable("HostProfileDocuments", (string)null);
-                });
-
-            modelBuilder.Entity("WorkSpace.Domain.Entities.Notification", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset>("CreateUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int?>("CreatedById")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("LastModifiedById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset?>("LastModifiedUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int>("SenderId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SenderRole")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("WorkSpace.Domain.Entities.PaymentMethod", b =>
@@ -1734,43 +1663,6 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.ToTable("WorkSpaceRoomTypes");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkSpaceService", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("ImageUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("WorkSpaceId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("WorkSpaceId");
-
-                    b.ToTable("WorkSpaceServices");
-                });
-
             modelBuilder.Entity("WorkSpace.Domain.Entities.WorkSpaceType", b =>
                 {
                     b.Property<int>("Id")
@@ -1940,25 +1832,6 @@ namespace WorkSpace.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Booking");
-                });
-
-            modelBuilder.Entity("WorkSpace.Domain.Entities.BookingServiceItem", b =>
-                {
-                    b.HasOne("WorkSpace.Domain.Entities.Booking", "Booking")
-                        .WithMany("BookingServiceItems")
-                        .HasForeignKey("BookingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("WorkSpace.Domain.Entities.WorkSpaceService", "Service")
-                        .WithMany()
-                        .HasForeignKey("ServiceId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Booking");
-
-                    b.Navigation("Service");
                 });
 
             modelBuilder.Entity("WorkSpace.Domain.Entities.ChatMessage", b =>
@@ -2305,17 +2178,6 @@ namespace WorkSpace.Infrastructure.Migrations
                     b.Navigation("WorkSpaceRoom");
                 });
 
-            modelBuilder.Entity("WorkSpace.Domain.Entities.WorkSpaceService", b =>
-                {
-                    b.HasOne("WorkSpace.Domain.Entities.WorkSpace", "WorkSpace")
-                        .WithMany("Services")
-                        .HasForeignKey("WorkSpaceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("WorkSpace");
-                });
-
             modelBuilder.Entity("WorkSpaceRoomAmenity", b =>
                 {
                     b.HasOne("WorkSpace.Domain.Entities.Amenity", "Amenity")
@@ -2369,8 +2231,6 @@ namespace WorkSpace.Infrastructure.Migrations
             modelBuilder.Entity("WorkSpace.Domain.Entities.Booking", b =>
                 {
                     b.Navigation("BookingParticipants");
-
-                    b.Navigation("BookingServiceItems");
 
                     b.Navigation("ChatThreads");
 
@@ -2430,8 +2290,6 @@ namespace WorkSpace.Infrastructure.Migrations
 
             modelBuilder.Entity("WorkSpace.Domain.Entities.WorkSpace", b =>
                 {
-                    b.Navigation("Services");
-
                     b.Navigation("WorkSpaceFavorites");
 
                     b.Navigation("WorkSpaceImages");

@@ -69,7 +69,6 @@ public static class ServiceRegistration
         services.AddScoped(typeof(IRecommendationService), typeof(RecommendationService));
         services.AddScoped(typeof(IAIChatbotService), typeof(AIChatbotService));
         services.AddScoped(typeof(IAIChatbotService), typeof(AIChatbotServiceImproved));
-        services.AddScoped<INotificationRepository, NotificationRepository>();
         #endregion
 
         #region Identity
@@ -158,6 +157,18 @@ public static class ServiceRegistration
                 return context.Response.WriteAsync(
                   JsonConvert.SerializeObject(new Response<string>("Forbidden"))
                 );
+            },
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    (path.StartsWithSegments("/hubs")))
+                {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
             }
         };
 

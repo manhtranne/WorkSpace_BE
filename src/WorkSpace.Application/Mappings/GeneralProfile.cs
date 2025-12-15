@@ -6,7 +6,6 @@ using WorkSpace.Application.DTOs.BookingStatus;
 using WorkSpace.Application.DTOs.Promotions;
 using WorkSpace.Application.DTOs.Refund;
 using WorkSpace.Application.DTOs.Reviews;
-using WorkSpace.Application.DTOs.Services;
 using WorkSpace.Application.DTOs.Users;
 using WorkSpace.Application.DTOs.WorkSpaces;
 using WorkSpace.Application.DTOs.WorkSpaceTypes;
@@ -50,7 +49,6 @@ namespace WorkSpace.Application.Mappings
                 .ForMember(d => d.HostName, o => o.MapFrom(s => s.Host.User.GetFullName()))
                 .ForMember(d => d.Rooms, o => o.MapFrom(s => s.WorkSpaceRooms));
             CreateMap<WorkSpaceType, WorkSpaceTypeDto>();
-            CreateMap<Notification, NotificationDto>();
             CreateMap<WorkSpace.Domain.Entities.WorkSpace, WorkSpaceListItemDto>()
               .ForMember(d => d.HostName, o => o.MapFrom(s => s.Host != null && s.Host.User != null ? s.Host.User.GetFullName() : null))
               .ForMember(d => d.WorkSpaceTypeName, o => o.MapFrom(s => s.WorkSpaceType != null ? s.WorkSpaceType.Name : null))
@@ -85,9 +83,7 @@ namespace WorkSpace.Application.Mappings
                 .ForMember(d => d.TotalRooms, o => o.MapFrom(s => s.WorkSpaceRooms.Count))
                 .ForMember(d => d.ImageUrls, o => o.MapFrom(s => s.WorkSpaceImages.Select(img => img.ImageUrl).ToList()))
                 .ForMember(d => d.Rooms, o => o.MapFrom(s => s.WorkSpaceRooms));
-            CreateMap<WorkSpaceService, CreateWorkSpaceServiceDto>().ReverseMap();
-            CreateMap<WorkSpaceService, UpdateWorkSpaceServiceDto>().ReverseMap();
-            CreateMap<WorkSpaceService, WorkSpaceServiceDto>().ReverseMap();
+
 
             CreateMap<WorkSpaceRoom, WorkSpaceRoomListItemDto>()
                 .ForMember(d => d.WorkSpaceTitle, o => o.MapFrom(s => s.WorkSpace.Title))
