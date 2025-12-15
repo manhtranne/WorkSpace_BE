@@ -31,15 +31,12 @@ namespace WorkSpace.Infrastructure
         public DbSet<WorkSpaceRoomType> WorkSpaceRoomTypes { get; set; }
         public DbSet<WorkSpaceRoomImage> WorkSpaceRoomImages { get; set; }
         public DbSet<WorkSpaceRoomAmenity> WorkSpaceRoomAmenities { get; set; }
-        public DbSet<WorkSpaceService> WorkSpaceServices { get; set; }
-    
-        public DbSet<BookingServiceItem> BookingServiceItems { get; set; }
 
         public DbSet<WorkSpaceType> WorkSpaceTypes { get; set; }
 
         public DbSet<SupportTicket> SupportTickets { get; set; }
         public DbSet<SupportTicketReply> SupportTicketReplies { get; set; }
-        public DbSet<Notification> Notifications { get; set; }
+        
         public DbSet<ChatThread> ChatThreads { get; set; }
         public DbSet<ChatMessage> ChatMessages { get; set; }
         public DbSet<RefundRequest> RefundRequests { get; set; }
@@ -111,34 +108,7 @@ namespace WorkSpace.Infrastructure
                     .WithMany(wr => wr.Bookings)
                     .HasForeignKey(b => b.WorkSpaceRoomId)
                     .OnDelete(DeleteBehavior.Restrict);
-                modelBuilder.Entity<WorkSpaceService>()
-         .HasOne(s => s.WorkSpace)
-         .WithMany(w => w.Services)
-         .HasForeignKey(s => s.WorkSpaceId)
-         .OnDelete(DeleteBehavior.Cascade);
 
-                modelBuilder.Entity<Notification>(entity =>
-                {
-                    entity.ToTable("Notifications");
-                    entity.HasKey(e => e.Id);
-                    entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
-                    entity.Property(e => e.Content).IsRequired();
-                    entity.Property(e => e.SenderRole).IsRequired().HasMaxLength(50);
-                });
-                modelBuilder.Entity<BookingServiceItem>(entity =>
-                {
-                    entity.ToTable("BookingServiceItems"); 
-
-                    entity.HasOne(bs => bs.Booking)
-                        .WithMany(b => b.BookingServiceItems)
-                        .HasForeignKey(bs => bs.BookingId)
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    entity.HasOne(bs => bs.Service)
-                        .WithMany()
-                        .HasForeignKey(bs => bs.ServiceId)
-                        .OnDelete(DeleteBehavior.Restrict);
-                });
                 modelBuilder.Entity<Review>()
                     .HasOne(r => r.WorkSpaceRoom)
                     .WithMany(wr => wr.Reviews)

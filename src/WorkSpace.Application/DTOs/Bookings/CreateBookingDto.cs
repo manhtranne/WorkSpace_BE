@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WorkSpace.Application.DTOs.Services;
 
 namespace WorkSpace.Application.DTOs.Bookings
 {
@@ -28,9 +27,6 @@ namespace WorkSpace.Application.DTOs.Bookings
         public decimal TaxAmount { get; set; }
         public decimal ServiceFee { get; set; }
         public decimal FinalAmount { get; set; }
-
-
-        public List<ServiceRequestDto>? Services { get; set; }
 
         [MaxLength(3)]
         public string? Currency { get; set; } = "VND";
