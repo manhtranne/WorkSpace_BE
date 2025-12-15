@@ -3,18 +3,18 @@ using System.Threading;
 using System.Threading.Tasks;
 using WorkSpace.Application.Interfaces.Repositories;
 using WorkSpace.Application.Interfaces.Services;
-using WorkSpace.Application.Wrappers;
 using WorkSpace.Domain.Entities;
 
 namespace WorkSpace.Application.Features.Notifications_F.Commands
 {
-    public class CreateAdminNotificationCommand : IRequest<Response<int>>
+    // Đổi return type từ Response<int> thành int (trả về ID)
+    public class CreateAdminNotificationCommand : IRequest<int>
     {
         public string Title { get; set; }
         public string Content { get; set; }
     }
 
-    public class CreateAdminNotificationCommandHandler : IRequestHandler<CreateAdminNotificationCommand, Response<int>>
+    public class CreateAdminNotificationCommandHandler : IRequestHandler<CreateAdminNotificationCommand, int>
     {
         private readonly INotificationRepository _notificationRepository;
         private readonly IAuthenticatedUserService _authenticatedUserService;
@@ -25,7 +25,7 @@ namespace WorkSpace.Application.Features.Notifications_F.Commands
             _authenticatedUserService = authenticatedUserService;
         }
 
-        public async Task<Response<int>> Handle(CreateAdminNotificationCommand request, CancellationToken cancellationToken)
+        public async Task<int> Handle(CreateAdminNotificationCommand request, CancellationToken cancellationToken)
         {
             var notification = new Notification
             {
@@ -36,7 +36,8 @@ namespace WorkSpace.Application.Features.Notifications_F.Commands
             };
 
             await _notificationRepository.AddAsync(notification);
-            return new Response<int>(notification.Id, "Tạo thông báo hệ thống thành công");
+
+            return notification.Id;
         }
     }
 }

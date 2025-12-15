@@ -21,6 +21,7 @@ namespace WorkSpace.Infrastructure.Repositories
             return await _context.Promotions
                 .AsNoTracking()
                 .Where(p => p.IsActive
+                            && p.HostId == null
                             && p.StartDate <= now
                             && p.EndDate >= now
                             && (p.UsageLimit == 0 || p.UsedCount < p.UsageLimit))
