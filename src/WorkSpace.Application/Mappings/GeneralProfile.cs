@@ -50,6 +50,7 @@ namespace WorkSpace.Application.Mappings
                 .ForMember(d => d.HostName, o => o.MapFrom(s => s.Host.User.GetFullName()))
                 .ForMember(d => d.Rooms, o => o.MapFrom(s => s.WorkSpaceRooms));
             CreateMap<WorkSpaceType, WorkSpaceTypeDto>();
+            CreateMap<Notification, NotificationDto>();
             CreateMap<WorkSpace.Domain.Entities.WorkSpace, WorkSpaceListItemDto>()
               .ForMember(d => d.HostName, o => o.MapFrom(s => s.Host != null && s.Host.User != null ? s.Host.User.GetFullName() : null))
               .ForMember(d => d.WorkSpaceTypeName, o => o.MapFrom(s => s.WorkSpaceType != null ? s.WorkSpaceType.Name : null))
