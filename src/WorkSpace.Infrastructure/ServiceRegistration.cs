@@ -69,6 +69,7 @@ public static class ServiceRegistration
         services.AddScoped(typeof(IRecommendationService), typeof(RecommendationService));
         services.AddScoped(typeof(IAIChatbotService), typeof(AIChatbotService));
         services.AddScoped(typeof(IAIChatbotService), typeof(AIChatbotServiceImproved));
+        services.AddScoped<INotificationRepository, NotificationRepository>();
         #endregion
 
         #region Identity
