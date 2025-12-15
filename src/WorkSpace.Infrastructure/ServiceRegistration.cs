@@ -43,6 +43,7 @@ public static class ServiceRegistration
         services.AddScoped(typeof(IChatMessageRepository), typeof(ChatMessageRepository));
         services.AddScoped(typeof(IChatbotConversationRepository), typeof(ChatbotConversationRepository));
         services.AddScoped(typeof(ICustomerChatSessionRepository), typeof(CustomerChatSessionRepository));
+        services.AddScoped<INotificationRepository, NotificationRepository>();
 
         services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<WorkSpaceContext>());
         #endregion

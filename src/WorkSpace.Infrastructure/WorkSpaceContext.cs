@@ -33,7 +33,9 @@ namespace WorkSpace.Infrastructure
         public DbSet<WorkSpaceRoomAmenity> WorkSpaceRoomAmenities { get; set; }
 
         public DbSet<WorkSpaceType> WorkSpaceTypes { get; set; }
-
+        public DbSet<WorkSpaceService> WorkSpaceServices { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<BookingServiceItem> BookingServiceItems { get; set; }
         public DbSet<SupportTicket> SupportTickets { get; set; }
         public DbSet<SupportTicketReply> SupportTicketReplies { get; set; }
         
@@ -338,6 +340,76 @@ namespace WorkSpace.Infrastructure
                 });
 
 
+
+                modelBuilder.Entity("WorkSpace.Domain.Entities.BookingServiceItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BookingId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ServiceId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BookingId");
+
+                    b.HasIndex("ServiceId");
+
+                    b.ToTable("BookingServiceItems", (string)null);
+                });
+                modelBuilder.Entity("WorkSpace.Domain.Entities.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("CreateUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("LastModifiedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("LastModifiedUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("SenderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SenderRole")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Notifications", (string)null);
+                });
 
                 modelBuilder.Entity<CustomerChatMessage>(entity =>
                 {

@@ -11,7 +11,7 @@ using WorkSpace.Application.DTOs.WorkSpaces;
 using WorkSpace.Application.DTOs.WorkSpaceTypes;
 using WorkSpace.Application.Features.HostProfile.Commands.CreateHostProfile;
 using WorkSpace.Domain.Entities;
-
+using WorkSpace.Application.DTOs.Services;
 namespace WorkSpace.Application.Mappings
 {
     public class GeneralProfile : Profile
@@ -31,7 +31,10 @@ namespace WorkSpace.Application.Mappings
 
             CreateMap<Promotion, PromotionDto>()
                 .ForMember(d => d.RemainingUsage, o => o.MapFrom(s => s.UsageLimit == 0 ? int.MaxValue : s.UsageLimit - s.UsedCount));
-
+            CreateMap<Notification, NotificationDto>();
+            CreateMap<WorkSpaceService, CreateWorkSpaceServiceDto>().ReverseMap();
+            CreateMap<WorkSpaceService, UpdateWorkSpaceServiceDto>().ReverseMap();
+            CreateMap<WorkSpaceService, WorkSpaceServiceDto>().ReverseMap();
             CreateMap<CreateHostProfileCommand, HostProfile>();
             CreateMap<HostProfile, HostProfileDto>()
                 .ForMember(d => d.UserName, o => o.MapFrom(s => s.User!.UserName))

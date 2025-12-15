@@ -21,7 +21,7 @@ public class Booking : AuditableBaseEntity
 
     [MaxLength(1000)]
     public string? SpecialRequests { get; set; }
-
+    public virtual List<BookingServiceItem> BookingServiceItems { get; set; } = new();
     public decimal TotalPrice { get; set; }
     public decimal TaxAmount { get; set; }
     public decimal ServiceFee { get; set; }
