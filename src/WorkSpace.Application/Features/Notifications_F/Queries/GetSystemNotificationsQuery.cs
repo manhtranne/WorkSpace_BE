@@ -10,13 +10,11 @@ using WorkSpace.Application.Wrappers;
 
 namespace WorkSpace.Application.Features.Notifications.Queries
 {
-    public class GetSystemNotificationsQuery : IRequest<PagedResponse<IEnumerable<NotificationDto>>>
+    public class GetSystemNotificationsQuery : IRequest<IEnumerable<NotificationDto>>
     {
-        public int PageNumber { get; set; }
-        public int PageSize { get; set; }
+       
     }
-
-    public class GetSystemNotificationsQueryHandler : IRequestHandler<GetSystemNotificationsQuery, PagedResponse<IEnumerable<NotificationDto>>>
+    public class GetSystemNotificationsQueryHandler : IRequestHandler<GetSystemNotificationsQuery, IEnumerable<NotificationDto>>
     {
         private readonly INotificationRepository _notificationRepository;
         private readonly IMapper _mapper;
@@ -27,17 +25,10 @@ namespace WorkSpace.Application.Features.Notifications.Queries
             _mapper = mapper;
         }
 
-        public async Task<PagedResponse<IEnumerable<NotificationDto>>> Handle(GetSystemNotificationsQuery request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<NotificationDto>> Handle(GetSystemNotificationsQuery request, CancellationToken cancellationToken)
         {
-            var validFilter = new RequestParameter
-            {
-                PageNumber = request.PageNumber,
-                PageSize = request.PageSize
-            };
-            var notifications = await _notificationRepository.GetSystemNotificationsAsync(validFilter.PageNumber, validFilter.PageSize);
-            var notificationDtos = _mapper.Map<IEnumerable<NotificationDto>>(notifications);
-
-            return new PagedResponse<IEnumerable<NotificationDto>>(notificationDtos, validFilter.PageNumber, validFilter.PageSize);
+            var notifications = await _notificationRepository.GetSystemNotificationsAsync(1, 1000);
+            return _mapper.Map<IEnumerable<NotificationDto>>(notifications);
         }
     }
 }

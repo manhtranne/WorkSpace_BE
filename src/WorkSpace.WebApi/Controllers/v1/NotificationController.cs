@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿
+
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using WorkSpace.Application.Features.Notifications;
 using WorkSpace.Application.Features.Notifications.Queries;
 using WorkSpace.Application.Features.Notifications_F.Commands;
 
@@ -13,6 +14,7 @@ namespace WorkSpace.WebApi.Controllers.v1
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateAdminNotification([FromBody] CreateAdminNotificationCommand command)
         {
+      
             return Ok(await Mediator.Send(command));
         }
 
@@ -23,17 +25,22 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(await Mediator.Send(command));
         }
 
+
         [HttpGet("system")]
-        public async Task<IActionResult> GetSystemNotifications([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetSystemNotifications()
         {
-            return Ok(await Mediator.Send(new GetSystemNotificationsQuery { PageNumber = pageNumber, PageSize = pageSize }));
+         
+            var result = await Mediator.Send(new GetSystemNotificationsQuery());
+            return Ok(result);
         }
 
         [HttpGet("personal")]
         [Authorize]
-        public async Task<IActionResult> GetPersonalNotifications([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetPersonalNotifications()
         {
-            return Ok(await Mediator.Send(new GetPersonalNotificationsQuery { PageNumber = pageNumber, PageSize = pageSize }));
+            
+            var result = await Mediator.Send(new GetPersonalNotificationsQuery());
+            return Ok(result); 
         }
     }
 }
