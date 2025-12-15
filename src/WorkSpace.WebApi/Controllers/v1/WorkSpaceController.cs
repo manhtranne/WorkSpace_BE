@@ -1,16 +1,25 @@
 ﻿
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using WorkSpace.Application.DTOs.WorkSpaces;
 using WorkSpace.Application.Features.WorkSpace.Commands;
 using WorkSpace.Application.Features.WorkSpace.Queries;
 using WorkSpace.Application.Features.WorkSpace.Queries.GetByWard;
 using WorkSpace.Application.Features.WorkSpace.Queries.GetWards;
+using WorkSpace.Domain.Entities;
+using WorkSpace.Infrastructure;
 
 namespace WorkSpace.WebApi.Controllers.v1
 {
     [Route("api/v1/workspaces")]
     public class WorkSpaceController : BaseApiController
     {
+        private readonly WorkSpaceContext _context;
+
+        public WorkSpaceController(WorkSpaceContext context)
+        {
+            _context = context;
+        }
         [HttpGet("by-type")]
         public async Task<IActionResult> GetAllByType(
             [FromQuery] string? type = null,
@@ -63,7 +72,22 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(result);
         }
 
-  
+        [HttpGet("{workspaceId}/services")]
+        public async Task<IActionResult> GetServicesByWorkspace(int workspaceId)
+        {
+            var services = await _context.Set<WorkSpaceService>()
+                                         .Where(s => s.WorkSpaceId == workspaceId && s.IsActive)
+                                         .Select(s => new {
+                                             s.Id,
+                                             s.Name,
+                                             s.Price,
+                                             s.Description,
+                                             s.ImageUrl
+                                         })
+                                         .ToListAsync();
+            return Ok(services);
+        }
+
         [HttpGet("rooms")]
         public async Task<IActionResult> GetPagedRooms(
             [FromQuery] int pageNumber = 1,

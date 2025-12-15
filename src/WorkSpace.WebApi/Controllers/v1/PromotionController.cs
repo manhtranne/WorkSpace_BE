@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WorkSpace.Application.DTOs.Promotions;
 using WorkSpace.Application.Enums;
@@ -6,6 +6,8 @@ using WorkSpace.Application.Extensions;
 using WorkSpace.Application.Features.Promotions.Commands.ActivatePromotion;
 using WorkSpace.Application.Features.Promotions.Commands.GeneratePromotion;
 using WorkSpace.Application.Features.Promotions.Queries;
+using WorkSpace.Application.Features.Promotions.Queries.GetAllAdminPromotions; 
+using WorkSpace.Application.Features.Promotions.Queries.GetOwnerPromotions;     
 
 namespace WorkSpace.WebApi.Controllers.v1
 {
@@ -13,7 +15,6 @@ namespace WorkSpace.WebApi.Controllers.v1
     [ApiController]
     public class PromotionController : BaseApiController
     {
-
         [HttpGet("active")]
         public async Task<IActionResult> GetActivePromotions(CancellationToken ct)
         {
@@ -21,7 +22,27 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(result);
         }
 
-     
+        [HttpGet("admin/all")]
+        [Authorize(Roles = $"{nameof(Roles.Admin)},{nameof(Roles.Staff)}")]
+        public async Task<IActionResult> GetAllAdminPromotions()
+        {
+            var query = new GetAllAdminPromotionsQuery();
+            var result = await Mediator.Send(query);
+
+            return Ok(result.Data);
+        }
+
+        [HttpGet("owner/all")]
+        [Authorize(Roles = nameof(Roles.Owner))]
+        public async Task<IActionResult> GetAllOwnerPromotions()
+        {
+            var userId = User.GetUserId(); 
+            var query = new GetOwnerPromotionsQuery { UserId = userId };
+            var result = await Mediator.Send(query);
+
+            return Ok(result.Data);
+        }
+
         [HttpPost("admin/generate")]
         [Authorize(Roles = $"{nameof(Roles.Admin)},{nameof(Roles.Staff)}")]
         public async Task<IActionResult> AdminGenerateCode([FromBody] GeneratePromotionDto dto)
@@ -30,12 +51,11 @@ namespace WorkSpace.WebApi.Controllers.v1
             {
                 Dto = dto,
                 RequestUserId = User.GetUserId(),
-                IsOwnerCode = false 
+                IsOwnerCode = false
             };
 
             var result = await Mediator.Send(command);
 
-   
             if (!result.Succeeded) return BadRequest(new { error = result.Message });
             return Ok(result.Data);
         }
@@ -65,7 +85,7 @@ namespace WorkSpace.WebApi.Controllers.v1
             {
                 Dto = dto,
                 RequestUserId = User.GetUserId(),
-                IsOwnerCode = true 
+                IsOwnerCode = true
             };
 
             var result = await Mediator.Send(command);
@@ -74,7 +94,6 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(result.Data);
         }
 
-     
         [HttpPut("owner/activate/{id}")]
         [Authorize(Roles = nameof(Roles.Owner))]
         public async Task<IActionResult> OwnerActivateCode(int id)
