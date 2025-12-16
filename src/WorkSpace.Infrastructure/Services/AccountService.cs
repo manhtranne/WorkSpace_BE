@@ -299,20 +299,161 @@ public class AccountService : IAccountService
 
     public async Task ForgotPassword(ForgotPasswordRequest model, string origin)
     {
-        var account = await _userManager.FindByEmailAsync(model.Email);
-
-        if (account == null) throw new ApiException($"No Accounts Registered with {model.Email}.");
-
-        var code = await _userManager.GeneratePasswordResetTokenAsync(account);
-        var route = "api/account/reset-password/";
-        var _enpointUri = new Uri(string.Concat($"{origin}/", route));
-        var emailRequest = new EmailRequest()
+        try
         {
-            Body = $"You reset token is - {code}",
-            To = model.Email,
-            Subject = "Reset Password",
-        };
-        await _emailService.SendAsync(emailRequest);
+            _logger.LogInformation("Forgot password request for email: {Email}", model.Email);
+
+            var account = await _userManager.FindByEmailAsync(model.Email);
+
+            if (account == null) 
+            {
+                _logger.LogWarning("Forgot password failed: No account found for {Email}", model.Email);
+                throw new ApiException($"Không tìm thấy tài khoản với email {model.Email}.");
+            }
+
+            // Tạo mật khẩu mới ngẫu nhiên
+            var newPassword = GenerateRandomPassword();
+            
+            // Tạo token để reset password
+            var resetToken = await _userManager.GeneratePasswordResetTokenAsync(account);
+            
+            // Reset password với mật khẩu mới
+            var result = await _userManager.ResetPasswordAsync(account, resetToken, newPassword);
+            
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                _logger.LogError("Password reset failed for {Email}: {Errors}", model.Email, errors);
+                throw new ApiException($"Không thể reset mật khẩu: {errors}");
+            }
+
+            // Tạo email body với template đẹp
+            var emailBody = $@"
+                <html>
+                <head>
+                    <style>
+                        body {{
+                            font-family: Arial, sans-serif;
+                            line-height: 1.6;
+                            color: #333;
+                        }}
+                        .container {{
+                            max-width: 600px;
+                            margin: 0 auto;
+                            padding: 20px;
+                            background-color: #f9f9f9;
+                        }}
+                        .header {{
+                            background-color: #4CAF50;
+                            color: white;
+                            padding: 20px;
+                            text-align: center;
+                            border-radius: 5px 5px 0 0;
+                        }}
+                        .content {{
+                            background-color: white;
+                            padding: 30px;
+                            border-radius: 0 0 5px 5px;
+                        }}
+                        .password-box {{
+                            background-color: #f0f0f0;
+                            border: 2px solid #4CAF50;
+                            padding: 15px;
+                            margin: 20px 0;
+                            text-align: center;
+                            font-size: 24px;
+                            font-weight: bold;
+                            letter-spacing: 2px;
+                            border-radius: 5px;
+                        }}
+                        .warning {{
+                            color: #ff6b6b;
+                            font-size: 14px;
+                            margin-top: 20px;
+                        }}
+                        .footer {{
+                            text-align: center;
+                            margin-top: 20px;
+                            font-size: 12px;
+                            color: #777;
+                        }}
+                    </style>
+                </head>
+                <body>
+                    <div class='container'>
+                        <div class='header'>
+                            <h1>Khôi Phục Mật Khẩu</h1>
+                        </div>
+                        <div class='content'>
+                            <p>Xin chào <strong>{account.GetFullName()}</strong>,</p>
+                            <p>Chúng tôi đã nhận được yêu cầu khôi phục mật khẩu cho tài khoản của bạn.</p>
+                            <p>Mật khẩu mới của bạn là:</p>
+                            <div class='password-box'>
+                                {newPassword}
+                            </div>
+                            <p>Vui lòng sử dụng mật khẩu này để đăng nhập và <strong>đổi mật khẩu mới</strong> ngay sau khi đăng nhập để đảm bảo an toàn tài khoản.</p>
+                            <div class='warning'>
+                                <strong>⚠️ Lưu ý:</strong> Nếu bạn không yêu cầu khôi phục mật khẩu, vui lòng liên hệ với chúng tôi ngay lập tức.
+                            </div>
+                        </div>
+                        <div class='footer'>
+                            <p>Email này được gửi tự động, vui lòng không trả lời.</p>
+                            <p>&copy; 2024 WorkSpace. All rights reserved.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>";
+
+            var emailRequest = new EmailRequest()
+            {
+                Body = emailBody,
+                To = model.Email,
+                Subject = "Khôi Phục Mật Khẩu - WorkSpace",
+            };
+            
+            await _emailService.SendAsync(emailRequest);
+
+            _logger.LogInformation("Password reset successful and email sent to {Email}", model.Email);
+        }
+        catch (ApiException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error during forgot password for {Email}", model.Email);
+            throw new ApiException("Có lỗi xảy ra khi xử lý yêu cầu. Vui lòng thử lại sau.");
+        }
+    }
+
+    /// <summary>
+    /// Tạo mật khẩu ngẫu nhiên an toàn
+    /// </summary>
+    private string GenerateRandomPassword()
+    {
+        const string lowercase = "abcdefghijklmnopqrstuvwxyz";
+        const string uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const string digits = "0123456789";
+        const string special = "!@#$%^&*";
+        const string allChars = lowercase + uppercase + digits + special;
+
+        var random = new Random();
+        var password = new StringBuilder();
+
+        // Đảm bảo có ít nhất 1 ký tự từ mỗi loại
+        password.Append(lowercase[random.Next(lowercase.Length)]);
+        password.Append(uppercase[random.Next(uppercase.Length)]);
+        password.Append(digits[random.Next(digits.Length)]);
+        password.Append(special[random.Next(special.Length)]);
+
+        // Thêm các ký tự ngẫu nhiên cho đủ độ dài 10 ký tự
+        for (int i = 4; i < 10; i++)
+        {
+            password.Append(allChars[random.Next(allChars.Length)]);
+        }
+
+        // Xáo trộn các ký tự để tăng tính ngẫu nhiên
+        return new string(password.ToString().OrderBy(c => random.Next()).ToArray());
     }
 
     public async Task<Response<string>> ResetPassword(ResetPasswordRequest model)
