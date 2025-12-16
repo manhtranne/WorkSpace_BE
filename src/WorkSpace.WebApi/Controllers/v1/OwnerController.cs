@@ -364,10 +364,24 @@ namespace WorkSpace.WebApi.Controllers.v1
             var result = await Mediator.Send(command, ct);
             return Ok(result);
         }
-        #region Service / Menu Management
+        #region Drink-Service Management
 
-        [HttpGet("workspaces/{workspaceId}/services")]
-        public async Task<IActionResult> GetWorkSpaceMenu(int workspaceId, CancellationToken ct)
+        [HttpGet("drink-services")]
+        public async Task<IActionResult> GetAllDrinkServices(CancellationToken ct)
+        {
+            var userId = User.GetUserId();
+            var query = new WorkSpace.Application.Features.Services.Queries.GetAllDrinkServices.GetAllDrinkServicesQuery
+            {
+                OwnerUserId = userId
+            };
+
+            var result = await Mediator.Send(query, ct);
+
+            return Ok(result);
+        }
+
+        [HttpGet("workspaces/{workspaceId}/drink-services")]
+        public async Task<IActionResult> GetWorkSpaceDrinkServices(int workspaceId, CancellationToken ct)
         {
             var userId = User.GetUserId();
             var query = new GetServicesByWorkSpaceQuery
@@ -377,13 +391,11 @@ namespace WorkSpace.WebApi.Controllers.v1
             };
 
             var result = await Mediator.Send(query, ct);
-
-            return Ok(result.Data);
+            return Ok(result.Data); 
         }
 
-
-        [HttpPost("workspaces/{workspaceId}/services")]
-        public async Task<IActionResult> AddServicesToMenu(
+        [HttpPost("workspaces/{workspaceId}/drink-services")]
+        public async Task<IActionResult> AddDrinkServices(
             int workspaceId,
             [FromBody] List<CreateWorkSpaceServiceDto> dtos,
             CancellationToken ct)
@@ -397,13 +409,11 @@ namespace WorkSpace.WebApi.Controllers.v1
             };
 
             var result = await Mediator.Send(command, ct);
-
             return Ok(result.Data);
         }
 
-
-        [HttpPut("services/{serviceId}")]
-        public async Task<IActionResult> UpdateServiceItem(
+        [HttpPut("drink-services/{serviceId}")]
+        public async Task<IActionResult> UpdateDrinkService(
             int serviceId,
             [FromBody] UpdateWorkSpaceServiceDto dto,
             CancellationToken ct)
@@ -418,13 +428,11 @@ namespace WorkSpace.WebApi.Controllers.v1
             };
 
             var result = await Mediator.Send(command, ct);
-
             return Ok(result.Data);
         }
 
-
-        [HttpDelete("services/{serviceId}")]
-        public async Task<IActionResult> DeleteServiceItem(int serviceId, CancellationToken ct)
+        [HttpDelete("drink-services/{serviceId}")]
+        public async Task<IActionResult> DeleteDrinkService(int serviceId, CancellationToken ct)
         {
             var userId = User.GetUserId();
             var command = new DeleteWorkSpaceServiceCommand
@@ -434,7 +442,6 @@ namespace WorkSpace.WebApi.Controllers.v1
             };
 
             var result = await Mediator.Send(command, ct);
-
             return Ok(result.Data);
         }
 

@@ -9,7 +9,7 @@ namespace WorkSpace.WebApi.Controllers.v1
 {
     public class NotificationController : BaseApiController
     {
-        [HttpPost("admin")]
+        [HttpPost("notification/admin")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateAdminNotification([FromBody] CreateAdminNotificationCommand command)
         {
@@ -17,7 +17,7 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(new { id = id, message = "Tạo thành công" });
         }
 
-        [HttpPost("owner")]
+        [HttpPost("notification/owner")]
         [Authorize(Roles = "Owner")]
         public async Task<IActionResult> CreateOwnerNotification([FromBody] CreateOwnerNotificationCommand command)
         {
@@ -25,14 +25,14 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(new { id = id, message = "Tạo thành công" });
         }
 
-        [HttpGet("system")]
+        [HttpGet("notification/All-Notification-system")]
         public async Task<IActionResult> GetSystemNotifications()
         {
             var result = await Mediator.Send(new GetSystemNotificationsQuery());
             return Ok(result);
         }
 
-        [HttpGet("personal")]
+        [HttpGet("notification/personal")]
         [Authorize]
         public async Task<IActionResult> GetPersonalNotifications()
         {
@@ -41,15 +41,15 @@ namespace WorkSpace.WebApi.Controllers.v1
         }
 
 
-        [HttpGet("{id}")]
+        [HttpGet("notification/{id}")]
         public async Task<IActionResult> GetNotificationById(int id)
         {
             var result = await Mediator.Send(new GetNotificationByIdQuery { Id = id });
             return Ok(result);
         }
 
-        [HttpPut("update/{id}")]
-        [Authorize] // Cần login
+        [HttpPut("notification/update/{id}")]
+        [Authorize] 
         public async Task<IActionResult> UpdateNotification(int id, [FromBody] UpdateNotificationCommand command)
         {
             if (id != command.Id) return BadRequest(new { message = "ID không khớp" });
@@ -58,7 +58,7 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(new { success = true, message = "Cập nhật thành công" });
         }
 
-        [HttpDelete("delete/{id}")]
+        [HttpDelete("notification/delete/{id}")]
         [Authorize]
         public async Task<IActionResult> DeleteNotification(int id)
         {
