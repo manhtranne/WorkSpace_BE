@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using WorkSpace.Application.DTOs.WorkSpaces;
 using WorkSpace.Application.Interfaces.Repositories;
 using WorkSpace.Domain.Entities;
-
+using WorkSpaceEntity = WorkSpace.Domain.Entities.WorkSpace;
 namespace WorkSpace.Infrastructure.Repositories
 {
 
@@ -33,15 +34,27 @@ namespace WorkSpace.Infrastructure.Repositories
                 .Select(f => f.WorkspaceId)
                 .ToListAsync();
         }
-
-        public async Task<List<Domain.Entities.WorkSpace>> GetFavoriteWorkSpacesAsync(int userId)
+        public async Task<List<WorkSpaceEntity>> GetFavoriteWorkSpacesAsync(int userId)
         {
-            return await _context.WorkSpaceFavorites
+            var workspaces = await _context.WorkSpaceFavorites
                 .Where(f => f.UserId == userId)
+                .Include(f => f.Workspace)
+                    .ThenInclude(w => w!.WorkSpaceImages) 
                 .Select(f => f.Workspace!)
                 .ToListAsync();
-        }
 
+            foreach (var ws in workspaces)
+            {
+                if (ws != null && ws.WorkSpaceImages != null && ws.WorkSpaceImages.Any())
+                {
+                    var firstImage = ws.WorkSpaceImages.OrderBy(img => img.Id).First();
+
+                    ws.WorkSpaceImages = new List<WorkSpaceImage> { firstImage };
+                }
+            }
+
+            return workspaces;
+        }
         public async Task<bool> IsFavoriteAsync(int workSpaceId, int userId)
         {
             return await _context.WorkSpaceFavorites
