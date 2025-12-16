@@ -45,10 +45,22 @@ namespace WorkSpace.WebApi.Controllers
         }
         [HttpPost("reset-password")]
     
-        public async Task<IActionResult> ResetPassword(ResetPasswordRequest model)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest model)
         {
             var result = await _accountService.ResetPassword(model);
             return Ok(result.Data);
+        }
+
+        [HttpPost("change-password")]
+        [Microsoft.AspNetCore.Authorization.Authorize]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest model)
+        {
+            var userId = int.Parse(User.FindFirst("uid")?.Value ?? "0");
+            if (userId == 0)
+                return Unauthorized("User not authenticated");
+
+            var result = await _accountService.ChangePasswordAsync(userId, model);
+            return Ok(result);
         }
         
         [HttpPost("refresh-token")]
