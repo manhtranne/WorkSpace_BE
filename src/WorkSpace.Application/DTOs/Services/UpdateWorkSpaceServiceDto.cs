@@ -4,7 +4,7 @@ namespace WorkSpace.Application.DTOs.Services
 {
     public class UpdateWorkSpaceServiceDto
     {
-        public int Id { get; set; } 
+        public int Id { get; set; }
 
         [Required]
         public string Name { get; set; } = default!;

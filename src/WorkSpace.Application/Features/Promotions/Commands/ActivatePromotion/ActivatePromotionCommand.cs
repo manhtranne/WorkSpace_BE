@@ -33,18 +33,20 @@ namespace WorkSpace.Application.Features.Promotions.Commands.ActivatePromotion
                 var hostProfile = await _hostRepo.GetHostProfileByUserId(request.RequestUserId, cancellationToken);
                 if (hostProfile == null || promotion.HostId != hostProfile.Id)
                 {
-                    throw new ApiException("Bạn không có quyền kích hoạt mã này.");
+                    throw new ApiException("Bạn không có quyền thay đổi trạng thái mã này.");
                 }
             }
             else
             {
-                if (promotion.HostId != null) throw new ApiException("Admin chỉ được kích hoạt mã hệ thống.");
+                if (promotion.HostId != null) throw new ApiException("Admin chỉ được thay đổi trạng thái mã hệ thống.");
             }
 
-            promotion.IsActive = true;
+            promotion.IsActive = !promotion.IsActive;
+
             await _promotionRepo.UpdateAsync(promotion, cancellationToken);
 
-            return new Response<bool>(true, "Đã kích hoạt.");
+            string statusMessage = promotion.IsActive ? "Đã kích hoạt thành công." : "Đã hủy kích hoạt (Unactive) thành công.";
+            return new Response<bool>(true, statusMessage);
         }
     }
 }

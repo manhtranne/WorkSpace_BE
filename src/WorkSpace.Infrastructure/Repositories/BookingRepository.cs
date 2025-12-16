@@ -21,7 +21,6 @@ public class BookingRepository : IBookingRepository
 
     public async Task<int> CreateBookingCustomerAsync(int userId, CreateBookingDto bookingDto)
     {
-        // --- Xử lý tính toán tiền dịch vụ đi kèm ---
         decimal servicesTotal = 0;
         var bookingServiceItems = new List<BookingServiceItem>();
 
@@ -29,7 +28,6 @@ public class BookingRepository : IBookingRepository
         {
             var serviceIds = bookingDto.Services.Select(s => s.ServiceId).ToList();
 
-            // Lấy giá hiện tại từ Database để đảm bảo chính xác
             var dbServices = await _context.Set<WorkSpaceService>()
                                            .Where(s => serviceIds.Contains(s.Id))
                                            .ToDictionaryAsync(s => s.Id);
@@ -51,7 +49,6 @@ public class BookingRepository : IBookingRepository
             }
         }
 
-        // Tính lại tổng tiền cuối cùng = Giá phòng (đã trừ KM nếu có) + Tiền dịch vụ
         var finalAmountWithServices = bookingDto.FinalAmount + servicesTotal;
 
         var booking = new Booking
@@ -68,12 +65,11 @@ public class BookingRepository : IBookingRepository
             TotalPrice = bookingDto.TotalPrice,
             TaxAmount = bookingDto.TaxAmount,
             ServiceFee = bookingDto.ServiceFee,
-            FinalAmount = finalAmountWithServices, // Cập nhật giá cuối
+            FinalAmount = finalAmountWithServices,
 
             Currency = "VND",
-            BookingStatusId = 11, // 'Pending'
+            BookingStatusId = 11, 
 
-            // Gán danh sách dịch vụ
             BookingServiceItems = bookingServiceItems
         };
 
@@ -84,7 +80,6 @@ public class BookingRepository : IBookingRepository
 
     public async Task<int> CreateBookingGuestAsync(int guestId, CreateBookingDto bookingDto)
     {
-        // --- Xử lý tính toán tiền dịch vụ đi kèm (Tương tự Customer) ---
         decimal servicesTotal = 0;
         var bookingServiceItems = new List<BookingServiceItem>();
 
@@ -131,7 +126,7 @@ public class BookingRepository : IBookingRepository
             FinalAmount = finalAmountWithServices,
 
             Currency = "VND",
-            BookingStatusId = 11, // 'Pending'
+            BookingStatusId = 11, 
 
             BookingServiceItems = bookingServiceItems
         };
@@ -158,7 +153,6 @@ public class BookingRepository : IBookingRepository
 
     public async Task<Booking> GetBookingByIdAsync(int id)
     {
-        // Nên include thêm BookingServiceItems để xem chi tiết đơn hàng
         return await _context.Bookings
             .Include(b => b.BookingServiceItems)
             .ThenInclude(bs => bs.Service)
@@ -169,7 +163,7 @@ public class BookingRepository : IBookingRepository
     {
         return await _context.Bookings
             .Include(b => b.WorkSpaceRoom)
-            .Include(b => b.BookingServiceItems) // Include thêm dịch vụ
+            .Include(b => b.BookingServiceItems) 
             .Where(b => b.CustomerId == userId)
             .OrderByDescending(b => b.CreateUtc)
             .ToListAsync();
@@ -206,7 +200,8 @@ public class BookingRepository : IBookingRepository
             .ThenInclude(r => r.WorkSpace)
             .ThenInclude(ws => ws.Host)
             .ThenInclude(h => h.User)
-            .Include(b => b.BookingServiceItems) // Include thêm dịch vụ
+            .Include(b => b.BookingServiceItems) 
+            .Include(b => b.BookingServiceItems) 
             .ThenInclude(bs => bs.Service)
             .FirstOrDefaultAsync(b => b.Id == bookingId, ct);
     }

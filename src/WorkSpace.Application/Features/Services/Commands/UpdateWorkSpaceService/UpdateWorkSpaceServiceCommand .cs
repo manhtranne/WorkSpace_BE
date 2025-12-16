@@ -35,10 +35,8 @@ namespace WorkSpace.Application.Features.Services.Commands.UpdateWorkSpaceServic
             var service = await _serviceRepository.GetByIdAsync(request.Dto.Id);
             if (service == null) throw new ApiException($"Service not found.");
 
-            // Verify Owner
             var workspace = await _workSpaceRepository.GetByIdAsync(service.WorkSpaceId);
 
-            // SỬA LẠI DÒNG NÀY: Bỏ chữ Async và truyền thêm cancellationToken
             var host = await _hostRepository.GetHostProfileByUserId(request.OwnerUserId, cancellationToken);
 
             if (host == null || workspace.HostId != host.Id)
@@ -46,7 +44,6 @@ namespace WorkSpace.Application.Features.Services.Commands.UpdateWorkSpaceServic
                 throw new ApiException("You do not own this workspace.");
             }
 
-            // Update fields
             service.Name = request.Dto.Name;
             service.Description = request.Dto.Description;
             service.Price = request.Dto.Price;

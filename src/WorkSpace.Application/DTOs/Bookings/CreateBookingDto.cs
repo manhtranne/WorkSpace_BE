@@ -29,11 +29,9 @@ namespace WorkSpace.Application.DTOs.Bookings
         public decimal ServiceFee { get; set; }
         public decimal FinalAmount { get; set; }
 
-
-        public List<ServiceRequestDto>? Services { get; set; }
-
         [MaxLength(3)]
         public string? Currency { get; set; } = "VND";
         public int BookingStatusId { get; set; }
+        public List<ServiceRequestDto>? Services { get; set; }
     }
 }

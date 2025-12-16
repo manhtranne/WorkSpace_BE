@@ -35,7 +35,6 @@ namespace WorkSpace.Application.Features.Services.Commands.DeleteWorkSpaceServic
 
             var workspace = await _workSpaceRepository.GetByIdAsync(service.WorkSpaceId);
 
-            // SỬA LẠI DÒNG NÀY: Bỏ chữ Async và truyền thêm cancellationToken
             var host = await _hostRepository.GetHostProfileByUserId(request.OwnerUserId, cancellationToken);
 
             if (host == null || workspace.HostId != host.Id)
@@ -43,7 +42,6 @@ namespace WorkSpace.Application.Features.Services.Commands.DeleteWorkSpaceServic
                 throw new ApiException("You do not own this workspace.");
             }
 
-            // SOFT DELETE
             service.IsActive = false;
 
             await _serviceRepository.UpdateAsync(service);

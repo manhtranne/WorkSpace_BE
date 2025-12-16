@@ -12,14 +12,14 @@ namespace WorkSpace.Domain.Entities
         [MaxLength(1000)]
         public string? Description { get; set; }
 
-        public decimal Price { get; set; } 
+        public decimal Price { get; set; }
 
         [MaxLength(500)]
         public string? ImageUrl { get; set; }
 
         public bool IsActive { get; set; } = true;
 
-       
+
         public int WorkSpaceId { get; set; }
         public virtual WorkSpace? WorkSpace { get; set; }
     }
