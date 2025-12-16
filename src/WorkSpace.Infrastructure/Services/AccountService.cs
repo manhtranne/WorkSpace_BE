@@ -484,6 +484,187 @@ public class AccountService : IAccountService
         }
     }
 
+    public async Task<Response<string>> ChangePasswordAsync(int userId, ChangePasswordRequest model)
+    {
+        try
+        {
+            _logger.LogInformation("Change password request for user ID: {UserId}", userId);
+
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+            {
+                _logger.LogWarning("Change password failed: User {UserId} not found", userId);
+                throw new ApiException($"Không tìm thấy người dùng.");
+            }
+
+            // Kiểm tra mật khẩu hiện tại
+            var isCurrentPasswordValid = await _userManager.CheckPasswordAsync(user, model.CurrentPassword);
+            if (!isCurrentPasswordValid)
+            {
+                _logger.LogWarning("Change password failed: Invalid current password for user {UserId}", userId);
+                throw new ApiException("Mật khẩu hiện tại không đúng.");
+            }
+
+            // Kiểm tra mật khẩu mới phải khác với mật khẩu cũ
+            if (model.CurrentPassword == model.NewPassword)
+            {
+                _logger.LogWarning("Change password failed: New password is same as current password for user {UserId}", userId);
+                throw new ApiException("Mật khẩu mới phải khác với mật khẩu hiện tại.");
+            }
+
+            // Đổi mật khẩu
+            var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            if (result.Succeeded)
+            {
+                _logger.LogInformation("Password changed successfully for user {UserId} ({Email})", user.Id, user.Email);
+
+                // Gửi email thông báo đổi mật khẩu thành công
+                await SendPasswordChangedEmailAsync(user);
+
+                return new Response<string>(user.Email, message: "Đổi mật khẩu thành công.");
+            }
+            else
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                _logger.LogError("Change password failed for user {UserId}: {Errors}", userId, errors);
+
+                if (result.Errors.Any(e => e.Code.Contains("Password")))
+                {
+                    throw new ApiException($"Mật khẩu không hợp lệ: {errors}");
+                }
+
+                throw new ApiException($"Đổi mật khẩu thất bại: {errors}");
+            }
+        }
+        catch (ApiException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error during password change for user {UserId}", userId);
+            throw new ApiException("Có lỗi xảy ra khi đổi mật khẩu. Vui lòng thử lại.");
+        }
+    }
+
+    /// <summary>
+    /// Gửi email thông báo đã đổi mật khẩu thành công
+    /// </summary>
+    private async Task SendPasswordChangedEmailAsync(AppUser user)
+    {
+        try
+        {
+            var emailBody = $@"
+                <html>
+                <head>
+                    <style>
+                        body {{
+                            font-family: Arial, sans-serif;
+                            line-height: 1.6;
+                            color: #333;
+                        }}
+                        .container {{
+                            max-width: 600px;
+                            margin: 0 auto;
+                            padding: 20px;
+                            background-color: #f9f9f9;
+                        }}
+                        .header {{
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: white;
+                            padding: 30px;
+                            text-align: center;
+                            border-radius: 10px 10px 0 0;
+                        }}
+                        .header h1 {{
+                            margin: 0;
+                            font-size: 24px;
+                        }}
+                        .content {{
+                            background-color: white;
+                            padding: 30px;
+                            border-radius: 0 0 10px 10px;
+                            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                        }}
+                        .info-box {{
+                            background-color: #e3f2fd;
+                            padding: 15px;
+                            margin: 20px 0;
+                            border-radius: 8px;
+                            border-left: 4px solid #2196f3;
+                        }}
+                        .warning {{
+                            background-color: #fff3cd;
+                            padding: 15px;
+                            margin: 20px 0;
+                            border-radius: 5px;
+                            border-left: 4px solid #ffc107;
+                        }}
+                        .footer {{
+                            text-align: center;
+                            margin-top: 30px;
+                            padding-top: 20px;
+                            border-top: 2px solid #e9ecef;
+                            font-size: 14px;
+                            color: #6c757d;
+                        }}
+                    </style>
+                </head>
+                <body>
+                    <div class='container'>
+                        <div class='header'>
+                            <h1>🔒 Mật Khẩu Đã Được Thay Đổi</h1>
+                        </div>
+                        <div class='content'>
+                            <p>Xin chào <strong>{user.GetFullName()}</strong>,</p>
+                            <p>Chúng tôi xác nhận rằng mật khẩu của bạn đã được thay đổi thành công.</p>
+                            
+                            <div class='info-box'>
+                                <strong>📅 Thời gian thay đổi:</strong> {DateTime.Now.ToString("HH:mm - dd/MM/yyyy")}<br/>
+                                <strong>📧 Tài khoản:</strong> {user.Email}<br/>
+                                <strong>👤 Tên người dùng:</strong> {user.UserName}
+                            </div>
+
+                            <p>Bạn có thể sử dụng mật khẩu mới để đăng nhập vào hệ thống.</p>
+
+                            <div class='warning'>
+                                <strong>⚠️ Lưu ý bảo mật:</strong><br/>
+                                Nếu bạn <strong>KHÔNG PHẢI</strong> là người thực hiện thay đổi này, vui lòng liên hệ với chúng tôi ngay lập tức để bảo vệ tài khoản của bạn.
+                            </div>
+
+                            <p>Để đảm bảo an toàn tài khoản:</p>
+                            <ul>
+                                <li>Không chia sẻ mật khẩu với bất kỳ ai</li>
+                                <li>Sử dụng mật khẩu mạnh và duy nhất</li>
+                                <li>Thay đổi mật khẩu định kỳ</li>
+                            </ul>
+                        </div>
+                        <div class='footer'>
+                            <p><strong>WorkSpace Team</strong></p>
+                            <p>📧 Email: support@workspace.com | 📞 Hotline: 1900-xxxx</p>
+                            <p style='font-size: 12px; color: #999;'>Email này được gửi tự động, vui lòng không trả lời.</p>
+                            <p style='font-size: 12px;'>&copy; 2024 WorkSpace. All rights reserved.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>";
+
+            var emailRequest = new EmailRequest
+            {
+                To = user.Email,
+                Subject = "🔒 Mật khẩu đã được thay đổi - WorkSpace",
+                Body = emailBody
+            };
+
+            await _emailService.SendAsync(emailRequest);
+        }
+        catch (Exception ex)
+        {
+            // Log lỗi nhưng không throw
+            _logger.LogError(ex, "Failed to send password changed email to {Email}", user.Email);
+        }
+    }
+
     public async Task<Response<AuthenticationResponse>> RefreshTokenAsync(RefreshTokenRequest request, string ipAddress)
     {
         try

@@ -10,6 +10,7 @@ public interface  IAccountService
     Task<Response<string>> ConfirmEmailAsync(string userId, string code);
     Task ForgotPassword(ForgotPasswordRequest model, string origin);
     Task<Response<string>> ResetPassword(ResetPasswordRequest model);
+    Task<Response<string>> ChangePasswordAsync(int userId, ChangePasswordRequest model);
     Task<Response<AuthenticationResponse>> RefreshTokenAsync(RefreshTokenRequest request, string ipAddress);
     Task<Response<string>> RevokeTokenAsync(string token, string ipAddress);
     Task<Response<AuthenticationResponse>> GoogleLoginAsync(GoogleLoginRequest request, string ipAddress);
