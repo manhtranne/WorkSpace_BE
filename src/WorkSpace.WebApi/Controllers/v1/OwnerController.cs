@@ -1,25 +1,25 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WorkSpace.Application.DTOs.Owner;
+using WorkSpace.Application.DTOs.Services;
 using WorkSpace.Application.Enums;
 using WorkSpace.Application.Extensions;
-using WorkSpace.Application.Features.Owner.Commands;
-using WorkSpace.Application.Features.Owner.Queries;
-using WorkSpace.Application.Features.Refunds.Commands;
 using WorkSpace.Application.Features.CustomerChat.Commands.CloseCustomerSession;
 using WorkSpace.Application.Features.CustomerChat.Commands.OwnerReplyToCustomer;
 using WorkSpace.Application.Features.CustomerChat.Queries.GetActiveCustomerSessions;
 using WorkSpace.Application.Features.CustomerChat.Queries.GetCustomerChatMessages;
-using WorkSpace.Application.Wrappers;
-using WorkSpace.Application.DTOs.Services;
-
+using WorkSpace.Application.Features.Owner.Commands;
 using WorkSpace.Application.Features.Owner.Commands;
 using WorkSpace.Application.Features.Owner.Queries;
+using WorkSpace.Application.Features.Owner.Queries;
+using WorkSpace.Application.Features.Refunds.Commands;
 using WorkSpace.Application.Features.Refunds.Commands;
 using WorkSpace.Application.Features.Services.Commands.CreateWorkSpaceServices;
 using WorkSpace.Application.Features.Services.Commands.DeleteWorkSpaceService;
 using WorkSpace.Application.Features.Services.Commands.UpdateWorkSpaceService;
+using WorkSpace.Application.Features.Services.Queries.GetAllServicesGrouped;
 using WorkSpace.Application.Features.Services.Queries.GetServicesByWorkSpace;
+using WorkSpace.Application.Wrappers;
 namespace WorkSpace.WebApi.Controllers.v1
 {
     [Route("api/v1/owner")]
@@ -367,17 +367,18 @@ namespace WorkSpace.WebApi.Controllers.v1
         #region Drink-Service Management
 
         [HttpGet("drink-services")]
-        public async Task<IActionResult> GetAllDrinkServices(CancellationToken ct)
+        public async Task<IActionResult> GetAllServices(CancellationToken ct)
         {
             var userId = User.GetUserId();
-            var query = new WorkSpace.Application.Features.Services.Queries.GetAllDrinkServices.GetAllDrinkServicesQuery
+
+            var query = new GetAllServicesGroupedQuery
             {
                 OwnerUserId = userId
             };
 
             var result = await Mediator.Send(query, ct);
 
-            return Ok(result);
+            return Ok(result.Data);
         }
 
         [HttpGet("workspaces/{workspaceId}/drink-services")]

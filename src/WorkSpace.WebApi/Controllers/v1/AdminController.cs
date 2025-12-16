@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using WorkSpace.Application.DTOs.Account;
 using WorkSpace.Application.Enums;
 using WorkSpace.Application.Features.Admin.Queries;
+using WorkSpace.Application.Features.Admin.Queries.GetAllBookings;
 using WorkSpace.Application.Features.HostProfile.Commands.ApproveHostProfile;
 using WorkSpace.Application.Interfaces.Services;
 
@@ -76,9 +77,17 @@ public class AdminController : BaseApiController
         return await ToggleUserStatus(id);
     }
 
-  
 
-  
+    [HttpGet("admin/All-bookings")]
+     [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetAllBookings([FromQuery] GetAllBookingsAdminQuery query)
+    {
+        var result = await Mediator.Send(query);
+
+
+        return Ok(result.Data);
+    }
+
     private async Task<IActionResult> ToggleUserStatus(int userId)
     {
      
