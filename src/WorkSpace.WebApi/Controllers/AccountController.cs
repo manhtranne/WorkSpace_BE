@@ -37,8 +37,7 @@ namespace WorkSpace.WebApi.Controllers
             return Ok(result.Data);
         }
         [HttpPost("forgot-password")]
-     
-        public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest model)
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest model)
         {
             var origin = GetOrigin();
             await _accountService.ForgotPassword(model, origin);
