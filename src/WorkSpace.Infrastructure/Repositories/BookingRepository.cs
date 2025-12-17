@@ -156,6 +156,8 @@ public class BookingRepository : IBookingRepository
         return await _context.Bookings
             .Include(b => b.BookingServiceItems)
             .ThenInclude(bs => bs.Service)
+            .Include(b => b.Customer) 
+            .Include(b => b.Guest)
             .FirstOrDefaultAsync(b => b.Id == id);
     }
 
