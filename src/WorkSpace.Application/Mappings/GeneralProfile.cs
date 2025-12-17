@@ -47,10 +47,12 @@ namespace WorkSpace.Application.Mappings
             CreateMap<CreateWorkSpaceRequest, WorkSpace.Domain.Entities.WorkSpace>();
 
             CreateMap<WorkSpace.Domain.Entities.WorkSpace, WorkSpaceDetailDto>()
-                .ForMember(d => d.AddressLine, o => o.MapFrom(s => $"{s.Address!.Street}, {s.Address.Ward}"))
-                .ForMember(d => d.Country, o => o.MapFrom(s => s.Address!.Country))
-                .ForMember(d => d.HostName, o => o.MapFrom(s => s.Host.User.GetFullName()))
-                .ForMember(d => d.Rooms, o => o.MapFrom(s => s.WorkSpaceRooms));
+      .ForMember(d => d.AddressLine, o => o.MapFrom(s => $"{s.Address!.Street}, {s.Address.Ward}"))
+      .ForMember(d => d.Country, o => o.MapFrom(s => s.Address!.Country))
+      .ForMember(d => d.HostName, o => o.MapFrom(s => s.Host.User.GetFullName()))
+      .ForMember(d => d.HostAvatar, o => o.MapFrom(s => s.Host.User.Avatar))
+      .ForMember(d => d.ImageUrls, o => o.MapFrom(s => s.WorkSpaceImages.Select(img => img.ImageUrl)))
+      .ForMember(d => d.Rooms, o => o.MapFrom(s => s.WorkSpaceRooms));
             CreateMap<WorkSpaceType, WorkSpaceTypeDto>();
             CreateMap<WorkSpace.Domain.Entities.WorkSpace, WorkSpaceListItemDto>()
               .ForMember(d => d.HostName, o => o.MapFrom(s => s.Host != null && s.Host.User != null ? s.Host.User.GetFullName() : null))
