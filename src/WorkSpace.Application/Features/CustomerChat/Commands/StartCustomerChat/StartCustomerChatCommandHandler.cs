@@ -70,7 +70,7 @@ public class StartCustomerChatCommandHandler : IRequestHandler<StartCustomerChat
                }
                
                workspaceId = workspace.Id;
-               workspaceName = workspace.WorkSpaceName;
+               workspaceName = workspace.Title;
         }
 
         var session = new CustomerChatSession()

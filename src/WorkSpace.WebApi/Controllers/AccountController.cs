@@ -22,12 +22,11 @@ namespace WorkSpace.WebApi.Controllers
             return Ok(result.Data);
         }
         [HttpPost("register")]
-       
         public async Task<IActionResult> RegisterAsync(RegisterRequest request)
         {
             var origin = GetOrigin();
             var result = await _accountService.RegisterAsync(request, origin, GenerateIPAddress());
-            return Ok(result.Data);
+            return Ok(result);
         }
         [HttpGet("confirm-email")]
     

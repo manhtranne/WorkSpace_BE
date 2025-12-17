@@ -70,7 +70,12 @@ public class AdminController : BaseApiController
     }
 
 
-
+    [HttpPut("users/{userId}/role")]
+    public async Task<IActionResult> UpdateUserRole([FromRoute] int userId, [FromBody] UpdateUserRoleDto request)
+    {
+        var result = await _accountService.SetUserRoleAsync(userId, request.Role);
+        return Ok(result);
+    }
     [HttpPut("{id}/block")]
     public async Task<IActionResult> BlockOwner([FromRoute] int id)
     {
