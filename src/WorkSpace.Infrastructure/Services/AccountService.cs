@@ -121,93 +121,91 @@ public class AccountService : IAccountService
         }
     }
 
-    public async Task<Response<AuthenticationResponse>> RegisterAsync(RegisterRequest request, string origin, string ipAddress)
+
+    public async Task<Response<string>> RegisterAsync(RegisterRequest request, string origin, string ipAddress)
     {
         try
         {
-            _logger.LogInformation("Registration attempt for email: {Email}, username: {UserName}", request.Email, request.UserName);
-
-            var customerRole = Roles.Customer.ToString();
-            if (!await _roleManager.RoleExistsAsync(customerRole))
-            {
-                _logger.LogError("Customer role does not exist in database. Database may not be seeded properly.");
-                throw new ApiException($"Role '{customerRole}' does not exist. Please contact administrator.");
-            }
+            _logger.LogInformation("Registration attempt for email: {Email}", request.Email);
 
             var userWithSameUserName = await _userManager.FindByNameAsync(request.UserName);
-            if (userWithSameUserName != null)
-            {
-                throw new ApiException($"Username '{request.UserName}' is already taken.");
-            }
+            if (userWithSameUserName != null) throw new ApiException($"Username '{request.UserName}' is already taken.");
 
             var userWithSameEmail = await _userManager.FindByEmailAsync(request.Email);
-            if (userWithSameEmail != null)
-            {
-                throw new ApiException($"Email '{request.Email}' is already registered.");
-            }
+            if (userWithSameEmail != null) throw new ApiException($"Email '{request.Email}' is already registered.");
 
-            var user = new AppUser()
+            var user = new AppUser
             {
                 Email = request.Email,
                 UserName = request.UserName,
                 DateCreated = DateTime.UtcNow,
                 IsActive = true,
+                EmailConfirmed = false
             };
 
             var result = await _userManager.CreateAsync(user, request.Password);
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                _logger.LogError("User creation failed for email {Email}: {Errors}", request.Email, errors);
                 throw new ApiException($"Registration failed: {errors}");
             }
 
-            var roleResult = await _userManager.AddToRoleAsync(user, customerRole);
-            if (!roleResult.Succeeded)
+            await _userManager.AddToRoleAsync(user, Roles.Customer.ToString());
+
+           
+            var verificationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            verificationToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(verificationToken));
+
+            var route = "confirm-email";
+            var endpointUri = new Uri(string.Concat($"{origin}/", route));
+            var verificationUri = QueryHelpers.AddQueryString(endpointUri.ToString(), "userId", user.Id.ToString());
+            verificationUri = QueryHelpers.AddQueryString(verificationUri, "code", verificationToken);
+
+            var emailBody = $@"
+            <html>
+            <head>
+                <style>
+                    body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                    .container {{ max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; }}
+                    .header {{ background-color: #4CAF50; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }}
+                    .content {{ background-color: white; padding: 30px; border-radius: 0 0 5px 5px; text-align: center; }}
+                    .btn {{ display: inline-block; padding: 12px 24px; background-color: #4CAF50; color: white !important; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 20px; }}
+                    .footer {{ text-align: center; margin-top: 20px; font-size: 12px; color: #777; }}
+                </style>
+            </head>
+            <body>
+                <div class='container'>
+                    <div class='header'>
+                        <h1>Xác Thực Tài Khoản</h1>
+                    </div>
+                    <div class='content'>
+                        <p>Xin chào <strong>{request.UserName}</strong>,</p>
+                        <p>Cảm ơn bạn đã đăng ký tài khoản tại WorkSpace. Vui lòng nhấn vào nút bên dưới để kích hoạt tài khoản của bạn:</p>
+                        <a href='{verificationUri}' class='btn'>Xác Thực Ngay</a>
+                        <p style='margin-top: 20px; font-size: 13px; color: #666;'>Nếu nút trên không hoạt động, hãy copy link sau vào trình duyệt:<br/>{verificationUri}</p>
+                    </div>
+                    <div class='footer'>
+                        <p>&copy; 2024 WorkSpace. All rights reserved.</p>
+                    </div>
+                </div>
+            </body>
+            </html>";
+
+            await _emailService.SendAsync(new EmailRequest
             {
-                var errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
-                _logger.LogError("Failed to add role '{Role}' to user {UserId}: {Errors}", customerRole, user.Id, errors);
+                To = user.Email,
+                Body = emailBody,
+                Subject = "Xác thực tài khoản WorkSpace"
+            });
 
-                await _userManager.DeleteAsync(user);
-                throw new ApiException($"Failed to assign customer role: {errors}");
-            }
+            _logger.LogInformation("User registered. Verification email sent to: {Email}", user.Email);
 
-            var emailConfirmToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var confirmResult = await _userManager.ConfirmEmailAsync(user, emailConfirmToken);
-            if (!confirmResult.Succeeded)
-            {
-                _logger.LogWarning("Email confirmation failed for user {UserId}, but continuing registration", user.Id);
-            }
-
-            _logger.LogInformation("User registered successfully: {UserId} ({Email})", user.Id, user.Email);
-
-            JwtSecurityToken jwtSecurityToken = await GenerateJWToken(user);
-            AuthenticationResponse response = new AuthenticationResponse();
-            response.Id = user.Id.ToString();
-            response.JWToken = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
-            response.Email = user.Email;
-            response.UserName = user.UserName;
-            var rolesList = await _userManager.GetRolesAsync(user).ConfigureAwait(false);
-            response.Roles = rolesList.ToList();
-            response.IsVerified = user.EmailConfirmed;
-            var refreshToken = GenerateRefreshToken(ipAddress);
-            response.RefreshToken = refreshToken.Token;
-
-            user.RefreshToken = refreshToken.Token;
-            user.RefreshTokenExpiryTime = refreshToken.Expires;
-            user.LastLoginDate = DateTime.UtcNow;
-            await _userManager.UpdateAsync(user);
-
-            return new Response<AuthenticationResponse>(response, $"User registered and authenticated successfully");
-        }
-        catch (ApiException)
-        {
-            throw;
+            return new Response<string>(user.Id.ToString(), "Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unexpected error during registration for email {Email}", request.Email);
-            throw new ApiException("An error occurred during registration. Please try again.");
+            _logger.LogError(ex, "Error registering user {Email}", request.Email);
+            throw new ApiException("An error occurred during registration.");
         }
     }
 
@@ -664,7 +662,90 @@ public class AccountService : IAccountService
             _logger.LogError(ex, "Failed to send password changed email to {Email}", user.Email);
         }
     }
+    // File: src/WorkSpace.Infrastructure/Services/AccountService.cs
 
+   // File: src/WorkSpace.Infrastructure/Services/AccountService.cs
+
+public async Task<Response<string>> SetUserRoleAsync(int userId, string newRole)
+{
+    try
+    {
+        // 1. Kiểm tra đầu vào
+        if (string.IsNullOrWhiteSpace(newRole))
+        {
+            throw new ApiException("Tên quyền (Role) không được để trống.");
+        }
+
+        // 2. Tìm User
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user == null)
+        {
+            throw new ApiException($"Không tìm thấy User với ID {userId}.");
+        }
+
+        // 3. Kiểm tra Role mới có tồn tại trong hệ thống không
+        if (!await _roleManager.RoleExistsAsync(newRole))
+        {
+            throw new ApiException($"Quyền '{newRole}' không tồn tại trong hệ thống.");
+        }
+
+        // 4. Lấy danh sách role hiện tại
+        var currentRoles = await _userManager.GetRolesAsync(user);
+
+        // -- TỐI ƯU: Nếu user đã có đúng quyền này rồi -> Return luôn --
+        if (currentRoles.Count == 1 && currentRoles.First().Equals(newRole, StringComparison.OrdinalIgnoreCase))
+        {
+            return new Response<string>(user.Id.ToString(), $"User đã có quyền '{newRole}' rồi.");
+        }
+
+        // 5. Xóa các role cũ (SỬA LẠI ĐOẠN NÀY ĐỂ TRÁNH LỖI)
+        foreach (var role in currentRoles)
+        {
+            // Kiểm tra chắc chắn user có trong role này không
+            if (await _userManager.IsInRoleAsync(user, role))
+            {
+                var removeResult = await _userManager.RemoveFromRoleAsync(user, role);
+                
+                // Nếu xóa thất bại
+                if (!removeResult.Succeeded)
+                {
+                    // Kiểm tra xem có phải lỗi "UserNotInRole" không. 
+                    // Nếu đúng là lỗi này nghĩa là role đã mất rồi -> Coi như thành công -> Bỏ qua.
+                    // Nếu là lỗi khác -> Báo lỗi.
+                    var isUserNotInRoleError = removeResult.Errors.Any(e => e.Code == "UserNotInRole");
+                    if (!isUserNotInRoleError) 
+                    {
+                        var errors = string.Join(", ", removeResult.Errors.Select(e => e.Description));
+                        throw new ApiException($"Lỗi khi xóa quyền cũ '{role}': {errors}");
+                    }
+                }
+            }
+        }
+
+        // 6. Thêm role mới
+        // (Kiểm tra xem đã có role này chưa để tránh lỗi duplicate)
+        if (!await _userManager.IsInRoleAsync(user, newRole))
+        {
+            var addResult = await _userManager.AddToRoleAsync(user, newRole);
+            if (!addResult.Succeeded)
+            {
+                var errors = string.Join(", ", addResult.Errors.Select(e => e.Description));
+                throw new ApiException($"Lỗi khi thêm quyền '{newRole}': {errors}");
+            }
+        }
+
+        return new Response<string>(user.Id.ToString(), $"Cập nhật quyền thành '{newRole}' thành công.");
+    }
+    catch (ApiException)
+    {
+        throw;
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Lỗi hệ thống khi update role cho User {UserId}", userId);
+        throw new ApiException($"Lỗi hệ thống: {ex.Message}");
+    }
+}
     public async Task<Response<AuthenticationResponse>> RefreshTokenAsync(RefreshTokenRequest request, string ipAddress)
     {
         try
