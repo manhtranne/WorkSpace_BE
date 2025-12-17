@@ -12,7 +12,7 @@ using WorkSpace.Application.Wrappers;
 namespace WorkSpace.WebApi.Controllers.v1;
 [Route("api/v1/customer-chat")]
 [ApiController]
-[Authorize(Roles = nameof(Roles.Customer))]
+
 public class CustomerChatController : BaseApiController
 {
 
