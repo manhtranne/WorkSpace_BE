@@ -39,7 +39,9 @@ public class GetActiveCustomerSessionsQueryHandler : IRequestHandler<GetActiveCu
             LastMessageAt = s.LastMessageAt,
             IsActive = s.IsActive,
             AssignedOwnerId = s.AssignedOwnerId,
-            AssignedOwnerName = s.AssignedOwner?.GetFullName()
+            AssignedOwnerName = s.AssignedOwner?.GetFullName(),
+            WorkspaceId = s.WorkspaceId,
+            WorkspaceName = s.WorkspaceName
         }).ToList();
 
 

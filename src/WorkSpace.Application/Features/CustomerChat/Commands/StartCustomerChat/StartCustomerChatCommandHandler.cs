@@ -44,42 +44,49 @@ public class StartCustomerChatCommandHandler : IRequestHandler<StartCustomerChat
              throw new ApiException("Customer not found");
          }
 
-         int ownerId = 0;
-         string ownerName = string.Empty;
-         
+        int ownerId = 0;
+        string ownerName = string.Empty;
+        int? workspaceId = null;
+        string? workspaceName = null;
+        
 
-         if (request.RequestDto.WorkSpaceId.HasValue)
-         {
-             var workspace = await _workSpaceRepository.GetByIdAsync(request.RequestDto.WorkSpaceId.Value, cancellationToken);
-                if (workspace == null)
-                {
-                    throw new ApiException("WorkSpace not found");
-                }
-                var hostProfile = await _hostProfileRepository.GetByIdAsync(workspace.HostId, cancellationToken);
-                if (hostProfile == null)
-                {
-                    throw new ApiException("Host profile not found");
-                }
-                ownerId = hostProfile.UserId;
-                var owner = await _userRepository.GetByIdAsync(ownerId, cancellationToken);
-                if (owner != null)
-                {
-                    ownerName = owner.GetFullName();
-                }
-         }
+        if (request.RequestDto.WorkSpaceId.HasValue)
+        {
+            var workspace = await _workSpaceRepository.GetByIdAsync(request.RequestDto.WorkSpaceId.Value, cancellationToken);
+               if (workspace == null)
+               {
+                   throw new ApiException("WorkSpace not found");
+               }
+               var hostProfile = await _hostProfileRepository.GetByIdAsync(workspace.HostId, cancellationToken);
+               if (hostProfile == null)
+               {
+                   throw new ApiException("Host profile not found");
+               }
+               ownerId = hostProfile.UserId;
+               var owner = await _userRepository.GetByIdAsync(ownerId, cancellationToken);
+               if (owner != null)
+               {
+                   ownerName = owner.GetFullName();
+               }
+               
+               workspaceId = workspace.Id;
+               workspaceName = workspace.WorkSpaceName;
+        }
 
-         var session = new CustomerChatSession()
-         {
-            SessionId = Guid.NewGuid().ToString(),
-            CustomerId = customer.Id,
-            CustomerName = customer.GetFullName(),
-            CustomerEmail = customer.Email,
-            AssignedOwnerId = ownerId,
-            IsActive = true,
-            CreatedById = customer.Id,
-            CreateUtc = now,
-            LastMessageAt = now,
-         };
+        var session = new CustomerChatSession()
+        {
+           SessionId = Guid.NewGuid().ToString(),
+           CustomerId = customer.Id,
+           CustomerName = customer.GetFullName(),
+           CustomerEmail = customer.Email,
+           AssignedOwnerId = ownerId,
+           WorkspaceId = workspaceId,
+           WorkspaceName = workspaceName,
+           IsActive = true,
+           CreatedById = customer.Id,
+           CreateUtc = now,
+           LastMessageAt = now,
+        };
          
          await _sessionRepository.AddAsync(session, cancellationToken);
          
@@ -100,17 +107,19 @@ public class StartCustomerChatCommandHandler : IRequestHandler<StartCustomerChat
              await _messageRepository.AddAsync(initialMessage, cancellationToken);
          }
          
-         var dto = new CustomerChatSessionDto
-         {
-             SessionId = session.SessionId,
-             CustomerName = session.CustomerName,
-             CustomerEmail = session.CustomerEmail,
-             AssignedOwnerId = ownerId,
-             AssignedOwnerName = ownerName,
-             CreatedAt = session.CreateUtc,
-             LastMessageAt = session.LastMessageAt,
-             IsActive = session.IsActive
-         };
+        var dto = new CustomerChatSessionDto
+        {
+            SessionId = session.SessionId,
+            CustomerName = session.CustomerName,
+            CustomerEmail = session.CustomerEmail,
+            AssignedOwnerId = ownerId,
+            AssignedOwnerName = ownerName,
+            WorkspaceId = workspaceId,
+            WorkspaceName = workspaceName,
+            CreatedAt = session.CreateUtc,
+            LastMessageAt = session.LastMessageAt,
+            IsActive = session.IsActive
+        };
 
          return new Response<CustomerChatSessionDto>(dto, "Customer chat session started successfully");
     }
