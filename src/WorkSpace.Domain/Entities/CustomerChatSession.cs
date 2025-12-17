@@ -26,6 +26,11 @@ public class CustomerChatSession : AuditableBaseEntity
 
     public DateTimeOffset? LastMessageAt { get; set; }
 
+    public int? WorkspaceId { get; set; }
+
+    [MaxLength(200)]
+    public string? WorkspaceName { get; set; }
+
     
     public virtual AppUser Customer { get; set; } = null!;
     public virtual AppUser? AssignedOwner { get; set; }

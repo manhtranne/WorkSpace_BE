@@ -10,6 +10,8 @@ public class CustomerChatSessionDto
     public bool IsActive { get; set; } = true;
     public int? AssignedOwnerId { get; set; }
     public string? AssignedOwnerName { get; set; }
+    public int? WorkspaceId { get; set; }
+    public string? WorkspaceName { get; set; }
 }
 
 
