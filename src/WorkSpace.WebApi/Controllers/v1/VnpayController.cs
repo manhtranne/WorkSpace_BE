@@ -1,13 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using System.Text.RegularExpressions;
 using VNPAY.NET;
 using VNPAY.NET.Enums;
 using VNPAY.NET.Models;
-using WorkSpace.Application.Interfaces.Repositories;
-using WorkSpace.Application.Hubs;
-using WorkSpace.Application.Extensions;
 using VNPAY.NET.Utilities;
-using System.Text.RegularExpressions;
+using WorkSpace.Application.DTOs.Email;
+using WorkSpace.Application.Extensions;
+using WorkSpace.Application.Hubs;
+using WorkSpace.Application.Interfaces.Repositories;
+using WorkSpace.Application.Interfaces.Services;
 
 namespace WorkSpace.WebApi.Controllers.v1
 {
@@ -20,19 +22,21 @@ namespace WorkSpace.WebApi.Controllers.v1
         private readonly IBookingRepository _bookingRepository;
         private readonly IBlockedTimeSlotRepository _blockedTimeSlotRepository;
         private readonly IHubContext<OrderHub> _hubContext;
-
+        private readonly IEmailService _emailService;
         public VnpayController(
             IConfiguration configuration,
             IVnpay vnpay,
             IBookingRepository bookingRepository,
             IBlockedTimeSlotRepository blockedTimeSlotRepository,
-            IHubContext<OrderHub> hubContext)
+            IHubContext<OrderHub> hubContext,
+            IEmailService emailService)
         {
             _configuration = configuration;
             _vnpay = vnpay;
             _bookingRepository = bookingRepository;
             _blockedTimeSlotRepository = blockedTimeSlotRepository;
             _hubContext = hubContext;
+            _emailService = emailService;
 
             _vnpay.Initialize(
                 _configuration["Vnpay:TmnCode"],
@@ -86,29 +90,25 @@ namespace WorkSpace.WebApi.Controllers.v1
 
             try
             {
-                // 1. Get payment result from VNPay
                 var result = _vnpay.GetPaymentResult(query);
-
-                // 2. Extract order info (Description) to find Booking ID
                 var orderInfo = result.Description ?? string.Empty;
                 int bookingId = ExtractBookingIdFromOrderInfo(orderInfo);
 
                 if (bookingId == 0)
                     return RedirectWithError("Booking ID trong thông tin đơn hàng không hợp lệ");
 
-                // 3. Retrieve Booking from Database
+                // Lấy thông tin Booking kèm theo thông tin Customer/Guest
                 var booking = await _bookingRepository.GetBookingByIdAsync(bookingId);
                 if (booking == null)
                     return RedirectWithError("Booking không tồn tại");
 
-                // 4. Process based on success or failure
                 if (result.IsSuccess)
                 {
-                    // Status 9 = Confirmed/Paid (example)
+                    // Trạng thái 3: Đã thanh toán (Confirmed/Paid)
                     if (booking.BookingStatusId != 3)
                     {
                         var confirmedStatusId = 3;
-                        var vnpayMethodId = 2; // Assuming ID 2 is VNPay
+                        var vnpayMethodId = 2;
 
                         booking.BookingStatusId = confirmedStatusId;
                         booking.PaymentMethodID = vnpayMethodId;
@@ -116,33 +116,101 @@ namespace WorkSpace.WebApi.Controllers.v1
 
                         await _bookingRepository.UpdateBookingAsync(booking.Id, booking);
 
+                        // Chặn lịch phòng
                         await _blockedTimeSlotRepository.CreateBlockedTimeForBookingAsync(
                             booking.WorkSpaceRoomId,
                             bookingId,
                             booking.StartTimeUtc,
                             booking.EndTimeUtc);
 
+                        // Thông báo SignalR
                         await _hubContext.Clients.Group("Staff")
-                            .SendAsync("New Booking", $"Booking #{bookingId} has been paid successfully");
+                            .SendAsync("New Booking", $"Booking #{bookingId} đã thanh toán thành công.");
+
+                        // Gửi Email xác nhận với giao diện Blue Theme
+                        try
+                        {
+                            var recipientEmail = booking.Customer?.Email ?? booking.Guest?.Email;
+                            var displayName = booking.Customer != null
+                                ? $"{booking.Customer.FirstName} {booking.Customer.LastName}"
+                                : "Quý khách";
+
+                            if (!string.IsNullOrEmpty(recipientEmail))
+                            {
+                                var emailRequest = new EmailRequest
+                                {
+                                    To = recipientEmail,
+                                    Subject = $"[WorkSpace] Xác nhận thanh toán thành công - Mã đơn: {booking.BookingCode}",
+                                    Body = $@"
+                            <div style='font-family: ""Segoe UI"", Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 20px auto; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05);'>
+                                <div style='background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 30px; text-align: center;'>
+                                    <h1 style='margin: 0; font-size: 28px; letter-spacing: 1px;'>Thanh toán thành công!</h1>
+                                    <p style='margin-top: 10px; opacity: 0.9;'>Cảm ơn bạn đã lựa chọn WorkSpace</p>
+                                </div>
+                                <div style='padding: 30px; background-color: #ffffff;'>
+                                    <p style='font-size: 16px;'>Xin chào <strong>{displayName}</strong>,</p>
+                                    <p>Yêu cầu đặt phòng của bạn đã được hệ thống xác nhận thanh toán qua cổng <strong>VNPay</strong>. Dưới đây là thông tin chi tiết:</p>
+                                    
+                                    <div style='background-color: #f0f7ff; border-radius: 8px; padding: 20px; margin: 25px 0; border: 1px solid #d1e9ff;'>
+                                        <table style='width: 100%; border-collapse: collapse;'>
+                                            <tr>
+                                                <td style='padding: 8px 0; color: #64748b; width: 40%;'>Mã đặt phòng:</td>
+                                                <td style='padding: 8px 0; font-weight: bold; color: #1e3a8a;'>{booking.BookingCode}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style='padding: 8px 0; color: #64748b;'>Thời gian bắt đầu:</td>
+                                                <td style='padding: 8px 0; font-weight: 500;'>{booking.StartTimeUtc.ToLocalTime():dd/MM/yyyy HH:mm}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style='padding: 8px 0; color: #64748b;'>Thời gian kết thúc:</td>
+                                                <td style='padding: 8px 0; font-weight: 500;'>{booking.EndTimeUtc.ToLocalTime():dd/MM/yyyy HH:mm}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style='padding: 8px 0; color: #64748b;'>Tổng số tiền:</td>
+                                                <td style='padding: 8px 0; color: #2563eb; font-weight: bold; font-size: 20px;'>{booking.FinalAmount:N0} VND</td>
+                                            </tr>
+                                            <tr>
+                                                <td style='padding: 8px 0; color: #64748b;'>Mã giao dịch:</td>
+                                                <td style='padding: 8px 0; font-size: 13px; color: #94a3b8;'>{query["vnp_TransactionNo"]}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+
+                                    <div style='border-top: 1px solid #eee; padding-top: 20px; margin-top: 20px;'>
+                                        <p style='margin: 0; color: #475569;'>Mọi thắc mắc vui lòng liên hệ hỗ trợ:</p>
+                                        <p style='margin: 5px 0; font-size: 18px; font-weight: bold; color: #1e3a8a;'>Hotline: 0357027134</p>
+                                    </div>
+                                    
+                                    <p style='margin-top: 25px; color: #64748b; font-style: italic; font-size: 13px;'>Lưu ý: Quý khách vui lòng cung cấp mã đặt phòng khi đến nhận phòng tại cơ sở.</p>
+                                </div>
+                                <div style='background-color: #f8fafc; padding: 20px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0;'>
+                                    <p style='margin: 0;'>Đây là email hệ thống tự động, vui lòng không trả lời.</p>
+                                    <p style='margin: 8px 0; font-weight: bold;'>© 2025 WorkSpace Platform</p>
+                                </div>
+                            </div>",
+                                    From = _configuration["MailSettings:EmailFrom"] ?? "noreply@workspace.com"
+                                };
+
+                                await _emailService.SendAsync(emailRequest);
+                            }
+                        }
+                        catch (Exception emailEx)
+                        {
+                            Console.WriteLine($"[Email Error]: {emailEx.Message}");
+                        }
                     }
                 }
                 else
                 {
-                    // Status 10 = PaymentFailed/Cancelled (example)
                     if (booking.BookingStatusId != 10 && booking.BookingStatusId != 3)
                     {
                         booking.BookingStatusId = 10;
                         await _bookingRepository.UpdateBookingAsync(booking.Id, booking);
                     }
-
-                    // Optional: Redirect with error if strictly required, 
-                    // or proceed to result page with failed status
                 }
 
-                // 5. Construct Redirect URL
                 string clientReturnUrl = _configuration["Vnpay:ClientReturnUrl"] ?? "http://localhost:3000";
-                string status = result.IsSuccess ? "success" : "failed";
-                string redirectUrl = $"{clientReturnUrl}/payment-result/success?&bookingCode={booking.BookingCode}";
+                string redirectUrl = $"{clientReturnUrl}/payment-result/{(result.IsSuccess ? "success" : "failed")}?bookingCode={booking.BookingCode}";
 
                 return Redirect(redirectUrl);
             }
