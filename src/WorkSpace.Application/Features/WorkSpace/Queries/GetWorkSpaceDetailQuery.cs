@@ -26,10 +26,15 @@ public class GetWorkSpaceDetailQueryHandler(
             Description = workspace.Description,
             HostId = workspace.HostId,
             HostName = workspace.Host?.User?.GetFullName(),
+            HostAvatar = workspace.Host?.User?.Avatar,
             HostCompanyName = workspace.Host?.CompanyName,
             HostContactPhone = workspace.Host?.ContactPhone,
             IsHostVerified = workspace.Host?.IsVerified ?? false,
-            
+            ImageUrls = workspace.WorkSpaceImages
+            .Select(img => img.ImageUrl)
+            .ToList(), 
+
+
             AddressLine = workspace.Address != null 
                 ? $"{workspace.Address.Street}, {workspace.Address.Ward}" 
                 : null,
