@@ -25,6 +25,10 @@ public class GetActiveCustomerSessionsQueryHandler : IRequestHandler<GetActiveCu
         {
             sessions = await _sessionRepository.GetSessionsByOwnerIdAsync(request.OwnerId.Value, cancellationToken);
         }
+        else if (request.CustomerId.HasValue)
+        {
+            sessions = await _sessionRepository.GetSessionsByCustomerIdAsync(request.CustomerId.Value, cancellationToken);
+        }
         else
         {
             sessions = await _sessionRepository.GetActiveSessionsAsync(cancellationToken);

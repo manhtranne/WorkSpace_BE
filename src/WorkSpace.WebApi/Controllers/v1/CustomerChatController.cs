@@ -49,7 +49,13 @@ public class CustomerChatController : BaseApiController
     public async Task<ActionResult<IEnumerable<CustomerChatSessionDto>>> GetMySessions(
         CancellationToken cancellationToken)
     {
-        var query = new GetActiveCustomerSessionsQuery();
+        var userId = User.GetUserId();
+        if (userId == 0) return Unauthorized(new { message = "User not authenticated" });
+
+        var query = new GetActiveCustomerSessionsQuery
+        {
+            CustomerId = userId
+        };
         var result = await Mediator.Send(query, cancellationToken);
         return Ok(result);
     }

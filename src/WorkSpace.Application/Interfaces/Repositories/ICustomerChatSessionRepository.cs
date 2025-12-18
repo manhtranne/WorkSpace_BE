@@ -7,6 +7,7 @@ public interface ICustomerChatSessionRepository : IGenericRepositoryAsync<Custom
     Task<CustomerChatSession?> GetBySessionIdAsync(string sessionId, CancellationToken cancellationToken = default);
     Task<List<CustomerChatSession>> GetActiveSessionsAsync(CancellationToken cancellationToken = default);
     Task<List<CustomerChatSession>> GetSessionsByOwnerIdAsync(int ownerId, CancellationToken cancellationToken = default);
+    Task<List<CustomerChatSession>> GetSessionsByCustomerIdAsync(int customerId, CancellationToken cancellationToken = default);
     Task<CustomerChatSession?> GetSessionWithMessagesAsync(string sessionId, CancellationToken cancellationToken = default);
 }
 

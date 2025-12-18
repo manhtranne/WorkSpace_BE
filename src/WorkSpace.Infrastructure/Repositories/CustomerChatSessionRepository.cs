@@ -40,6 +40,16 @@ public class CustomerChatSessionRepository : GenericRepositoryAsync<CustomerChat
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<CustomerChatSession>> GetSessionsByCustomerIdAsync(int customerId, CancellationToken cancellationToken = default)
+    {
+        return await _context.CustomerChatSessions
+            .Include(s => s.AssignedOwner)
+            .Where(s => s.CustomerId == customerId && s.IsActive)
+            .OrderByDescending(s => s.LastMessageAt ?? s.CreateUtc)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<CustomerChatSession?> GetSessionWithMessagesAsync(string sessionId, CancellationToken cancellationToken = default)
     {
         return await _context.CustomerChatSessions
