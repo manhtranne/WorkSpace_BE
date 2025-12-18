@@ -42,16 +42,9 @@ public class GetWorkSpaceRoomDetailQueryHandler : IRequestHandler<GetWorkSpaceRo
             Capacity = room.Capacity,
             Area = room.Area,
 
-      
-            Images = room.WorkSpaceRoomImages.Select(img => new RoomImageDto
-            {
-                Id = img.Id,
-                ImageUrl = img.ImageUrl,
-                Caption = img.Caption,
-                CreateUtc = img.CreateUtc
-            }).ToList(),
 
-   
+            Images = room.WorkSpaceRoomImages.Select(img => img.ImageUrl).ToList(),
+
             Amenities = room.WorkSpaceRoomAmenities.Select(wra => new RoomAmenityDto
             {
                 Id = wra.Amenity.Id, 

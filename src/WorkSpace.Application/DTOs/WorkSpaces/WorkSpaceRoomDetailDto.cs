@@ -20,7 +20,7 @@ namespace WorkSpace.Application.DTOs.WorkSpaces
         public double Area { get; set; }
 
 
-        public List<RoomImageDto> Images { get; set; } = new();
+        public List<string> Images { get; set; } = new();
         public List<RoomAmenityDto> Amenities { get; set; } = new();
         public List<RoomReviewDto> Reviews { get; set; } = new();
     }

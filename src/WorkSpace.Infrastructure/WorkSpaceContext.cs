@@ -454,21 +454,21 @@ namespace WorkSpace.Infrastructure
 
 
                 #region Identity Tables Configuration
-
+                modelBuilder.Entity<AppUser>().ToTable("Users"); 
+                modelBuilder.Entity<AppRole>().ToTable("Roles");
                 modelBuilder.Entity<IdentityUserClaim<int>>().ToTable("AppUserClaims").HasKey(x => x.Id);
-                modelBuilder.Entity<IdentityRoleClaim<int>>().ToTable("AppRoleClaims").HasKey(x => x.Id);
-                modelBuilder.Entity<IdentityUserLogin<int>>().ToTable("AppUserLogins").HasKey(x => x.UserId);
-                modelBuilder.Entity<IdentityUserRole<int>>().ToTable("AppUserRoles").HasKey(x => new { x.RoleId, x.UserId });
-                modelBuilder.Entity<IdentityUserToken<int>>().ToTable("AppUserTokens").HasKey(x => x.UserId);
 
-                foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-                {
-                    var tableName = entityType.GetTableName() ?? string.Empty;
-                    if (tableName.StartsWith("AspNet"))
-                    {
-                        entityType.SetTableName(tableName.Substring(6));
-                    }
-                }
+                modelBuilder.Entity<IdentityRoleClaim<int>>().ToTable("AppRoleClaims").HasKey(x => x.Id);
+
+                modelBuilder.Entity<IdentityUserLogin<int>>().ToTable("AppUserLogins")
+                    .HasKey(x => new { x.LoginProvider, x.ProviderKey });
+
+                modelBuilder.Entity<IdentityUserRole<int>>().ToTable("AppUserRoles")
+                    .HasKey(x => new { x.UserId, x.RoleId });
+
+                modelBuilder.Entity<IdentityUserToken<int>>().ToTable("AppUserTokens")
+                    .HasKey(x => new { x.UserId, x.LoginProvider, x.Name });
+
 
                 #endregion
             });

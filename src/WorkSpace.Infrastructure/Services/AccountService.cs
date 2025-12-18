@@ -182,7 +182,7 @@ public class AccountService : IAccountService
                         <p>Xin chào <strong>{request.UserName}</strong>,</p>
                         <p>Cảm ơn bạn đã đăng ký tài khoản tại WorkSpace. Vui lòng nhấn vào nút bên dưới để kích hoạt tài khoản của bạn:</p>
                         <a href='{verificationUri}' class='btn'>Xác Thực Ngay</a>
-                        <p style='margin-top: 20px; font-size: 13px; color: #666;'>Nếu nút trên không hoạt động, hãy copy link sau vào trình duyệt:<br/>{verificationUri}</p>
+
                     </div>
                     <div class='footer'>
                         <p>&copy; 2024 WorkSpace. All rights reserved.</p>
@@ -662,90 +662,85 @@ public class AccountService : IAccountService
             _logger.LogError(ex, "Failed to send password changed email to {Email}", user.Email);
         }
     }
-    // File: src/WorkSpace.Infrastructure/Services/AccountService.cs
-
-   // File: src/WorkSpace.Infrastructure/Services/AccountService.cs
-
-public async Task<Response<string>> SetUserRoleAsync(int userId, string newRole)
-{
-    try
+    public async Task<Response<string>> SetUserRoleAsync(int userId, string newRole)
     {
-        // 1. Kiểm tra đầu vào
-        if (string.IsNullOrWhiteSpace(newRole))
+        try
         {
-            throw new ApiException("Tên quyền (Role) không được để trống.");
-        }
-
-        // 2. Tìm User
-        var user = await _userManager.FindByIdAsync(userId.ToString());
-        if (user == null)
-        {
-            throw new ApiException($"Không tìm thấy User với ID {userId}.");
-        }
-
-        // 3. Kiểm tra Role mới có tồn tại trong hệ thống không
-        if (!await _roleManager.RoleExistsAsync(newRole))
-        {
-            throw new ApiException($"Quyền '{newRole}' không tồn tại trong hệ thống.");
-        }
-
-        // 4. Lấy danh sách role hiện tại
-        var currentRoles = await _userManager.GetRolesAsync(user);
-
-        // -- TỐI ƯU: Nếu user đã có đúng quyền này rồi -> Return luôn --
-        if (currentRoles.Count == 1 && currentRoles.First().Equals(newRole, StringComparison.OrdinalIgnoreCase))
-        {
-            return new Response<string>(user.Id.ToString(), $"User đã có quyền '{newRole}' rồi.");
-        }
-
-        // 5. Xóa các role cũ (SỬA LẠI ĐOẠN NÀY ĐỂ TRÁNH LỖI)
-        foreach (var role in currentRoles)
-        {
-            // Kiểm tra chắc chắn user có trong role này không
-            if (await _userManager.IsInRoleAsync(user, role))
+            // 1. Kiểm tra đầu vào
+            if (string.IsNullOrWhiteSpace(newRole))
             {
-                var removeResult = await _userManager.RemoveFromRoleAsync(user, role);
-                
-                // Nếu xóa thất bại
-                if (!removeResult.Succeeded)
+                throw new ApiException("Tên quyền (Role) không được để trống.");
+            }
+
+            // 2. Tìm User
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+            {
+                throw new ApiException($"Không tìm thấy User với ID {userId}.");
+            }
+
+            // 3. Kiểm tra Role mới có tồn tại trong hệ thống không
+            if (!await _roleManager.RoleExistsAsync(newRole))
+            {
+                throw new ApiException($"Quyền '{newRole}' không tồn tại trong hệ thống.");
+            }
+
+            // 4. Lấy danh sách role hiện tại
+            var currentRoles = await _userManager.GetRolesAsync(user);
+
+            // Danh sách các role cần xóa (Loại trừ role mới nếu user đã có, để tránh xóa rồi thêm lại)
+            var rolesToRemove = new List<string>();
+            foreach (var role in currentRoles)
+            {
+                // Nếu role hiện tại trùng với role mới thì giữ lại, không xóa
+                if (string.Equals(role, newRole, StringComparison.OrdinalIgnoreCase))
                 {
-                    // Kiểm tra xem có phải lỗi "UserNotInRole" không. 
-                    // Nếu đúng là lỗi này nghĩa là role đã mất rồi -> Coi như thành công -> Bỏ qua.
-                    // Nếu là lỗi khác -> Báo lỗi.
-                    var isUserNotInRoleError = removeResult.Errors.Any(e => e.Code == "UserNotInRole");
-                    if (!isUserNotInRoleError) 
-                    {
-                        var errors = string.Join(", ", removeResult.Errors.Select(e => e.Description));
-                        throw new ApiException($"Lỗi khi xóa quyền cũ '{role}': {errors}");
-                    }
+                    continue;
+                }
+
+                // QUAN TRỌNG: Kiểm tra lại chắc chắn user có trong role này trước khi đưa vào danh sách xóa
+                // Bước này giúp tránh lỗi "User is not in role..."
+                if (await _userManager.IsInRoleAsync(user, role))
+                {
+                    rolesToRemove.Add(role);
                 }
             }
-        }
 
-        // 6. Thêm role mới
-        // (Kiểm tra xem đã có role này chưa để tránh lỗi duplicate)
-        if (!await _userManager.IsInRoleAsync(user, newRole))
-        {
-            var addResult = await _userManager.AddToRoleAsync(user, newRole);
-            if (!addResult.Succeeded)
+            // 5. Thực hiện xóa các role cũ (Xóa 1 lần - Batch delete)
+            if (rolesToRemove.Any())
             {
-                var errors = string.Join(", ", addResult.Errors.Select(e => e.Description));
-                throw new ApiException($"Lỗi khi thêm quyền '{newRole}': {errors}");
+                var removeResult = await _userManager.RemoveFromRolesAsync(user, rolesToRemove);
+                if (!removeResult.Succeeded)
+                {
+                    // Nếu lỗi là "UserNotInRole" thì có thể bỏ qua, nhưng vì đã check IsInRoleAsync ở trên nên ít khả năng xảy ra.
+                    var errors = string.Join(", ", removeResult.Errors.Select(e => e.Description));
+                    throw new ApiException($"Lỗi khi xóa các quyền cũ: {errors}");
+                }
             }
-        }
 
-        return new Response<string>(user.Id.ToString(), $"Cập nhật quyền thành '{newRole}' thành công.");
+            // 6. Thêm role mới (nếu chưa có)
+            if (!await _userManager.IsInRoleAsync(user, newRole))
+            {
+                var addResult = await _userManager.AddToRoleAsync(user, newRole);
+                if (!addResult.Succeeded)
+                {
+                    var errors = string.Join(", ", addResult.Errors.Select(e => e.Description));
+                    throw new ApiException($"Lỗi khi thêm quyền '{newRole}': {errors}");
+                }
+            }
+
+            return new Response<string>(user.Id.ToString(), $"Cập nhật quyền thành '{newRole}' thành công.");
+        }
+        catch (ApiException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Lỗi hệ thống khi update role cho User {UserId}", userId);
+            throw new ApiException($"Lỗi hệ thống: {ex.Message}");
+        }
     }
-    catch (ApiException)
-    {
-        throw;
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "Lỗi hệ thống khi update role cho User {UserId}", userId);
-        throw new ApiException($"Lỗi hệ thống: {ex.Message}");
-    }
-}
     public async Task<Response<AuthenticationResponse>> RefreshTokenAsync(RefreshTokenRequest request, string ipAddress)
     {
         try
@@ -812,6 +807,8 @@ public async Task<Response<string>> SetUserRoleAsync(int userId, string newRole)
         }
         catch (Exception ex)
         {
+
+            var innerMsg = ex.InnerException?.Message;
             _logger.LogError(ex, "Unexpected error during token refresh from IP {IpAddress}", ipAddress);
             throw new ApiException("An error occurred during token refresh. Please try again.");
         }
