@@ -35,7 +35,7 @@ public class CustomerChatSessionRepository : GenericRepositoryAsync<CustomerChat
         return await _context.CustomerChatSessions
             .Include(s => s.AssignedOwner)
             .Where(s => s.AssignedOwnerId == ownerId && s.IsActive)
-            .OrderBy(s => s.LastMessageAt ?? s.CreateUtc)
+            .OrderByDescending(s => s.LastMessageAt ?? s.CreateUtc)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
     }
