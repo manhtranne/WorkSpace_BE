@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WorkSpace.Infrastructure;
 
@@ -11,9 +12,11 @@ using WorkSpace.Infrastructure;
 namespace WorkSpace.Infrastructure.Migrations
 {
     [DbContext(typeof(WorkSpaceContext))]
-    partial class WorkSpaceContextModelSnapshot : ModelSnapshot
+    [Migration("20251218032545_FixIdentityKeys2")]
+    partial class FixIdentityKeys2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -249,7 +252,7 @@ namespace WorkSpace.Infrastructure.Migrations
                         .HasDatabaseName("RoleNameIndex")
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
-                    b.ToTable("Roles", (string)null);
+                    b.ToTable("AspNetRoles", (string)null);
                 });
 
             modelBuilder.Entity("WorkSpace.Domain.Entities.AppUser", b =>
@@ -348,7 +351,7 @@ namespace WorkSpace.Infrastructure.Migrations
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("AspNetUsers", (string)null);
                 });
 
             modelBuilder.Entity("WorkSpace.Domain.Entities.BlockedTimeSlot", b =>
