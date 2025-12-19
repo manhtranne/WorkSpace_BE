@@ -8,6 +8,7 @@ namespace WorkSpace.Application.Interfaces.Repositories
         Task<Promotion> GetPromotionByCodeAsync(string code);
         Task<IReadOnlyList<Promotion>> GetPromotionsByAdminAsync(CancellationToken cancellationToken = default);
         Task<IReadOnlyList<Promotion>> GetPromotionsByHostIdAsync(int hostId, CancellationToken cancellationToken = default);
+        Task<IReadOnlyList<Promotion>> GetActivePromotionsByHostIdAsync(int hostId, CancellationToken cancellationToken = default);
     }
 }
 
