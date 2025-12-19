@@ -192,7 +192,11 @@ public class BookingRepository : IBookingRepository
     }
 
     public Task<Booking?> GetByCodeAsync(string bookingCode, CancellationToken ct)
-        => _context.Bookings.Include(x => x.LastModifiedById).FirstOrDefaultAsync(x => x.BookingCode == bookingCode, ct);
+    {
+        return _context.Bookings
+            .Include(x => x.Customer) 
+            .FirstOrDefaultAsync(x => x.BookingCode == bookingCode, ct);
+    }
 
     public async Task<Booking?> GetBookingWithDetailsAsync(int bookingId, CancellationToken ct)
     {
