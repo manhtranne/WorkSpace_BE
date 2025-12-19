@@ -13,7 +13,7 @@ using WorkSpace.Application.DTOs.Account;
 using WorkSpace.Application.DTOs.Email;
 using WorkSpace.Application.Enums;
 using WorkSpace.Application.Exceptions;
-using WorkSpace.Application.Interfaces; // [Added] Namespace cho IApplicationDbContext
+using WorkSpace.Application.Interfaces; 
 using WorkSpace.Application.Interfaces.Services;
 using WorkSpace.Application.Wrappers;
 using WorkSpace.Domain.ConfigOptions;
@@ -122,6 +122,40 @@ public class AccountService : IAccountService
     }
 
 
+    public async Task<Response<string>> UpdateProfileAsync(int userId, UpdateProfileRequest request)
+    {
+        try
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+            {
+                throw new ApiException("Không tìm thấy người dùng.");
+            }
+
+            user.FirstName = request.FirstName ?? user.FirstName;
+            user.LastName = request.LastName ?? user.LastName;
+            user.PhoneNumber = request.PhoneNumber ?? user.PhoneNumber;
+            user.Avatar = request.Avatar ?? user.Avatar;
+            user.Dob = request.DateOfBirth ?? user.Dob;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (result.Succeeded)
+            {
+                return new Response<string>(user.Id.ToString(), "Cập nhật thông tin thành công.");
+            }
+            else
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new ApiException($"Lỗi khi cập nhật: {errors}");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Lỗi khi update profile user {UserId}", userId);
+            throw new ApiException(ex.Message);
+        }
+    }
     public async Task<Response<string>> RegisterAsync(RegisterRequest request, string origin, string ipAddress)
     {
         try

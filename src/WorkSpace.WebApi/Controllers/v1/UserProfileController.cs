@@ -2,7 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WorkSpace.Application.Features.Users.Queries.GetCurrentUser;
 using WorkSpace.Application.Extensions;
-
+using WorkSpace.Application.DTOs.Account;
+using WorkSpace.Application.Features.Users.Commands.UpdateProfile;
 namespace WorkSpace.WebApi.Controllers.v1
 {
     [Route("api/v1/profile")]
@@ -34,6 +35,26 @@ namespace WorkSpace.WebApi.Controllers.v1
             }
 
             return Ok(await Mediator.Send(new GetCurrentUserQuery { UserId = userId }, cancellationToken));
+        }
+
+        [HttpPut("updateProfile")]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
+        {
+            var userId = User.GetUserId();
+            if (userId == 0) return Unauthorized();
+
+            var command = new UpdateProfileCommand
+            {
+                UserId = userId,
+                UpdateRequest = request
+            };
+
+            var response = await Mediator.Send(command);
+
+            if (response.Succeeded)
+                return Ok(response);
+
+            return BadRequest(response);
         }
     }
 }
