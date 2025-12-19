@@ -132,8 +132,13 @@ namespace WorkSpace.WebApi.Controllers.v1
         
             return Ok("This endpoint is ready. Please implement GetWorkSpaceRoomByIdQuery and its handler.");
         }
+        [HttpGet("top-booked")]
+        public async Task<IActionResult> GetTopBooked([FromQuery] int count = 5)
+        {
+            var response = await Mediator.Send(new GetTopBookedWorkSpacesQuery { Count = count });
 
-
+            return Ok(response.Data);
+        }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateWorkSpaceRequest request, CancellationToken cancellationToken)
