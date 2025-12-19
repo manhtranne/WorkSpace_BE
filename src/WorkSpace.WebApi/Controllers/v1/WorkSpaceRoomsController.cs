@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WorkSpace.Application.DTOs.WorkSpaces;
-using WorkSpace.Application.Features.WorkSpace.Queries; 
-
+using WorkSpace.Application.Features.WorkSpace.Queries;
+using WorkSpace.Application.Features.Services.Queries.GetServicesByRoomId;
 namespace WorkSpace.WebApi.Controllers.v1
 {
 
@@ -25,8 +25,19 @@ namespace WorkSpace.WebApi.Controllers.v1
 
             return Ok(result.Data);
         }
+        [HttpGet("{id}/drink-services")]
+        public async Task<IActionResult> GetServicesByRoomId(int id)
+        {
+            var response = await Mediator.Send(new GetServicesByRoomIdQuery { WorkSpaceRoomId = id });
 
-       
+            if (!response.Succeeded)
+            {
+                return BadRequest(response.Message);
+            }
+
+            return Ok(response.Data);
+        }
+
         [HttpPost("check-availability")]
         public async Task<IActionResult> CheckAvailableRooms(
             [FromBody] CheckAvailableRoomsRequest request,
@@ -41,7 +52,6 @@ namespace WorkSpace.WebApi.Controllers.v1
             [FromQuery] int pageSize = 10,
             CancellationToken cancellationToken = default)
         {
-            // Validate request
             if (request.StartTime >= request.EndTime)
             {
                 return BadRequest(new { message = "Start time must be before end time." });
