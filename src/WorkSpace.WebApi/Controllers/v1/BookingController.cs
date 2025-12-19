@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WorkSpace.Application.DTOs.Bookings;
 using WorkSpace.Application.DTOs.Customer;
@@ -8,7 +9,7 @@ using WorkSpace.Application.Features.Bookings.Commands;
 using WorkSpace.Application.Interfaces.Repositories;
 using WorkSpace.Application.Interfaces.Services;
 using WorkSpace.Infrastructure.Repositories;
-
+using WorkSpace.Application.DTOs.Owner;
 
 namespace WorkSpace.WebApi.Controllers.v1
 {
@@ -43,9 +44,17 @@ namespace WorkSpace.WebApi.Controllers.v1
             }
             return Ok(bookings);
         }
-        [HttpPut("cancel")]
-        public async Task<IActionResult> CancelBooking([FromBody] CancelBookingCommand command)
+        [HttpPut("{id}/cancel")]
+        [Authorize]
+        public async Task<IActionResult> CancelBooking(int id, [FromBody] CancelBookingDto requestBody)
         {
+            var command = new CancelBookingCommand
+            {
+                BookingId = id,            
+                Reason = requestBody.Reason,
+                UserId = User.GetUserId()   
+            };
+
             var response = await _mediator.Send(command);
 
             if (response.Succeeded)
