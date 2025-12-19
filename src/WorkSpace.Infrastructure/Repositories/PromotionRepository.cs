@@ -54,5 +54,19 @@ namespace WorkSpace.Infrastructure.Repositories
                 .OrderByDescending(p => p.CreateUtc)
                 .ToListAsync(cancellationToken);
         }
+        public async Task<IReadOnlyList<Promotion>> GetActivePromotionsByHostIdAsync(int hostId, CancellationToken cancellationToken = default)
+        {
+            var now = DateTime.UtcNow;
+
+            return await _context.Promotions
+                .AsNoTracking()
+                .Where(p => p.HostId == hostId
+                            && p.IsActive
+                            && p.StartDate <= now
+                            && p.EndDate >= now
+                            && (p.UsageLimit == 0 || p.UsedCount < p.UsageLimit)) 
+                .OrderByDescending(p => p.EndDate)
+                .ToListAsync(cancellationToken);
+        }
     }
 }

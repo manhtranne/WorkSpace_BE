@@ -7,8 +7,8 @@ using WorkSpace.Application.Features.Promotions.Commands.ActivatePromotion;
 using WorkSpace.Application.Features.Promotions.Commands.GeneratePromotion;
 using WorkSpace.Application.Features.Promotions.Queries;
 using WorkSpace.Application.Features.Promotions.Queries.GetAllAdminPromotions; 
-using WorkSpace.Application.Features.Promotions.Queries.GetOwnerPromotions;     
-
+using WorkSpace.Application.Features.Promotions.Queries.GetOwnerPromotions;
+using WorkSpace.Application.Features.Promotions.Queries.GetPromotionsByWorkspace;
 namespace WorkSpace.WebApi.Controllers.v1
 {
     [Route("api/v1/promotions")]
@@ -41,6 +41,14 @@ namespace WorkSpace.WebApi.Controllers.v1
             var result = await Mediator.Send(query);
 
             return Ok(result.Data);
+        }
+        [HttpGet("workspace/{workSpaceId}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetPromotionsByWorkspace(int workSpaceId)
+        {
+            var response = await Mediator.Send(new GetPromotionsByWorkspaceQuery { WorkSpaceId = workSpaceId });
+
+            return Ok(response.Data);
         }
 
         [HttpPost("admin/generate")]
