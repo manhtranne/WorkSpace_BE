@@ -24,6 +24,7 @@ namespace WorkSpace.Application.Interfaces.Repositories
         Task<IReadOnlyList<Domain.Entities.WorkSpace>> GetWorkSpacesByTypeNameAsync(string typeName, CancellationToken cancellationToken = default);
 
         Task<IReadOnlyList<Domain.Entities.WorkSpace>> GetWorkSpacesByTypeIdAsync(int typeId, CancellationToken cancellationToken = default);
+        Task<IReadOnlyList<Domain.Entities.WorkSpace>> GetTopBookedWorkSpacesAsync(int count, CancellationToken cancellationToken = default);
 
         Task<(IReadOnlyList<WorkSpaceRoom> Rooms, int TotalCount)> GetAvailableRoomsAsync(
             CheckAvailableRoomsRequestInternal request,

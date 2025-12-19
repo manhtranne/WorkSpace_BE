@@ -39,7 +39,46 @@ namespace WorkSpace.Infrastructure.Repositories
                 .AsNoTracking()
                 .FirstOrDefaultAsync(w => w.Id == id, cancellationToken);
         }
+        public async Task<IReadOnlyList<Domain.Entities.WorkSpace>> GetTopBookedWorkSpacesAsync(int count, CancellationToken cancellationToken = default)
+        {
+            var topWorkspaceIds = await _context.Bookings
+                .Include(b => b.WorkSpaceRoom)
+             
+                 .Where(b => b.BookingStatus.Name == "Completed") 
+                .GroupBy(b => b.WorkSpaceRoom.WorkSpaceId)
+                .Select(g => new
+                {
+                    WorkSpaceId = g.Key,
+                    BookingCount = g.Count()
+                })
+                .OrderByDescending(x => x.BookingCount)
+                .Take(count)
+                .Select(x => x.WorkSpaceId)
+                .ToListAsync(cancellationToken);
 
+            if (!topWorkspaceIds.Any())
+            {
+                return new List<Domain.Entities.WorkSpace>();
+            }
+
+            var workspaces = await _context.Workspaces
+                .Include(w => w.Address)
+                .Include(w => w.Host)
+                    .ThenInclude(h => h.User)
+                .Include(w => w.WorkSpaceType)
+                .Include(w => w.WorkSpaceImages)
+                .Include(w => w.WorkSpaceRooms)
+                .Where(w => topWorkspaceIds.Contains(w.Id))
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+
+            var result = topWorkspaceIds
+                .Select(id => workspaces.FirstOrDefault(w => w.Id == id))
+                .Where(w => w != null)
+                .ToList();
+
+            return result!;
+        }
         public async Task<WorkSpaceRoom?> GetRoomByIdWithDetailsAsync(int roomId, CancellationToken cancellationToken = default)
         {
             return await _context.WorkSpaceRooms
