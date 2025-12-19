@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using WorkSpace.Application.Interfaces.Services;
-using WorkSpace.Application.DTOs.Guest;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using WorkSpace.Application.DTOs.Bookings;
 using WorkSpace.Application.DTOs.Customer;
-using WorkSpace.Application.Interfaces.Repositories;
+using WorkSpace.Application.DTOs.Guest;
 using WorkSpace.Application.Extensions;
+using WorkSpace.Application.Features.Bookings.Commands;
+using WorkSpace.Application.Interfaces.Repositories;
+using WorkSpace.Application.Interfaces.Services;
 using WorkSpace.Infrastructure.Repositories;
 
 
@@ -17,11 +19,17 @@ namespace WorkSpace.WebApi.Controllers.v1
         private readonly IBookingService _bookingService;
         private readonly IBookingRepository _bookingRepository;
         private readonly IPromotionRepository _promotionRepository;
-        public BookingController(IBookingService bookingService, IBookingRepository bookingRepository, IPromotionRepository promotionRepository)
+        private readonly IMediator _mediator;
+        public BookingController(
+                IBookingService bookingService,
+                IBookingRepository bookingRepository,
+                IPromotionRepository promotionRepository,
+                IMediator mediator)
         {
             _bookingService = bookingService;
             _bookingRepository = bookingRepository;
             _promotionRepository = promotionRepository;
+            _mediator = mediator;
         }
 
         [HttpGet("customer")]
@@ -35,7 +43,18 @@ namespace WorkSpace.WebApi.Controllers.v1
             }
             return Ok(bookings);
         }
+        [HttpPut("cancel")]
+        public async Task<IActionResult> CancelBooking([FromBody] CancelBookingCommand command)
+        {
+            var response = await _mediator.Send(command);
 
+            if (response.Succeeded)
+            {
+                return Ok(response);
+            }
+
+            return BadRequest(response);
+        }
         [HttpGet("code")]
         public async Task<IActionResult> GetPromotionByCode([FromQuery] string promotionCode)
         {
