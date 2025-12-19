@@ -106,9 +106,9 @@ namespace WorkSpace.Infrastructure.Migrations
                 name: "PK_AppUserRoles",
                 table: "AppUserRoles");
 
-            //migrationBuilder.DropIndex(
-            //    name: "IX_AppUserRoles_UserId",
-            //    table: "AppUserRoles");
+            migrationBuilder.DropIndex(
+                name: "IX_AppUserRoles_UserId",
+                table: "AppUserRoles");
 
             migrationBuilder.DropPrimaryKey(
                 name: "PK_Users",
@@ -118,13 +118,13 @@ namespace WorkSpace.Infrastructure.Migrations
                 name: "PK_Roles",
                 table: "Roles");
 
-            //migrationBuilder.RenameTable(
-            //    name: "Users",
-            //    newName: "AspNetUsers");
+            migrationBuilder.RenameTable(
+                name: "Users",
+                newName: "AspNetUsers");
 
-            //migrationBuilder.RenameTable(
-            //    name: "Roles",
-            //    newName: "AspNetRoles");
+            migrationBuilder.RenameTable(
+                name: "Roles",
+                newName: "AspNetRoles");
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_AppUserRoles",

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WorkSpace.Application.DTOs.WorkSpaces;
+using WorkSpace.Application.Features.Services.Queries.GetServicesByWorkSpace;
 using WorkSpace.Application.Features.WorkSpace.Commands;
 using WorkSpace.Application.Features.WorkSpace.Queries;
 using WorkSpace.Application.Features.WorkSpace.Queries.GetByWard;
@@ -73,19 +74,17 @@ namespace WorkSpace.WebApi.Controllers.v1
         }
 
         [HttpGet("{workspaceId}/services")]
-        public async Task<IActionResult> GetServicesByWorkspace(int workspaceId)
+        public async Task<IActionResult> GetServicesByWorkspace(int workspaceId, CancellationToken cancellationToken)
         {
-            var services = await _context.Set<WorkSpaceService>()
-                                         .Where(s => s.WorkSpaceId == workspaceId && s.IsActive)
-                                         .Select(s => new {
-                                             s.Id,
-                                             s.Name,
-                                             s.Price,
-                                             s.Description,
-                                             s.ImageUrl
-                                         })
-                                         .ToListAsync();
-            return Ok(services);
+            var query = new GetServicesByWorkSpaceQuery { WorkSpaceId = workspaceId };
+            var result = await Mediator.Send(query, cancellationToken);
+
+            if (result == null || result.Data == null)
+            {
+                return NotFound(new { message = $"Không tìm thấy dịch vụ nào cho Workspace ID {workspaceId}" });
+            }
+
+            return Ok(result.Data);
         }
 
         [HttpGet("rooms")]
