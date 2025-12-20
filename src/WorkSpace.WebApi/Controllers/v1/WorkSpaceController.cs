@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WorkSpace.Application.DTOs.WorkSpaces;
+using WorkSpace.Application.Features.Reviews.Queries.GetReviewsByWorkSpace;
 using WorkSpace.Application.Features.Services.Queries.GetServicesByWorkSpace;
 using WorkSpace.Application.Features.WorkSpace.Commands;
 using WorkSpace.Application.Features.WorkSpace.Queries;
@@ -138,6 +139,13 @@ namespace WorkSpace.WebApi.Controllers.v1
             var response = await Mediator.Send(new GetTopBookedWorkSpacesQuery { Count = count });
 
             return Ok(response.Data);
+        }
+        [HttpGet("{id}/reviews")]
+        public async Task<IActionResult> GetReviewsByWorkSpace(int id, CancellationToken cancellationToken)
+        {
+            var query = new GetReviewsByWorkSpaceQuery { WorkSpaceId = id };
+            var result = await Mediator.Send(query, cancellationToken);
+            return Ok(result.Data);
         }
 
         [HttpPost]
