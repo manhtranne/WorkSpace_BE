@@ -33,7 +33,6 @@ namespace WorkSpace.WebApi.Controllers.v1
         }
 
         [HttpGet("notification/personal")]
-        [Authorize]
         public async Task<IActionResult> GetPersonalNotifications()
         {
             var result = await Mediator.Send(new GetPersonalNotificationsQuery());

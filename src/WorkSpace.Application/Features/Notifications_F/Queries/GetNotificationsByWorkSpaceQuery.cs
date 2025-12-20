@@ -13,7 +13,7 @@ namespace WorkSpace.Application.Features.Notifications_F.Queries
 {
     public class GetNotificationsByWorkSpaceQuery : IRequest<Response<IEnumerable<Notification>>>
     {
-        public int WorkSpaceId { get; set; } // Khách đang xem Workspace nào?
+        public int WorkSpaceId { get; set; }
     }
 
     public class GetNotificationsByWorkSpaceQueryHandler : IRequestHandler<GetNotificationsByWorkSpaceQuery, Response<IEnumerable<Notification>>>
@@ -27,8 +27,9 @@ namespace WorkSpace.Application.Features.Notifications_F.Queries
 
         public async Task<Response<IEnumerable<Notification>>> Handle(GetNotificationsByWorkSpaceQuery request, CancellationToken cancellationToken)
         {
-            // B1: Tìm Workspace để biết Owner (HostId) là ai
+            // 1. Tìm Workspace và Include luôn HostProfile để lấy được UserId gốc
             var workspace = await _context.Workspaces
+                .Include(w => w.Host) // [QUAN TRỌNG] Include Host để truy cập UserId
                 .AsNoTracking()
                 .FirstOrDefaultAsync(w => w.Id == request.WorkSpaceId, cancellationToken);
 
@@ -37,9 +38,17 @@ namespace WorkSpace.Application.Features.Notifications_F.Queries
                 throw new ApiException($"Workspace ID {request.WorkSpaceId} not found.");
             }
 
-            // B2: Lấy tất cả thông báo được tạo bởi Owner đó (SenderId == HostId)
+            if (workspace.Host == null)
+            {
+                return new Response<IEnumerable<Notification>>(new List<Notification>(), "Workspace chưa có Owner/Host hợp lệ.");
+            }
+
+            // 2. Lấy UserId thật của Owner từ HostProfile
+            var ownerUserId = workspace.Host.UserId;
+
+            // 3. Tìm thông báo có SenderId trùng với UserId của Owner
             var notifications = await _context.Set<Notification>()
-                .Where(n => n.SenderId == workspace.HostId && n.SenderRole == "Owner")
+                .Where(n => n.SenderId == ownerUserId && n.SenderRole == "Owner")
                 .OrderByDescending(n => n.CreateUtc)
                 .ToListAsync(cancellationToken);
 

@@ -43,7 +43,8 @@ namespace WorkSpace.Infrastructure.Repositories
             var interestedOwnerIds = ownerIdsFromFavorites.Union(ownerIdsFromBookings);
 
             var query = _notifications
-                .Where(n => n.SenderRole == "Owner" && interestedOwnerIds.Contains(n.SenderId))
+                .Where(n => n.SenderRole == "Owner" &&
+                           (interestedOwnerIds.Contains(n.SenderId) || n.SenderId == userId))
                 .OrderByDescending(n => n.CreateUtc)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize);
