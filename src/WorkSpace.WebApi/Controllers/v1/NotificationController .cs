@@ -32,15 +32,13 @@ namespace WorkSpace.WebApi.Controllers.v1
             return Ok(result);
         }
 
-        [HttpGet("notification/personal")]
-        [Authorize]
-        public async Task<IActionResult> GetPersonalNotifications()
+        [HttpGet("{id}/Workspaces-notifications")]
+        public async Task<IActionResult> GetWorkSpaceNotifications(int id, CancellationToken cancellationToken)
         {
-            var result = await Mediator.Send(new GetPersonalNotificationsQuery());
-            return Ok(result);
+            var query = new GetNotificationsByWorkSpaceQuery { WorkSpaceId = id };
+            var result = await Mediator.Send(query, cancellationToken);
+            return Ok(result.Data);
         }
-
-
         [HttpGet("notification/{id}")]
         public async Task<IActionResult> GetNotificationById(int id)
         {

@@ -219,7 +219,7 @@ public class AccountService : IAccountService
 
                     </div>
                     <div class='footer'>
-                        <p>&copy; 2024 WorkSpace. All rights reserved.</p>
+                        <p>&copy; 2025 WorkSpace. All rights reserved.</p>
                     </div>
                 </div>
             </body>
