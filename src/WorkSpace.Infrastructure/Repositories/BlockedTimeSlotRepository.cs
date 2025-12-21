@@ -25,7 +25,13 @@ public class BlockedTimeSlotRepository : GenericRepositoryAsync<BlockedTimeSlot>
                         && b.EndTime > startTime)
             .ToListAsync(cancellationToken);
     }
-
+    public async Task<BlockedTimeSlot?> GetByRoomAndTimeAsync(int roomId, DateTime start, DateTime end, CancellationToken ct)
+    {
+        return await _context.BlockedTimeSlots
+            .FirstOrDefaultAsync(x => x.WorkSpaceRoomId == roomId
+                                   && x.StartTime == start
+                                   && x.EndTime == end, ct);
+    }
     public async Task<bool> IsTimeSlotBlockedAsync(
         int workSpaceRoomId, 
         DateTime startTime, 
