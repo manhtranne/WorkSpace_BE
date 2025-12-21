@@ -1,5 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using WorkSpace.Domain.Common;
 
 namespace WorkSpace.Domain.Entities;
@@ -13,7 +14,8 @@ public class Booking : AuditableBaseEntity
     public int? CustomerId { get; set; }
     public int? GuestId { get; set; }
     public int WorkSpaceRoomId { get; set; }
-
+    [NotMapped]
+    public int? WorkSpaceId => WorkSpaceRoom?.WorkSpaceId;
     public DateTime StartTimeUtc { get; set; }
     public DateTime EndTimeUtc { get; set; }
 
