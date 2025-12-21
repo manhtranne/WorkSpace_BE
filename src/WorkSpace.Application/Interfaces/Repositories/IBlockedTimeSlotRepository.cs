@@ -32,5 +32,11 @@ public interface IBlockedTimeSlotRepository : IGenericRepositoryAsync<BlockedTim
     Task RemoveBlockedTimeSlotForBookingAsync(
         int bookingId, 
         CancellationToken cancellationToken = default);
+
+    Task<BlockedTimeSlot?> GetByRoomAndTimeAsync(
+        int roomId, 
+        DateTime start,
+        DateTime end, 
+        CancellationToken ct);
 }
 
