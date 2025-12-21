@@ -4,6 +4,7 @@ public class BookingDto
 {
     public int Id { get; set; }
     public string BookingCode { get; set; } = default!;
+    public int? WorkSpaceId { get; set; }
     public int WorkSpaceRoomId { get; set; }
     public string? WorkSpaceRoomTitle { get; set; }
     public string? WorkSpaceName { get; set; }

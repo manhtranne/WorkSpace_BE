@@ -4,12 +4,13 @@ using Microsoft.AspNetCore.Mvc;
 using WorkSpace.Application.DTOs.Bookings;
 using WorkSpace.Application.DTOs.Customer;
 using WorkSpace.Application.DTOs.Guest;
+using WorkSpace.Application.DTOs.Owner;
 using WorkSpace.Application.Extensions;
 using WorkSpace.Application.Features.Bookings.Commands;
+using WorkSpace.Application.Features.Bookings.Queries;
 using WorkSpace.Application.Interfaces.Repositories;
 using WorkSpace.Application.Interfaces.Services;
 using WorkSpace.Infrastructure.Repositories;
-using WorkSpace.Application.DTOs.Owner;
 
 namespace WorkSpace.WebApi.Controllers.v1
 {
@@ -33,16 +34,27 @@ namespace WorkSpace.WebApi.Controllers.v1
             _mediator = mediator;
         }
 
+
         [HttpGet("customer")]
-        public async Task<IActionResult> GetBookingById()
+        [Authorize]
+        public async Task<IActionResult> GetBookingById([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
         {
-            var userId = User.GetUserId();
-            var bookings = await _bookingRepository.GetBookingsByUserIdAsync(userId);
-            if (bookings == null)
+            var query = new GetUserBookingsQuery
             {
-                return NotFound(new { Message = "Booking not found." });
+                UserId = User.GetUserId(),
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+
+            var response = await _mediator.Send(query);
+
+            if (response.Succeeded)
+            {
+
+                return Ok(response.Data);
             }
-            return Ok(bookings);
+
+            return BadRequest(response.Errors);
         }
         [HttpPut("{id}/cancel")]
         [Authorize]
