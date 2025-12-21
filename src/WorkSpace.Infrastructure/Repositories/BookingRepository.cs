@@ -57,6 +57,7 @@ public class BookingRepository : IBookingRepository
             CustomerId = userId,
             GuestId = null,
             WorkSpaceRoomId = bookingDto.WorkSpaceRoomId,
+
             StartTimeUtc = bookingDto.StartTimeUtc,
             EndTimeUtc = bookingDto.EndTimeUtc,
             NumberOfParticipants = bookingDto.NumberOfParticipants,
@@ -68,7 +69,7 @@ public class BookingRepository : IBookingRepository
             FinalAmount = finalAmountWithServices,
 
             Currency = "VND",
-            BookingStatusId = 11, 
+            BookingStatusId = 11,
 
             BookingServiceItems = bookingServiceItems
         };
@@ -126,7 +127,7 @@ public class BookingRepository : IBookingRepository
             FinalAmount = finalAmountWithServices,
 
             Currency = "VND",
-            BookingStatusId = 11, 
+            BookingStatusId = 11,
 
             BookingServiceItems = bookingServiceItems
         };
@@ -156,7 +157,7 @@ public class BookingRepository : IBookingRepository
         return await _context.Bookings
             .Include(b => b.BookingServiceItems)
             .ThenInclude(bs => bs.Service)
-            .Include(b => b.Customer) 
+            .Include(b => b.Customer)
             .Include(b => b.Guest)
             .FirstOrDefaultAsync(b => b.Id == id);
     }
@@ -165,11 +166,13 @@ public class BookingRepository : IBookingRepository
     {
         return await _context.Bookings
             .Include(b => b.WorkSpaceRoom)
-            .Include(b => b.BookingServiceItems) 
+                .ThenInclude(r => r.WorkSpace) 
+            .Include(b => b.BookingServiceItems)
             .Where(b => b.CustomerId == userId)
             .OrderByDescending(b => b.CreateUtc)
             .ToListAsync();
     }
+
 
     public async Task UpdateBookingAsync(int id, Booking booking)
     {
@@ -194,7 +197,7 @@ public class BookingRepository : IBookingRepository
     public Task<Booking?> GetByCodeAsync(string bookingCode, CancellationToken ct)
     {
         return _context.Bookings
-            .Include(x => x.Customer) 
+            .Include(x => x.Customer)
             .FirstOrDefaultAsync(x => x.BookingCode == bookingCode, ct);
     }
 
@@ -206,8 +209,8 @@ public class BookingRepository : IBookingRepository
             .ThenInclude(r => r.WorkSpace)
             .ThenInclude(ws => ws.Host)
             .ThenInclude(h => h.User)
-            .Include(b => b.BookingServiceItems) 
-            .Include(b => b.BookingServiceItems) 
+            .Include(b => b.BookingServiceItems)
+            .Include(b => b.BookingServiceItems)
             .ThenInclude(bs => bs.Service)
             .FirstOrDefaultAsync(b => b.Id == bookingId, ct);
     }
