@@ -32,7 +32,9 @@ namespace WorkSpace.Infrastructure.Repositories
                 .Include(w => w.WorkSpaceRooms)
                     .ThenInclude(wr => wr.Reviews)
 
-
+                .Include(w => w.Host)
+            // 2. Phải ThenInclude User để lấy Host.User.FirstName/LastName (cho hàm GetFullName)
+            .ThenInclude(h => h.User)
                 .Include(w => w.WorkSpaceRooms)
                     .ThenInclude(wr => wr.BlockedTimeSlots)
 

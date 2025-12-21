@@ -26,7 +26,7 @@ public class GetWorkSpaceDetailQueryHandler(
             Description = workspace.Description,
             HostId = workspace.HostId,
             HostName = workspace.Host?.User?.GetFullName(),
-            HostAvatar = workspace.Host?.User?.Avatar,
+            HostAvatar = workspace.Host?.Avatar ?? workspace.Host?.User?.Avatar,
             HostCompanyName = workspace.Host?.CompanyName,
             HostContactPhone = workspace.Host?.ContactPhone,
             IsHostVerified = workspace.Host?.IsVerified ?? false,
