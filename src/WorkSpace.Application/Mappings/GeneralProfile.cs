@@ -80,6 +80,7 @@ namespace WorkSpace.Application.Mappings
             CreateMap<WorkSpace.Domain.Entities.WorkSpace, WorkSpaceModerationDto>()
                 .ForMember(d => d.HostName, o => o.MapFrom(s => s.Host != null && s.Host.User != null ? s.Host.User.GetFullName() : null))
                 .ForMember(d => d.HostEmail, o => o.MapFrom(s => s.Host != null && s.Host.User != null ? s.Host.User.Email : null))
+                .ForMember(d => d.HostAvatar, o => o.MapFrom(s => s.Host.Avatar ?? (s.Host.User != null ? s.Host.User.Avatar : null)))
                 .ForMember(d => d.WorkSpaceTypeName, o => o.MapFrom(s => s.WorkSpaceType != null ? s.WorkSpaceType.Name : null))
                 .ForMember(d => d.AddressLine, o => o.MapFrom(s => s.Address != null ? $"{s.Address.Street}, {s.Address.Ward}" : null))
                 .ForMember(d => d.City, o => o.MapFrom(s => s.Address != null ? s.Address.Ward : null))

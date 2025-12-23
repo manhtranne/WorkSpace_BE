@@ -11,6 +11,7 @@ namespace WorkSpace.Application.DTOs.WorkSpaces
         public int HostId { get; set; }
         public string? HostName { get; set; }
         public string? HostEmail { get; set; }
+        public string? HostAvatar { get; set; }
         public string? WorkSpaceTypeName { get; set; }
         public string? AddressLine { get; set; }
         public string? City { get; set; }
