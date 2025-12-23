@@ -12,11 +12,7 @@ namespace WorkSpace.WebApi.Controllers.v1;
 [ApiController]
 public class CustomerChatOwnerController : BaseApiController
 {
-    /// <summary>
-    /// Get all active customer chat sessions
-    /// </summary>
-    /// <param name="cancellationToken"></param>
-    /// <returns>List of active sessions</returns>
+
     [HttpGet("sessions")]
     public async Task<ActionResult<IEnumerable<CustomerChatSessionDto>>> GetActiveSessions(
         CancellationToken cancellationToken)
