@@ -1,7 +1,5 @@
 ﻿namespace WorkSpace.Application.DTOs.Recommendations;
-/// <summary>
-/// Recommended workspace with score
-/// </summary>
+
 public class RecommendedWorkSpaceDto
 {
     public int WorkSpaceId { get; set; }
