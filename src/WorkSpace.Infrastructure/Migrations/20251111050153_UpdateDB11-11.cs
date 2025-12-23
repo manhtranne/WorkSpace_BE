@@ -5,10 +5,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace WorkSpace.Infrastructure.Migrations
 {
-    /// <inheritdoc />
     public partial class UpdateDB1111 : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
@@ -93,7 +91,6 @@ namespace WorkSpace.Infrastructure.Migrations
                 column: "WorkSpaceId");
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

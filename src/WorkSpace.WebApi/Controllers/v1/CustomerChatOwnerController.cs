@@ -12,11 +12,7 @@ namespace WorkSpace.WebApi.Controllers.v1;
 [ApiController]
 public class CustomerChatOwnerController : BaseApiController
 {
-    /// <summary>
-    /// Get all active customer chat sessions
-    /// </summary>
-    /// <param name="cancellationToken"></param>
-    /// <returns>List of active sessions</returns>
+
     [HttpGet("sessions")]
     public async Task<ActionResult<IEnumerable<CustomerChatSessionDto>>> GetActiveSessions(
         CancellationToken cancellationToken)
@@ -26,11 +22,7 @@ public class CustomerChatOwnerController : BaseApiController
         return Ok(result);
     }
     
-    /// <summary>
-    /// Get active sessions assigned to current owner
-    /// </summary>
-    /// <param name="cancellationToken"></param>
-    /// <returns>List of sessions assigned to owner</returns>
+
     [HttpGet("my-sessions")]
     public async Task<ActionResult<IEnumerable<CustomerChatSessionDto>>> GetMySessions(
         CancellationToken cancellationToken)
@@ -47,12 +39,7 @@ public class CustomerChatOwnerController : BaseApiController
         return Ok(result);
     }
     
-    /// <summary>
-    /// Get messages for a specific session
-    /// </summary>
-    /// <param name="sessionId">Session ID</param>
-    /// <param name="cancellationToken"></param>
-    /// <returns>List of messages</returns>
+
     [HttpGet("sessions/{sessionId}/messages")]
     public async Task<ActionResult<IEnumerable<CustomerChatMessageDto>>> GetMessages(
         [FromRoute] string sessionId,
@@ -67,13 +54,7 @@ public class CustomerChatOwnerController : BaseApiController
         return Ok(result);
     }
 
-    /// <summary>
-    /// Reply to customer (HTTP endpoint - for non-SignalR clients)
-    /// </summary>
-    /// <param name="sessionId">Session ID</param>
-    /// <param name="message">Message content</param>
-    /// <param name="cancellationToken"></param>
-    /// <returns>Created message</returns>
+
     [HttpPost("sessions/{sessionId}/reply")]
     public async Task<ActionResult<Response<CustomerChatMessageDto>>> ReplyToCustomer(
         [FromRoute] string sessionId,
@@ -94,12 +75,7 @@ public class CustomerChatOwnerController : BaseApiController
         return Ok(result);
     }
 
-    /// <summary>
-    /// Close a customer chat session
-    /// </summary>
-    /// <param name="sessionId">Session ID</param>
-    /// <param name="cancellationToken"></param>
-    /// <returns>Success response</returns>
+
     [HttpPost("sessions/{sessionId}/close")]
     public async Task<ActionResult<Response<bool>>> CloseSession(
         [FromRoute] string sessionId,
