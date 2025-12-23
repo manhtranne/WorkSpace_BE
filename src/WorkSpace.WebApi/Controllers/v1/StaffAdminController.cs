@@ -14,6 +14,7 @@ using WorkSpace.Application.Features.Staff.Queries;
 using WorkSpace.Application.Features.SupportTickets.Commands;
 using WorkSpace.Application.Features.SupportTickets.Queries;
 using WorkSpace.Application.Features.WorkSpace.Commands;
+using WorkSpace.Application.Features.WorkSpace.Commands.ToggleActive;
 using WorkSpace.Application.Features.WorkSpace.Queries;
 using WorkSpace.Application.Wrappers;
 
@@ -79,7 +80,18 @@ public class StaffAdminController : BaseApiController
         return Ok(result);
     }
 
+    [HttpPut("workspaces/{id}/Block-Workspace")]
+    public async Task<IActionResult> ToggleWorkSpaceActive([FromRoute] int id, CancellationToken cancellationToken)
+    {
+        var command = new ToggleWorkSpaceActiveCommand(id);
+        var result = await Mediator.Send(command, cancellationToken);
 
+        if (!result.Succeeded)
+        {
+            return BadRequest(result);
+        }
+        return Ok(result);
+    }
     //[HttpPut("reviews/{reviewId}/hide")]
     //public async Task<IActionResult> HideReview(
     //    [FromRoute] int reviewId,
@@ -92,7 +104,7 @@ public class StaffAdminController : BaseApiController
     //    return Ok(result);
     //}
 
- 
+
     //[HttpPut("reviews/{reviewId}/show")]
     //public async Task<IActionResult> ShowReview(
     //    [FromRoute] int reviewId,
@@ -128,6 +140,7 @@ public class StaffAdminController : BaseApiController
     [HttpGet("workspaces")]
     public async Task<IActionResult> GetAllWorkSpaces(
            [FromQuery] bool? isVerified = null,
+           [FromQuery] bool? isActive = null, 
            CancellationToken cancellationToken = default)
     {
         var query = new GetAllWorkSpacesQuery(IsVerified: isVerified);

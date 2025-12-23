@@ -12,6 +12,7 @@ namespace WorkSpace.Application.DTOs.WorkSpaces
         public string? WorkSpaceTypeName { get; set; }
         public string? AddressLine { get; set; }
         public string? City { get; set; }
+        public string? HostAvatarUrl { get; set; }
         public bool IsActive { get; set; }
         public bool IsVerified { get; set; }
         public int TotalRooms { get; set; }
