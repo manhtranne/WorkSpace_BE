@@ -4,10 +4,8 @@
 
 namespace WorkSpace.Infrastructure.Migrations
 {
-    /// <inheritdoc />
     public partial class FixIdentityKeys : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropPrimaryKey(
@@ -74,7 +72,6 @@ namespace WorkSpace.Infrastructure.Migrations
                 column: "UserId");
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropPrimaryKey(

@@ -12,13 +12,10 @@ public class EnhancedChatHub : Hub
     private readonly IMediator _mediator;
     private readonly ILogger<EnhancedChatHub> _logger;
     
-    // Track online users: UserId -> List of ConnectionIds
     private static readonly ConcurrentDictionary<int, HashSet<string>> OnlineUsers = new();
     
-    // Track typing users: ThreadId -> List of UserIds
     private static readonly ConcurrentDictionary<int, HashSet<int>> TypingUsers = new();
     
-    // Track user's threads: ConnectionId -> List of ThreadIds
     private static readonly ConcurrentDictionary<string, HashSet<int>> UserThreads = new();
 
     public EnhancedChatHub(IMediator mediator, ILogger<EnhancedChatHub> logger)

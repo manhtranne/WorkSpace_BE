@@ -5,6 +5,7 @@ using WorkSpace.Application.Enums;
 using WorkSpace.Application.Features.Admin.Queries;
 using WorkSpace.Application.Features.Admin.Queries.GetAllBookings;
 using WorkSpace.Application.Features.HostProfile.Commands.ApproveHostProfile;
+using WorkSpace.Application.Features.HostProfile.Commands.DeleteHostProfile;
 using WorkSpace.Application.Interfaces.Services;
 
 namespace WorkSpace.WebApi.Controllers.v1;
@@ -135,6 +136,21 @@ public class AdminController : BaseApiController
         }
 
         return Ok(new { success = true, isVerified = isApproved });
+    }
+    [HttpDelete("reject-owner/{hostProfileId}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> RejectOwnerRegistration([FromRoute] int hostProfileId)
+    {
+        var command = new DeleteHostProfileCommand(hostProfileId);
+
+        var result = await Mediator.Send(command);
+
+        if (!result.Succeeded)
+        {
+            return BadRequest(new { error = result.Message });
+        }
+
+        return Ok(new { success = true, message = "Đã từ chối yêu cầu và xóa hồ sơ đăng ký thành công." });
     }
 
     [HttpGet("users/{userId}")]

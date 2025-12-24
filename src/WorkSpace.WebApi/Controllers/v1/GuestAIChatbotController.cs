@@ -17,13 +17,7 @@ public class GuestAIChatbotController : ControllerBase
         _aiChatbotService = aiChatbotService;
         _recommendationService = recommendationService;
     }
-    /// <summary>
-    /// Guest chatbot - Không cần đăng nhập
-    /// Conversation history được quản lý ở client-side
-    /// </summary>
-    /// <param name="request">Request chứa message và optional session ID</param>
-    /// <param name="cancellationToken"></param>
-    /// <returns>Response với workspace recommendations</returns>
+
     [HttpPost("chat")]
     [ProducesResponseType(typeof(GuestChatbotResponseDto), 200)]
     [ProducesResponseType(400)]
@@ -46,9 +40,6 @@ public class GuestAIChatbotController : ControllerBase
         return Ok(response);
     }
 
-    /// <summary>
-    /// Get trending workspaces - không cần login
-    /// </summary>
     [HttpGet("trending")]
     [ProducesResponseType(200)]
     public async Task<IActionResult> GetTrending(
