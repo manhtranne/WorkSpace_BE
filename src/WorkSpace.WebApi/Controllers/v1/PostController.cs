@@ -15,7 +15,6 @@ namespace WorkSpace.WebApi.Controllers.v1
             _postRepository = postRepository;
         }
 
-        // GET: api/v1/posts
         [HttpGet]
         public async Task<IActionResult> GetAllPosts()
         {

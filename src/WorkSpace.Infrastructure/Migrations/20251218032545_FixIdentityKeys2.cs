@@ -4,10 +4,8 @@
 
 namespace WorkSpace.Infrastructure.Migrations
 {
-    /// <inheritdoc />
     public partial class FixIdentityKeys2 : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
@@ -329,7 +327,6 @@ namespace WorkSpace.Infrastructure.Migrations
                 onDelete: ReferentialAction.Cascade);
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(

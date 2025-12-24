@@ -4,10 +4,8 @@
 
 namespace WorkSpace.Infrastructure.Migrations
 {
-    /// <inheritdoc />
     public partial class AddWorkspaceFieldsToCustomerChatSession : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<int>(
@@ -24,7 +22,6 @@ namespace WorkSpace.Infrastructure.Migrations
                 nullable: true);
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
