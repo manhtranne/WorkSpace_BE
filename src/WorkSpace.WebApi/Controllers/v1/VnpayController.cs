@@ -159,11 +159,11 @@ namespace WorkSpace.WebApi.Controllers.v1
                                             </tr>
                                             <tr>
                                                 <td style='padding: 8px 0; color: #64748b;'>Thời gian bắt đầu:</td>
-                                                <td style='padding: 8px 0; font-weight: 500;'>{booking.StartTimeUtc.ToLocalTime():dd/MM/yyyy HH:mm}</td>
+                                                <td style='padding: 8px 0; font-weight: 500;'>{booking.StartTimeUtc:dd/MM/yyyy HH:mm}</td>
                                             </tr>
                                             <tr>
                                                 <td style='padding: 8px 0; color: #64748b;'>Thời gian kết thúc:</td>
-                                                <td style='padding: 8px 0; font-weight: 500;'>{booking.EndTimeUtc.ToLocalTime():dd/MM/yyyy HH:mm}</td>
+                                                <td style='padding: 8px 0; font-weight: 500;'>{booking.EndTimeUtc:dd/MM/yyyy HH:mm}</td>
                                             </tr>
                                             <tr>
                                                 <td style='padding: 8px 0; color: #64748b;'>Tổng số tiền:</td>
