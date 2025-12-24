@@ -137,6 +137,7 @@ public class AdminController : BaseApiController
 
         return Ok(new { success = true, isVerified = isApproved });
     }
+
     [HttpDelete("reject-owner/{hostProfileId}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> RejectOwnerRegistration([FromRoute] int hostProfileId)
