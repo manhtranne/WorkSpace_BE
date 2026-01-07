@@ -17,6 +17,7 @@ namespace WorkSpace.Infrastructure.Repositories
         {
             return await _context.BookingStatuses
                 .AsNoTracking()
+                //f
                 .FirstOrDefaultAsync(bs => bs.Name == name, cancellationToken);
         }
 
